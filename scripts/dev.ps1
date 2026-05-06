@@ -1,0 +1,6 @@
+Write-Host "ParkVision dev helper"
+Write-Host "1. Start backend:  cd backend; mvn spring-boot:run"
+Write-Host "2. Start frontend: cd frontend; npm install; npm run dev"
+Write-Host "3. Preview built frontend: npm run build; node scripts/serve-frontend.mjs"
+Write-Host "Frontend: http://localhost:5173"
+Write-Host "Backend:  http://localhost:8080"

@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: parkvision-backend
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+parkvision:
+  demo:
+    station-name: 同济智慧立体车库
+    pre-dispatch-threshold: 18

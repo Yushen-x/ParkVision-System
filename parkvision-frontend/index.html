@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ParkVision 智慧停车综合管理平台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">PV</div>
+          <div>
+            <strong>ParkVision</strong>
+            <span>CPS 智慧停车系统</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="主导航">
+          <button class="nav-item active" data-view="overview" title="总览驾驶舱">
+            <span class="nav-icon">01</span>
+            <span>总览驾驶舱</span>
+          </button>
+          <button class="nav-item" data-view="owner" title="车主端 H5">
+            <span class="nav-icon">02</span>
+            <span>车主端 H5</span>
+          </button>
+          <button class="nav-item" data-view="admin" title="运营后台">
+            <span class="nav-icon">03</span>
+            <span>运营后台</span>
+          </button>
+          <button class="nav-item" data-view="twin" title="数字孪生">
+            <span class="nav-icon">04</span>
+            <span>数字孪生</span>
+          </button>
+          <button class="nav-item" data-view="ai" title="AI 感知">
+            <span class="nav-icon">05</span>
+            <span>AI 感知</span>
+          </button>
+          <button class="nav-item" data-view="dispatch" title="调度中枢">
+            <span class="nav-icon">06</span>
+            <span>调度中枢</span>
+          </button>
+          <button class="nav-item" data-view="demo" title="答辩脚本">
+            <span class="nav-icon">07</span>
+            <span>答辩脚本</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="panel-label">演示状态</span>
+          <strong id="systemMode">联调演示中</strong>
+          <p>前端使用模拟数据驱动，后续可替换为 Spring Boot / FastAPI 接口。</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">AGV 自动立体车库 · 云边协同调度</p>
+            <h1 id="viewTitle">总览驾驶舱</h1>
+          </div>
+          <div class="topbar-actions">
+            <div class="time-chip">
+              <span>当前时间</span>
+              <strong id="clock">--:--:--</strong>
+            </div>
+            <button class="ghost-button" id="simulateEntryBtn" title="模拟车辆入场">模拟入场</button>
+            <button class="primary-button" id="preDispatchBtn" title="触发高峰预调度">预调度</button>
+            <button class="danger-button" id="emergencyBtn" title="触发安全急停">急停</button>
+          </div>
+        </header>
+
+        <section class="view active" id="overview">
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <span>库容占用率</span>
+              <strong id="occupancyRate">--</strong>
+              <small>车位状态由视觉识别与订单状态同步</small>
+            </article>
+            <article class="kpi-card">
+              <span>今日车辆流量</span>
+              <strong id="trafficTotal">--</strong>
+              <small>入场、出场、预约取车累计</small>
+            </article>
+            <article class="kpi-card">
+              <span>AGV 在线数</span>
+              <strong id="agvOnline">--</strong>
+              <small>沙盘坐标 500ms 级刷新</small>
+            </article>
+            <article class="kpi-card alert">
+              <span>异常告警</span>
+              <strong id="alertCount">--</strong>
+              <small>安全、设备、计费链路可追溯</small>
+            </article>
+          </div>
+
+          <div class="dashboard-layout">
+            <article class="surface chart-panel">
+              <div class="section-head">
+                <div>
+                  <h2>今日车流与未来空闲率预测</h2>
+                  <p>模拟 Prophet / 时序模型输出，超过阈值自动建议 Pre-Dispatch。</p>
+                </div>
+                <span class="status-pill stable">预测正常</span>
+              </div>
+              <canvas id="trafficCanvas" width="920" height="320" aria-label="车流趋势图"></canvas>
+            </article>
+
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>业务闭环</h2>
+                <span class="status-pill">演示链路</span>
+              </div>
+              <div class="flow-stack">
+                <div class="flow-step done">
+                  <b>AI 识别</b>
+                  <span>车牌、车位、人员入侵</span>
+                </div>
+                <div class="flow-step done">
+                  <b>业务流转</b>
+                  <span>入库、计费、取车、支付</span>
+                </div>
+                <div class="flow-step active">
+                  <b>调度决策</b>
+                  <span>优先级队列与提前移库</span>
+                </div>
+                <div class="flow-step">
+                  <b>数字孪生</b>
+                  <span>AGV、库位、告警实时展示</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-layout lower">
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>实时库区概览</h2>
+                <button class="text-button" data-jump="twin">进入沙盘</button>
+              </div>
+              <div class="mini-grid" id="miniSlotGrid"></div>
+              <div class="legend-row">
+                <span><i class="legend empty"></i>空闲</span>
+                <span><i class="legend occupied"></i>占用</span>
+                <span><i class="legend charging"></i>充电</span>
+                <span><i class="legend buffer"></i>浅层缓存</span>
+              </div>
+            </article>
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>最新事件</h2>
+                <button class="text-button" id="clearLogBtn">清空</button>
+              </div>
+              <div class="event-list" id="eventList"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="owner">
+          <div class="mobile-workbench">
+            <div class="phone-frame">
+              <div class="phone-status">
+                <span>ParkVision</span>
+                <b>5G</b>
+              </div>
+              <div class="phone-screen">
+                <section class="phone-hero">
+                  <span>最近场站</span>
+                  <h2>同济智慧立体车库</h2>
+                  <p>距你 420m · 剩余 <b id="mobileFreeCount">--</b> 个可用车位</p>
+                </section>
+
+                <div class="mobile-actions">
+                  <button data-mobile-action="reserve">预约车位</button>
+                  <button data-mobile-action="retrieve">我要取车</button>
+                  <button data-mobile-action="touch">临时取物</button>
+                  <button data-mobile-action="pay">缴费离场</button>
+                </div>
+
+                <section class="phone-card">
+                  <div class="card-row">
+                    <span>绑定车牌</span>
+                    <strong>沪A·P7686</strong>
+                  </div>
+                  <div class="card-row">
+                    <span>当前订单</span>
+                    <strong id="ownerOrderStatus">停车中</strong>
+                  </div>
+                  <div class="card-row">
+                    <span>已停时长</span>
+                    <strong id="parkingDuration">02:36</strong>
+                  </div>
+                  <div class="card-row">
+                    <span>预估费用</span>
+                    <strong id="parkingFee">¥18.00</strong>
+                  </div>
+                </section>
+
+                <section class="phone-card assistant">
+                  <span>智能助手</span>
+                  <p id="assistantReply">当前 A 区车位较空，新能源充电位剩余 4 个。需要取车时我会为你申请最近 AGV。</p>
+                  <div class="fake-input">帮我找一个最近的充电位</div>
+                </section>
+
+                <section class="phone-card timeline">
+                  <span>服务进度</span>
+                  <div id="ownerTimeline"></div>
+                </section>
+              </div>
+            </div>
+
+            <div class="surface owner-detail">
+              <div class="section-head">
+                <div>
+                  <h2>车主端核心功能</h2>
+                  <p>用于答辩展示“用户查车位、预约、取车、支付”的完整服务路径。</p>
+                </div>
+              </div>
+              <div class="feature-grid">
+                <div class="feature-item">
+                  <b>实时车位</b>
+                  <span>展示空闲数、充电位、室内外接续导航。</span>
+                </div>
+                <div class="feature-item">
+                  <b>无感支付</b>
+                  <span>车牌识别后自动生成订单，离场时扣费放行。</span>
+                </div>
+                <div class="feature-item">
+                  <b>Touch-and-Go</b>
+                  <span>临时取物倒计时，计费不中断，结束后自动回库。</span>
+                </div>
+                <div class="feature-item">
+                  <b>对话助手</b>
+                  <span>把自然语言转成查库容、取车、查账单等 API 调用。</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="admin">
+          <div class="admin-grid">
+            <article class="surface wide">
+              <div class="section-head">
+                <div>
+                  <h2>运营后台</h2>
+                  <p>覆盖场站、计费、订单、黑白名单与异常告警管理。</p>
+                </div>
+                <button class="primary-button small" id="addRuleBtn">新增计费规则</button>
+              </div>
+              <div class="admin-tabs" role="tablist">
+                <button class="tab active" data-admin-tab="orders">出入场记录</button>
+                <button class="tab" data-admin-tab="pricing">计费规则</button>
+                <button class="tab" data-admin-tab="alerts">异常告警</button>
+                <button class="tab" data-admin-tab="access">名单管理</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead id="adminTableHead"></thead>
+                  <tbody id="adminTableBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>经营指标</h2>
+                <span class="status-pill stable">实时</span>
+              </div>
+              <div class="metric-list">
+                <div>
+                  <span>今日收入</span>
+                  <strong>¥8,426</strong>
+                </div>
+                <div>
+                  <span>订单完成率</span>
+                  <strong>96.8%</strong>
+                </div>
+                <div>
+                  <span>平均取车等待</span>
+                  <strong id="avgWait">04:12</strong>
+                </div>
+                <div>
+                  <span>充电位周转</span>
+                  <strong>7.4 次/日</strong>
+                </div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>自然语言报表</h2>
+              </div>
+              <div class="query-box">
+                <p>“帮我看一下今天 18 点后的出库高峰和收入变化。”</p>
+                <button class="ghost-button small" id="reportBtn">生成简报</button>
+              </div>
+              <div class="report-output" id="reportOutput">
+                系统会把问题解析为受控字段查询，再生成经营简报。
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="twin">
+          <div class="twin-layout">
+            <article class="surface twin-main">
+              <div class="section-head">
+                <div>
+                  <h2>数字孪生库区沙盘</h2>
+                  <p>用二维网格映射立体车架、交接区、浅层缓存区与 AGV 轨迹。</p>
+                </div>
+                <span class="status-pill" id="twinStatus">运行中</span>
+              </div>
+              <div class="warehouse-map" id="warehouseMap"></div>
+            </article>
+            <aside class="surface twin-side">
+              <div class="section-head compact">
+                <h2>AGV 车队</h2>
+              </div>
+              <div class="agv-list" id="agvList"></div>
+              <div class="section-head compact nested">
+                <h2>安全网关</h2>
+              </div>
+              <div class="safety-card" id="safetyCard">
+                <strong>交接区正常</strong>
+                <span>未发现人员闯入，闸机允许放行。</span>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="ai">
+          <div class="ai-layout">
+            <article class="surface camera-panel">
+              <div class="section-head">
+                <div>
+                  <h2>边缘视觉识别演示</h2>
+                  <p>模拟车牌识别、车位占用判断、人员闯入检测输出结构化 JSON。</p>
+                </div>
+                <button class="primary-button small" id="runVisionBtn">运行识别</button>
+              </div>
+              <div class="camera-view" id="cameraView">
+                <div class="lane-line left"></div>
+                <div class="lane-line right"></div>
+                <div class="vehicle-shape">
+                  <span class="plate" id="detectedPlate">沪A·P7686</span>
+                </div>
+                <div class="detection-box plate-box">plate 0.98</div>
+                <div class="detection-box vehicle-box">vehicle 0.96</div>
+                <div class="intruder" id="intruderMark">person</div>
+              </div>
+            </article>
+
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>识别结果</h2>
+                <span class="status-pill stable" id="visionStatus">可信</span>
+              </div>
+              <pre class="json-output" id="visionJson"></pre>
+            </article>
+
+            <article class="surface wide">
+              <div class="section-head compact">
+                <h2>AI 模块落地说明</h2>
+              </div>
+              <div class="module-row">
+                <div>
+                  <b>车牌识别</b>
+                  <span>YOLOv8 定位车辆/车牌，HyperLPR 或 OCR 识别号码，输出置信度。</span>
+                </div>
+                <div>
+                  <b>车位检测</b>
+                  <span>按 ROI 切片做二分类，或检测车辆 bbox 与泊位区域交并比。</span>
+                </div>
+                <div>
+                  <b>车流预测</b>
+                  <span>使用 Prophet / LSTM 预测未来出库压力，触发提前移库。</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="dispatch">
+          <div class="dispatch-layout">
+            <article class="surface">
+              <div class="section-head">
+                <div>
+                  <h2>调度优先级队列</h2>
+                  <p>展示 FIFO、VIP 插队、Touch-and-Go、预调度任务如何统一排队。</p>
+                </div>
+                <button class="primary-button small" id="enqueueVipBtn">VIP 加急</button>
+              </div>
+              <div class="queue-list" id="queueList"></div>
+            </article>
+
+            <article class="surface">
+              <div class="section-head compact">
+                <h2>Pre-Dispatch 策略</h2>
+                <span class="status-pill warning" id="dispatchPressure">中等压力</span>
+              </div>
+              <div class="strategy-card">
+                <span>触发条件</span>
+                <strong>未来 30 分钟出库需求 &gt; 18 辆</strong>
+              </div>
+              <div class="strategy-card">
+                <span>车辆评分</span>
+                <strong>预约时间 + 历史取车习惯 + 会员权重</strong>
+              </div>
+              <div class="strategy-card">
+                <span>执行动作</span>
+                <strong>深层库位 → 浅层缓存区</strong>
+              </div>
+              <button class="ghost-button full" id="optimizeBtn">重新计算调度方案</button>
+            </article>
+
+            <article class="surface wide">
+              <div class="section-head compact">
+                <h2>任务生命周期</h2>
+              </div>
+              <div class="task-timeline" id="taskTimeline"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="demo">
+          <article class="surface demo-panel">
+            <div class="section-head">
+              <div>
+                <h2>系统实现汇报建议</h2>
+                <p>参考上一届模板，汇报时用“端侧实现 + 控制台实现 + 后端/AI 对接 + 演示闭环”组织内容。</p>
+              </div>
+            </div>
+            <div class="demo-grid">
+              <div class="demo-step">
+                <span>1</span>
+                <b>项目回顾</b>
+                <p>讲清 ParkVision 解决的是 AGV 立体车库高并发取车、视觉安全、柔性服务问题。</p>
+              </div>
+              <div class="demo-step">
+                <span>2</span>
+                <b>车主端实现</b>
+                <p>展示查库容、预约、取车、临时取物、缴费离场，以及对话式助手。</p>
+              </div>
+              <div class="demo-step">
+                <span>3</span>
+                <b>管理端实现</b>
+                <p>展示订单、计费规则、黑白名单、异常告警、自然语言报表。</p>
+              </div>
+              <div class="demo-step">
+                <span>4</span>
+                <b>数字孪生实现</b>
+                <p>用沙盘讲 AGV 坐标、库位状态、浅层缓存区和安全网关联动。</p>
+              </div>
+              <div class="demo-step">
+                <span>5</span>
+                <b>AI 功能实现</b>
+                <p>演示车牌识别 JSON、车位占用、人员闯入急停、车流预测触发预调度。</p>
+              </div>
+              <div class="demo-step">
+                <span>6</span>
+                <b>闭环演示</b>
+                <p>按“模拟入场 → 生成订单 → 沙盘更新 → 预调度 → 取车支付”跑一遍。</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
