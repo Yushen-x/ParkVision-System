@@ -1,12 +1,12 @@
 package com.parkvision.cps.parking;
 
 import com.parkvision.cps.common.ApiResponse;
+import com.parkvision.cps.parking.dto.ParkingSlotResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -18,7 +18,7 @@ public class ParkingController {
     }
 
     @GetMapping("/slots")
-    public ApiResponse<List<Map<String, String>>> slots() {
+    public ApiResponse<List<ParkingSlotResponse>> slots() {
         return ApiResponse.ok(parkingService.slots());
     }
 }

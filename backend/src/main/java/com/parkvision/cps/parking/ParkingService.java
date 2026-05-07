@@ -1,26 +1,22 @@
 package com.parkvision.cps.parking;
 
-import com.parkvision.cps.infrastructure.InMemoryDataStore;
+import com.parkvision.cps.infrastructure.repository.ParkVisionRepository;
+import com.parkvision.cps.parking.dto.ParkingSlotResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ParkingService {
-    private final InMemoryDataStore store;
+    private final ParkVisionRepository repository;
 
-    public ParkingService(InMemoryDataStore store) {
-        this.store = store;
+    public ParkingService(ParkVisionRepository repository) {
+        this.repository = repository;
     }
 
-    public List<Map<String, String>> slots() {
-        return store.slots().stream()
-                .map(slot -> Map.of(
-                        "id", slot.getId(),
-                        "layer", slot.getLayer(),
-                        "status", slot.getStatus().name().toLowerCase()
-                ))
+    public List<ParkingSlotResponse> slots() {
+        return repository.findSlots().stream()
+                .map(ParkingSlotResponse::from)
                 .toList();
     }
 }

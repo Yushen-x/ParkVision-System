@@ -12,6 +12,7 @@ management:
         include: health,info
 
 parkvision:
-  demo:
-    station-name: 同济智慧立体车库
-    pre-dispatch-threshold: 18
+  persistence:
+    mode: fallback
+  ai:
+    inference-mode: fallback

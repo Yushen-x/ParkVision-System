@@ -1,6 +1,6 @@
 package com.parkvision.cps.admin;
 
-import com.parkvision.cps.infrastructure.InMemoryDataStore;
+import com.parkvision.cps.infrastructure.repository.ParkVisionRepository;
 import com.parkvision.cps.order.ParkingOrder;
 import org.springframework.stereotype.Service;
 
@@ -8,24 +8,24 @@ import java.util.List;
 
 @Service
 public class AdminService {
-    private final InMemoryDataStore store;
+    private final ParkVisionRepository repository;
 
-    public AdminService(InMemoryDataStore store) {
-        this.store = store;
+    public AdminService(ParkVisionRepository repository) {
+        this.repository = repository;
     }
 
     public List<List<String>> orderTable() {
-        return store.orders().stream().map(this::toOrderRow).toList();
+        return repository.findOrders().stream().map(this::toOrderRow).toList();
     }
 
     public List<List<String>> alertTable() {
-        return store.alerts().stream()
+        return repository.findAlerts().stream()
                 .map(alert -> List.of(alert.alertNo(), alert.type(), alert.content(), alert.status(), alert.level()))
                 .toList();
     }
 
     public List<PricingRule> pricingRules() {
-        return store.pricingRules();
+        return repository.findPricingRules();
     }
 
     private List<String> toOrderRow(ParkingOrder order) {
