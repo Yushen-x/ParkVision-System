@@ -114,13 +114,13 @@ if (Test-Port $FrontendPort) {
             Start-LoggedProcess `
                 -Name "Vue frontend dev server" `
                 -FilePath "npm.cmd" `
-                -ArgumentList @("run", "dev", "--", "--host", "0.0.0.0", "--port", "$FrontendPort") `
+                -ArgumentList @("run", "dev") `
                 -WorkingDirectory $FrontendDir `
                 -OutFile $frontendOut `
                 -ErrFile $frontendErr
         } else {
             Push-Location $FrontendDir
-            npm run dev -- --host 0.0.0.0 --port $FrontendPort
+            npm run dev
             Pop-Location
         }
     } else {
