@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 18px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #64748b; }
+      .entity { fill: #ffffff; stroke: #1e293b; stroke-width: 2; rx: 12; }
+      .head { fill: #0f172a; rx: 12; }
+      .head-blue { fill: #0369a1; }
+      .head-green { fill: #047857; }
+      .head-amber { fill: #b45309; }
+      .head-red { fill: #b91c1c; }
+      .entity-name { font: 700 19px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #ffffff; }
+      .field { font: 400 15px "Consolas", "Microsoft YaHei", monospace; fill: #334155; }
+      .pk { font: 700 15px "Consolas", "Microsoft YaHei", monospace; fill: #0f172a; }
+      .fk { font: 700 15px "Consolas", "Microsoft YaHei", monospace; fill: #2563eb; }
+      .line { stroke: #475569; stroke-width: 2.2; fill: none; }
+      .label { font: 600 14px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #475569; }
+      .note { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; rx: 10; }
+      .note-text { font: 500 16px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #0f172a; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <text class="title" x="70" y="70">ParkVision 数据库核心关系图</text>
+  <text class="subtitle" x="70" y="104">围绕车主、车辆、停车订单、物理车位、AGV 调度任务与 AI 告警事件建立业务数据闭环</text>
+
+  <!-- User -->
+  <g transform="translate(70,160)">
+    <rect class="entity" width="280" height="220"/>
+    <rect class="head head-blue" width="280" height="48"/>
+    <text class="entity-name" x="18" y="31">c_user 车主用户表</text>
+    <text class="pk" x="18" y="78">PK  id</text>
+    <text class="field" x="18" y="108">phone 手机号</text>
+    <text class="field" x="18" y="138">nickname 用户昵称</text>
+    <text class="field" x="18" y="168">member_level 会员等级</text>
+    <text class="field" x="18" y="198">created_at 注册时间</text>
+  </g>
+
+  <!-- Vehicle -->
+  <g transform="translate(430,160)">
+    <rect class="entity" width="310" height="240"/>
+    <rect class="head head-blue" width="310" height="48"/>
+    <text class="entity-name" x="18" y="31">c_vehicle 车辆资产表</text>
+    <text class="pk" x="18" y="78">PK  id</text>
+    <text class="fk" x="18" y="108">FK  user_id</text>
+    <text class="field" x="18" y="138">plate_no 车牌号</text>
+    <text class="field" x="18" y="168">energy_type 能源类型</text>
+    <text class="field" x="18" y="198">default_charge_policy 充电策略</text>
+    <text class="field" x="18" y="228">white_list_status 白名单状态</text>
+  </g>
+
+  <!-- Order -->
+  <g transform="translate(790,135)">
+    <rect class="entity" width="360" height="300"/>
+    <rect class="head head-green" width="360" height="48"/>
+    <text class="entity-name" x="18" y="31">parking_order 停车订单表</text>
+    <text class="pk" x="18" y="78">PK  id / order_no</text>
+    <text class="fk" x="18" y="108">FK  user_id</text>
+    <text class="fk" x="18" y="138">FK  vehicle_id</text>
+    <text class="fk" x="18" y="168">FK  slot_id</text>
+    <text class="field" x="18" y="198">status 订单状态</text>
+    <text class="field" x="18" y="228">entry_time 入场时间</text>
+    <text class="field" x="18" y="258">amount 计费金额</text>
+    <text class="field" x="18" y="288">touch_and_go 临时取物标记</text>
+  </g>
+
+  <!-- Slot -->
+  <g transform="translate(1240,135)">
+    <rect class="entity" width="300" height="280"/>
+    <rect class="head head-green" width="300" height="48"/>
+    <text class="entity-name" x="18" y="31">parking_slot 物理库位表</text>
+    <text class="pk" x="18" y="78">PK  id</text>
+    <text class="field" x="18" y="108">slot_code 库位编码</text>
+    <text class="field" x="18" y="138">layer_type 深浅层类型</text>
+    <text class="field" x="18" y="168">zone_type 区域类型</text>
+    <text class="field" x="18" y="198">status 库位状态</text>
+    <text class="field" x="18" y="228">x / y 物理坐标</text>
+    <text class="field" x="18" y="258">updated_at 状态更新时间</text>
+  </g>
+
+  <!-- AGV -->
+  <g transform="translate(880,535)">
+    <rect class="entity" width="300" height="230"/>
+    <rect class="head head-amber" width="300" height="48"/>
+    <text class="entity-name" x="18" y="31">agv_unit AGV 设备表</text>
+    <text class="pk" x="18" y="78">PK  id</text>
+    <text class="field" x="18" y="108">agv_code 设备编号</text>
+    <text class="field" x="18" y="138">status 运行状态</text>
+    <text class="field" x="18" y="168">battery 电量</text>
+    <text class="field" x="18" y="198">x / y 实时坐标</text>
+  </g>
+
+  <!-- Dispatch -->
+  <g transform="translate(1240,500)">
+    <rect class="entity" width="300" height="300"/>
+    <rect class="head head-amber" width="300" height="48"/>
+    <text class="entity-name" x="18" y="31">dispatch_task 调度任务表</text>
+    <text class="pk" x="18" y="78">PK  id / task_no</text>
+    <text class="fk" x="18" y="108">FK  order_id</text>
+    <text class="fk" x="18" y="138">FK  agv_id</text>
+    <text class="fk" x="18" y="168">FK  from_slot_id</text>
+    <text class="fk" x="18" y="198">FK  to_slot_id</text>
+    <text class="field" x="18" y="228">priority 队列优先级</text>
+    <text class="field" x="18" y="258">task_type 任务类型</text>
+    <text class="field" x="18" y="288">status 执行状态</text>
+  </g>
+
+  <!-- Alert -->
+  <g transform="translate(430,535)">
+    <rect class="entity" width="330" height="260"/>
+    <rect class="head head-red" width="330" height="48"/>
+    <text class="entity-name" x="18" y="31">alert_event AI 告警事件表</text>
+    <text class="pk" x="18" y="78">PK  id / alert_no</text>
+    <text class="fk" x="18" y="108">FK  order_id</text>
+    <text class="field" x="18" y="138">camera_id 摄像头编号</text>
+    <text class="field" x="18" y="168">event_type 告警类型</text>
+    <text class="field" x="18" y="198">confidence 识别置信度</text>
+    <text class="field" x="18" y="228">action 联动动作</text>
+  </g>
+
+  <!-- Pricing -->
+  <g transform="translate(70,535)">
+    <rect class="entity" width="280" height="220"/>
+    <rect class="head" width="280" height="48"/>
+    <text class="entity-name" x="18" y="31">pricing_rule 计费规则表</text>
+    <text class="pk" x="18" y="78">PK  id</text>
+    <text class="field" x="18" y="108">rule_name 规则名称</text>
+    <text class="field" x="18" y="138">time_range 生效时段</text>
+    <text class="field" x="18" y="168">charge_method 计费方式</text>
+    <text class="field" x="18" y="198">status 启用状态</text>
+  </g>
+
+  <!-- Relationship lines -->
+  <path class="line" marker-end="url(#arrow)" d="M350 250 L430 250"/>
+  <text class="label" x="368" y="232">1 : N</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M740 265 L790 265"/>
+  <text class="label" x="748" y="246">1 : N</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M1150 270 L1240 270"/>
+  <text class="label" x="1175" y="250">N : 1</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M970 435 L970 535"/>
+  <text class="label" x="985" y="492">订单触发调度</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M1180 650 L1240 650"/>
+  <text class="label" x="1192" y="630">1 : N</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M1390 415 L1390 500"/>
+  <text class="label" x="1408" y="465">库位迁移</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M790 350 C720 430 700 500 710 535"/>
+  <text class="label" x="700" y="472">AI 异常关联订单</text>
+
+  <path class="line" marker-end="url(#arrow)" d="M210 380 L210 535"/>
+  <text class="label" x="230" y="470">订单计费</text>
+
+  <!-- Note -->
+  <g transform="translate(70,815)">
+    <rect class="note" width="1470" height="55"/>
+    <text class="note-text" x="22" y="35">业务主线：车主绑定车辆 -> AI 识别入场 -> 创建停车订单 -> 分配库位 -> 生成 AGV 调度任务 -> AI 告警与计费规则共同影响后续取车、支付和安全控制。</text>
+  </g>
+</svg>

@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .bg { fill: #07111f; }
+      .title { font: 800 42px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 400 19px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #94a3b8; }
+      .lane-title { font: 700 18px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #bae6fd; }
+      .lane { fill: rgba(15, 23, 42, 0.72); stroke: rgba(56, 189, 248, 0.22); stroke-width: 1.5; rx: 18; }
+      .node { fill: #0f172a; stroke: #38bdf8; stroke-width: 2.4; rx: 16; }
+      .node-green { stroke: #34d399; }
+      .node-amber { stroke: #f59e0b; }
+      .node-red { stroke: #f87171; }
+      .node-purple { stroke: #a78bfa; }
+      .node-title { font: 800 22px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #f8fafc; }
+      .node-sub { font: 500 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #cbd5e1; }
+      .tag { font: 700 13px "Consolas", "Microsoft YaHei", monospace; fill: #020617; }
+      .tag-box { fill: #38bdf8; rx: 9; }
+      .tag-green { fill: #34d399; }
+      .tag-amber { fill: #f59e0b; }
+      .tag-red { fill: #f87171; }
+      .tag-purple { fill: #a78bfa; }
+      .arrow { stroke: #7dd3fc; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .arrow-green { stroke: #34d399; marker-end: url(#arrowGreen); }
+      .arrow-red { stroke: #f87171; marker-end: url(#arrowRed); }
+      .arrow-amber { stroke: #f59e0b; marker-end: url(#arrowAmber); }
+      .small { font: 500 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #94a3b8; }
+      .json { font: 500 15px "Consolas", "Microsoft YaHei", monospace; fill: #bbf7d0; }
+      .json-key { fill: #67e8f9; }
+      .decision { fill: #111827; stroke: #f59e0b; stroke-width: 2.2; rx: 14; }
+      .decision-title { font: 800 20px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #fde68a; }
+      .footer { font: 600 17px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #e2e8f0; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L0,10 L11,5 z" fill="#7dd3fc"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L0,10 L11,5 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L0,10 L11,5 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="12" markerHeight="12" refX="10" refY="5" orient="auto">
+      <path d="M0,0 L0,10 L11,5 z" fill="#f59e0b"/>
+    </marker>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <circle cx="1380" cy="120" r="230" fill="#0ea5e9" opacity="0.08"/>
+  <circle cx="180" cy="780" r="260" fill="#22c55e" opacity="0.06"/>
+
+  <text class="title" x="70" y="70">AI 视觉推理与后端业务联动流程</text>
+  <text class="subtitle" x="72" y="108">摄像头画面经过目标检测、车牌识别、安全检测后，转换为结构化 JSON，并驱动订单、告警与 AGV 调度动作</text>
+
+  <!-- Lanes -->
+  <rect class="lane" x="60" y="150" width="1480" height="170"/>
+  <text class="lane-title" x="85" y="185">边缘采集层 Edge Capture</text>
+
+  <rect class="lane" x="60" y="350" width="1480" height="210"/>
+  <text class="lane-title" x="85" y="385">AI 推理层 AI Inference Pipeline</text>
+
+  <rect class="lane" x="60" y="590" width="1480" height="230"/>
+  <text class="lane-title" x="85" y="625">业务联动层 Backend Orchestration</text>
+
+  <!-- Row 1 -->
+  <g transform="translate(115,205)" filter="url(#glow)">
+    <rect class="node" width="250" height="92"/>
+    <rect class="tag-box" x="18" y="16" width="76" height="24"/>
+    <text class="tag" x="31" y="33">INPUT</text>
+    <text class="node-title" x="18" y="63">摄像头画面</text>
+    <text class="node-sub" x="18" y="84">frame + cameraId + time</text>
+  </g>
+  <path class="arrow" d="M365 251 L455 251"/>
+
+  <g transform="translate(455,205)">
+    <rect class="node" width="250" height="92"/>
+    <rect class="tag-box tag-purple" x="18" y="16" width="86" height="24"/>
+    <text class="tag" x="30" y="33">PREP</text>
+    <text class="node-title" x="18" y="63">图像预处理</text>
+    <text class="node-sub" x="18" y="84">去噪 / 增强 / ROI 裁剪</text>
+  </g>
+  <path class="arrow" d="M705 251 L795 251"/>
+
+  <g transform="translate(795,205)">
+    <rect class="node" width="280" height="92"/>
+    <rect class="tag-box" x="18" y="16" width="92" height="24"/>
+    <text class="tag" x="30" y="33">STREAM</text>
+    <text class="node-title" x="18" y="63">边缘推理节点</text>
+    <text class="node-sub" x="18" y="84">低延迟处理，减少云端压力</text>
+  </g>
+
+  <!-- Row 2 -->
+  <g transform="translate(115,425)">
+    <rect class="node node-green" width="250" height="100"/>
+    <rect class="tag-box tag-green" x="18" y="16" width="88" height="24"/>
+    <text class="tag" x="29" y="33">YOLOv8</text>
+    <text class="node-title" x="18" y="65">目标检测</text>
+    <text class="node-sub" x="18" y="87">vehicle / plate / person bbox</text>
+  </g>
+  <path class="arrow arrow-green" d="M365 475 L455 475"/>
+
+  <g transform="translate(455,425)">
+    <rect class="node node-green" width="250" height="100"/>
+    <rect class="tag-box tag-green" x="18" y="16" width="104" height="24"/>
+    <text class="tag" x="29" y="33">HyperLPR</text>
+    <text class="node-title" x="18" y="65">车牌识别</text>
+    <text class="node-sub" x="18" y="87">plateNo + confidence</text>
+  </g>
+  <path class="arrow arrow-amber" d="M705 475 L795 475"/>
+
+  <g transform="translate(795,425)">
+    <rect class="node node-amber" width="250" height="100"/>
+    <rect class="tag-box tag-amber" x="18" y="16" width="92" height="24"/>
+    <text class="tag" x="33" y="33">ROI</text>
+    <text class="node-title" x="18" y="65">安全区域检测</text>
+    <text class="node-sub" x="18" y="87">intrusion / obstacle / risk</text>
+  </g>
+  <path class="arrow" d="M1045 475 L1135 475"/>
+
+  <g transform="translate(1135,395)">
+    <rect class="node node-purple" width="335" height="160"/>
+    <rect class="tag-box tag-purple" x="18" y="18" width="76" height="24"/>
+    <text class="tag" x="31" y="35">JSON</text>
+    <text class="json" x="22" y="68">{</text>
+    <text class="json" x="42" y="92"><tspan class="json-key">plate</tspan>: "沪A·P7686",</text>
+    <text class="json" x="42" y="116"><tspan class="json-key">confidence</tspan>: 0.982,</text>
+    <text class="json" x="42" y="140"><tspan class="json-key">intrusion</tspan>: false,</text>
+    <text class="json" x="42" y="164"><tspan class="json-key">action</tspan>: "ALLOW_ENTRY"</text>
+    <text class="json" x="22" y="188">}</text>
+  </g>
+
+  <!-- Row 3 -->
+  <g transform="translate(145,665)">
+    <rect class="node" width="255" height="105"/>
+    <rect class="tag-box" x="18" y="16" width="72" height="24"/>
+    <text class="tag" x="29" y="33">API</text>
+    <text class="node-title" x="18" y="66">VisionController</text>
+    <text class="node-sub" x="18" y="88">POST /api/edge/vision/infer</text>
+  </g>
+  <path class="arrow" d="M400 717 L485 717"/>
+
+  <g transform="translate(485,650)">
+    <rect class="decision" width="270" height="135"/>
+    <text class="decision-title" x="18" y="42">业务动作判断</text>
+    <text class="node-sub" x="18" y="72">action = ALLOW_ENTRY</text>
+    <text class="node-sub" x="18" y="96">action = ESTOP_AND_REVIEW</text>
+    <text class="node-sub" x="18" y="120">action = PRE_DISPATCH</text>
+  </g>
+
+  <path class="arrow arrow-green" d="M755 687 L860 660"/>
+  <path class="arrow arrow-red" d="M755 717 L860 717"/>
+  <path class="arrow arrow-amber" d="M755 747 L860 780"/>
+
+  <g transform="translate(860,610)">
+    <rect class="node node-green" width="235" height="86"/>
+    <text class="node-title" x="18" y="38">OrderService</text>
+    <text class="node-sub" x="18" y="64">创建订单 / 分配车位</text>
+  </g>
+
+  <g transform="translate(860,704)">
+    <rect class="node node-red" width="235" height="86"/>
+    <text class="node-title" x="18" y="38">AlertEvent</text>
+    <text class="node-sub" x="18" y="64">安全告警 / AGV 急停</text>
+  </g>
+
+  <g transform="translate(1160,660)">
+    <rect class="node node-amber" width="260" height="100"/>
+    <text class="node-title" x="18" y="42">DispatchService</text>
+    <text class="node-sub" x="18" y="68">预调度 / VIP 队列重排</text>
+  </g>
+
+  <path class="arrow arrow-amber" d="M1095 747 C1120 747 1135 718 1160 710"/>
+
+  <g transform="translate(70,835)">
+    <text class="footer">讲解关键词：AI 输出不是孤立展示，而是通过结构化 JSON 进入后端，驱动“订单创建、库位更新、安全急停、预调度”四类业务动作。</text>
+  </g>
+</svg>

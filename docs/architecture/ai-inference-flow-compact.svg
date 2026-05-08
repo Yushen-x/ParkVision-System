@@ -1,0 +1,77 @@
+<svg width="1100" height="380" viewBox="0 0 1100 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ParkVision AI视觉推理流程</title>
+  <desc id="desc">从摄像头画面到AI识别，再到后端业务处理的简化流程图</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#94a3b8" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f7fbff; }
+      .title { font: 700 30px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 15px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #64748b; }
+      .step { fill: #ffffff; stroke: #dbeafe; stroke-width: 2; filter: url(#shadow); }
+      .step-title { font: 700 20px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #0f172a; }
+      .step-desc { font: 400 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #475569; }
+      .tag { fill: #e0f2fe; stroke: #7dd3fc; stroke-width: 1; }
+      .tag-text { font: 600 13px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #0369a1; }
+      .ai { fill: #f0fdf4; stroke: #86efac; }
+      .json { fill: #fff7ed; stroke: #fdba74; }
+      .biz { fill: #fef2f2; stroke: #fca5a5; }
+      .arrow { stroke: #64748b; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .small { font: 600 12px "Microsoft YaHei", "PingFang SC", Arial, sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1100" height="380" rx="24"/>
+  <circle cx="1000" cy="66" r="86" fill="#dbeafe" opacity="0.36"/>
+  <circle cx="90" cy="344" r="118" fill="#dcfce7" opacity="0.32"/>
+
+  <text class="title" x="56" y="62">AI视觉识别推理流程</text>
+  <text class="subtitle" x="56" y="91">摄像头画面经过目标检测、车牌识别和安全区域判断，形成结构化结果并驱动后端业务。</text>
+
+  <rect class="step" x="56" y="165" width="170" height="150" rx="18"/>
+  <rect class="tag" x="78" y="187" width="70" height="26" rx="13"/>
+  <text class="tag-text" x="93" y="205">输入</text>
+  <text class="step-title" x="78" y="244">摄像头画面</text>
+  <text class="step-desc" x="78" y="274">停车区实时视频流</text>
+  <text class="step-desc" x="78" y="296">按车位ROI切片</text>
+
+  <path class="arrow" d="M236 240 H286"/>
+
+  <rect class="step ai" x="300" y="128" width="255" height="224" rx="18"/>
+  <rect class="tag" x="322" y="150" width="82" height="26" rx="13"/>
+  <text class="tag-text" x="342" y="168">AI推理</text>
+  <rect x="322" y="192" width="210" height="38" rx="10" fill="#ffffff" stroke="#bbf7d0"/>
+  <text class="step-title" x="338" y="217">YOLOv8</text>
+  <text class="step-desc" x="425" y="216">车辆/车位检测</text>
+  <rect x="322" y="248" width="210" height="38" rx="10" fill="#ffffff" stroke="#bbf7d0"/>
+  <text class="step-title" x="338" y="273">HyperLPR</text>
+  <text class="step-desc" x="448" y="272">车牌识别</text>
+  <rect x="322" y="304" width="210" height="38" rx="10" fill="#ffffff" stroke="#bbf7d0"/>
+  <text class="step-title" x="338" y="329">ROI</text>
+  <text class="step-desc" x="392" y="328">安全区域判断</text>
+
+  <path class="arrow" d="M565 240 H615"/>
+
+  <rect class="step json" x="630" y="165" width="190" height="150" rx="18"/>
+  <rect class="tag" x="652" y="187" width="74" height="26" rx="13" fill="#ffedd5" stroke="#fdba74"/>
+  <text class="tag-text" x="672" y="205" fill="#c2410c">输出</text>
+  <text class="step-title" x="652" y="244">JSON结果</text>
+  <text class="step-desc" x="652" y="274">车牌、车位、置信度</text>
+  <text class="step-desc" x="652" y="296">事件类型、时间戳</text>
+
+  <path class="arrow" d="M830 240 H880"/>
+
+  <rect class="step biz" x="895" y="128" width="170" height="224" rx="18"/>
+  <rect class="tag" x="917" y="150" width="74" height="26" rx="13" fill="#fee2e2" stroke="#fca5a5"/>
+  <text class="tag-text" x="937" y="168" fill="#b91c1c">业务</text>
+  <text class="step-title" x="917" y="205">后端系统</text>
+  <text class="step-desc" x="917" y="235">车位状态更新</text>
+  <text class="step-desc" x="917" y="263">停车订单生成</text>
+  <text class="step-desc" x="917" y="291">异常告警推送</text>
+  <text class="step-desc" x="917" y="319">AGV调度联动</text>
+
+</svg>
