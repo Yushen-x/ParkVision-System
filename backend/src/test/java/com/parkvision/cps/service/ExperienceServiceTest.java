@@ -18,7 +18,7 @@ class ExperienceServiceTest {
 
         assertThat(preview.orderNo()).isEqualTo("PV20260506002");
         assertThat(preview.components()).extracting(component -> component.label())
-                .contains("EV charging");
+                .contains("新能源充电");
         assertThat(preview.totalAmount()).isGreaterThan(preview.baseAmount());
     }
 
@@ -32,6 +32,6 @@ class ExperienceServiceTest {
 
         assertThat(snapshot.orderNo()).isEqualTo("PV20260506001");
         assertThat(snapshot.remainingMeters()).isPositive();
-        assertThat(snapshot.handoffZone()).isEqualTo("Zone A handoff");
+        assertThat(snapshot.handoffZone()).isEqualTo("A 区交接点");
     }
 }

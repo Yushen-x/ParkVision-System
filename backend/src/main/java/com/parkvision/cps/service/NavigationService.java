@@ -44,7 +44,7 @@ public class NavigationService {
                 order.getOrderNo(),
                 order.getPlateNo(),
                 order.getSlotId(),
-                "Zone A handoff",
+                "A 区交接点",
                 "GATE-OUT-01",
                 remainingMeters,
                 etaSeconds,
@@ -54,8 +54,8 @@ public class NavigationService {
                 nextInstruction(order.getStatus(), remainingMeters),
                 statusLabel(order.getStatus(), leadAgv),
                 deviceService.emergencyActive()
-                        ? "Safety review is active. Wait for staff clearance before entering the handoff zone."
-                        : "Indoor route is clear and synchronized with live AGV and gate telemetry."
+                        ? "安全复核正在进行，请等待工作人员确认后再进入交接区。"
+                        : "室内路线安全，已与实时 AGV 和闸机遥测同步。"
         );
     }
 
@@ -73,23 +73,23 @@ public class NavigationService {
 
     private String nextInstruction(OrderStatus status, int remainingMeters) {
         if (status == OrderStatus.TOUCHING) {
-            return "Proceed to the handoff bay and collect temporary items before the timer expires";
+            return "前往交接区，并在倒计时结束前完成物品拿取";
         }
         if (remainingMeters > 120) {
-            return "Keep straight past the inbound lane, then turn right toward the handoff corridor";
+            return "沿入场车道直行后右转，前往交接走廊";
         }
         if (remainingMeters > 70) {
-            return "Stay on the main aisle and follow the illuminated path markers to Zone A";
+            return "沿主通道前进，并跟随地面指引灯前往 A 区";
         }
-        return "The handoff bay is ahead. Slow down and prepare for gate release confirmation";
+        return "交接区就在前方，请减速并等待闸机放行确认";
     }
 
     private String statusLabel(OrderStatus status, AgvUnit agv) {
         return switch (status) {
-            case RETRIEVING -> agv.getId() + " is approaching the release corridor";
-            case TOUCHING -> "Vehicle is parked at the handoff bay for temporary access";
-            case FINISHED -> "Order is closed and the route can be reused";
-            default -> "Vehicle is still stored and the indoor route is in standby";
+            case RETRIEVING -> agv.getId() + " 正在接近放行走廊";
+            case TOUCHING -> "车辆已到达交接区，可进行临时取物";
+            case FINISHED -> "订单已关闭，路线可重新分配";
+            default -> "车辆仍在库内，室内路线处于待命状态";
         };
     }
 }

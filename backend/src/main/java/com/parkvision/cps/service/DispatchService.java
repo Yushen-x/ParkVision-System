@@ -45,9 +45,9 @@ public class DispatchService {
                 .orElseGet(this::latestActiveOrder);
 
         DispatchTask task = repository.enqueueDispatchTask(
-                new DispatchTask(order.getPlateNo(), "Pre-dispatch relocation", "PRE", "00:48", true)
+                new DispatchTask(order.getPlateNo(), "高峰预调度移位", "预调度", "00:48", true)
         );
-        updateLeadAgv("Relocating " + order.getPlateNo() + " from " + slot.getId(), true, "TRANSIT", 0.78, "relocate");
+        updateLeadAgv("将 " + order.getPlateNo() + " 从 " + slot.getId() + " 移至缓冲区", true, "TRANSIT", 0.78, "relocate");
         deviceService.recordDispatchTask(task);
         return task;
     }
@@ -62,9 +62,9 @@ public class DispatchService {
         });
 
         DispatchTask task = repository.enqueueDispatchTask(
-                new DispatchTask(order.getPlateNo(), "VIP retrieval", "VIP", "00:30", true)
+                new DispatchTask(order.getPlateNo(), "VIP 优先取车", "VIP", "00:30", true)
         );
-        updateLeadAgv("VIP pickup for " + order.getPlateNo(), true, "CARRYING", 0.92, "vip-priority");
+        updateLeadAgv("VIP 优先取车 " + order.getPlateNo(), true, "CARRYING", 0.92, "vip-priority");
         deviceService.recordDispatchTask(task);
         return task;
     }

@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { state } from "../stores/parkingStore";
+import { zhText } from "../utils/localize";
 
 const route = computed(() => state.indoorRoute);
 const leadGate = computed(() => state.devices.gates.find((gate) => gate.gateId === route.value.targetGate) || state.devices.gates[0]);
@@ -8,8 +9,8 @@ const progressSegments = computed(() => {
   const completed = Math.max(0, Math.min(3, Number(route.value.completedSegments || 0)));
   return [0, 1, 2].map((index) => index < completed);
 });
-const etaLabel = computed(() => `${Math.floor((route.value.etaSeconds || 0) / 60)} min`);
-const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSeconds || 0) / 60))} min`);
+const etaLabel = computed(() => `${Math.floor((route.value.etaSeconds || 0) / 60)} 分钟`);
+const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSeconds || 0) / 60))} 分钟`);
 </script>
 
 <template>
@@ -21,8 +22,8 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
       </div>
       <div class="phone-screen" style="background: #0f172a;">
         <div style="padding: 2rem 1.5rem 1rem; color: #fff;">
-          <h2 style="font-size:22px; font-weight:700;"><i class="fa-solid fa-location-arrow" style="color:var(--brand); margin-right:8px;"></i>Indoor handoff navigation</h2>
-          <p style="color:#94a3b8; font-size:13px; margin-top:5px;">{{ route.remainingMeters }} meters remain before {{ route.handoffZone }}.</p>
+          <h2 style="font-size:22px; font-weight:700;"><i class="fa-solid fa-location-arrow" style="color:var(--brand); margin-right:8px;"></i>室内交接导航</h2>
+          <p style="color:#94a3b8; font-size:13px; margin-top:5px;">距离 {{ zhText(route.handoffZone) }} 还剩 {{ route.remainingMeters }} 米。</p>
         </div>
 
         <div style="flex:1; position:relative; margin: 0 1rem 1rem; border-radius: 20px; background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); overflow:hidden;">
@@ -41,13 +42,13 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
             <i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-flag-checkered'"></i>
           </div>
           <div style="position:absolute; top:15px; right:20px; font-size:11px; font-weight:700;" :style="leadGate?.estopArmed ? 'color:var(--danger-red);' : 'color:var(--safety-green);'">
-            {{ route.handoffZone }}
+            {{ zhText(route.handoffZone) }}
           </div>
         </div>
 
         <div style="padding: 1.5rem; background:rgba(255,255,255,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; backdrop-filter:blur(10px);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:12px;">
-            <div style="color:#fff; font-size:18px; font-weight:700;">{{ route.nextInstruction }}</div>
+            <div style="color:#fff; font-size:18px; font-weight:700;">{{ zhText(route.nextInstruction) }}</div>
             <div style="color:var(--brand); font-size:24px; font-weight:800; font-family:'Orbitron', sans-serif;">{{ route.walkingSpeedKph }} km/h</div>
           </div>
           <div style="display:flex; gap:10px;">
@@ -65,27 +66,27 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
     <div class="surface owner-detail" style="border:none; box-shadow:none; background:transparent;">
       <div class="section-head">
         <div>
-          <h2 style="font-size:24px; margin-bottom:10px;">Indoor continuation routing</h2>
-          <p style="font-size:15px; max-width:500px;">This screen now uses the backend navigation snapshot, outbound gate status, and live AGV ETA instead of fixed placeholder copy.</p>
+          <h2 style="font-size:24px; margin-bottom:10px;">室内接驳导航</h2>
+          <p style="font-size:15px; max-width:500px;">本页面读取后端导航快照、出场闸机状态和实时 AGV 到达时间，而不是固定占位文案。</p>
         </div>
       </div>
       <div class="metric-list" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-        <div><span>Current order</span><strong>{{ route.orderNo }}</strong></div>
-        <div><span>Plate / slot</span><strong>{{ route.plateNo }} / {{ route.slotId }}</strong></div>
-        <div><span>Owner ETA</span><strong>{{ etaLabel }}</strong></div>
-        <div><span>AGV ETA</span><strong>{{ agvLabel }}</strong></div>
-        <div><span>Target gate</span><strong>{{ route.targetGate }}</strong></div>
-        <div><span>Gate status</span><strong>{{ leadGate?.gateState || "N/A" }}</strong></div>
+        <div><span>当前订单</span><strong>{{ route.orderNo }}</strong></div>
+        <div><span>车牌 / 车位</span><strong>{{ route.plateNo }} / {{ route.slotId }}</strong></div>
+        <div><span>车主预计到达</span><strong>{{ etaLabel }}</strong></div>
+        <div><span>AGV 预计到达</span><strong>{{ agvLabel }}</strong></div>
+        <div><span>目标闸机</span><strong>{{ route.targetGate }}</strong></div>
+        <div><span>闸机状态</span><strong>{{ zhText(leadGate?.gateState, "未知") }}</strong></div>
       </div>
 
       <div class="module-row" style="grid-template-columns: 1fr; margin-top:18px;">
         <div :style="leadGate?.estopArmed ? 'background:rgba(239,68,68,0.1); border-color:var(--danger-red);' : 'background:rgba(56,189,248,0.1); border-color:var(--brand);'">
-          <b><i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-satellite-dish'"></i> Route safety</b>
-          <span>{{ route.safetyMessage }}</span>
+          <b><i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-satellite-dish'"></i> 路线安全</b>
+          <span>{{ zhText(route.safetyMessage) }}</span>
         </div>
         <div style="background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08);">
-          <b><i class="fa-solid fa-robot"></i> AGV sync</b>
-          <span>{{ route.status }}</span>
+          <b><i class="fa-solid fa-robot"></i> AGV 同步</b>
+          <span>{{ zhText(route.status) }}</span>
         </div>
       </div>
     </div>

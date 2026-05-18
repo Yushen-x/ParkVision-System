@@ -52,10 +52,10 @@ public class PricingService {
                 .orElse(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
 
         List<PricingComponent> components = new ArrayList<>();
-        components.add(new PricingComponent("Base parking", billedHours + "h ladder", baseAmount.setScale(2, RoundingMode.HALF_UP), "base"));
-        components.add(new PricingComponent("Peak shaping", peakMultiplier + "x congestion multiplier", peakSurcharge, "peak"));
-        components.add(new PricingComponent("EV charging", "1.20 CNY/kWh", chargingSurcharge, "charging"));
-        components.add(new PricingComponent("VIP retrieval", "Fixed dispatch priority surcharge", vipSurcharge, "vip"));
+        components.add(new PricingComponent("基础停车费", billedHours + " 小时阶梯计费", baseAmount.setScale(2, RoundingMode.HALF_UP), "base"));
+        components.add(new PricingComponent("高峰调节费", peakMultiplier + " 倍拥堵调节", peakSurcharge, "peak"));
+        components.add(new PricingComponent("新能源充电", "1.20 元/千瓦时", chargingSurcharge, "charging"));
+        components.add(new PricingComponent("VIP 优先取车", "固定调度优先费", vipSurcharge, "vip"));
 
         BigDecimal totalAmount = peakAdjusted
                 .add(chargingSurcharge)
@@ -68,13 +68,13 @@ public class PricingService {
         return new PricingPreview(
                 order.getOrderNo(),
                 order.getPlateNo(),
-                isPeakWindow(LocalDateTime.now()) ? "Workday peak window" : "Standard hourly window",
+                isPeakWindow(LocalDateTime.now()) ? "工作日高峰时段" : "标准计时时段",
                 durationMinutes,
                 baseAmount.setScale(2, RoundingMode.HALF_UP),
                 peakMultiplier.setScale(2, RoundingMode.HALF_UP),
                 components,
                 totalAmount,
-                "Preview is generated from the persisted order, current dispatch priority, and live charger telemetry."
+                "费用预览来自持久化订单、当前调度优先级和实时充电桩遥测。"
         );
     }
 

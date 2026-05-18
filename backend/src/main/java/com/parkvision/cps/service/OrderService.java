@@ -50,9 +50,9 @@ public class OrderService {
         );
         ParkingOrder saved = repository.saveOrder(order);
         DispatchTask inboundTask = repository.enqueueDispatchTask(
-                new DispatchTask(saved.getPlateNo(), "Inbound storage", "IN", "00:36", false)
+                new DispatchTask(saved.getPlateNo(), "入场存车", "入场", "00:36", false)
         );
-        updateLeadAgv("Storing " + saved.getPlateNo() + " into " + saved.getSlotId(), true, "TRANSIT", 0.72, "store");
+        updateLeadAgv("将 " + saved.getPlateNo() + " 存入 " + saved.getSlotId(), true, "TRANSIT", 0.72, "store");
         deviceService.recordEntry(saved);
         deviceService.recordDispatchTask(inboundTask);
         return saved;
@@ -68,15 +68,15 @@ public class OrderService {
         }
         ParkingOrder saved = repository.saveOrder(order);
         if (status == OrderStatus.RETRIEVING) {
-            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "Standard retrieval", "FIFO", "04:12", false));
-            updateLeadAgv("Retrieving " + saved.getPlateNo(), true, "CARRYING", 0.84, "retrieve");
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "标准取车", "先到先取", "04:12", false));
+            updateLeadAgv("取车 " + saved.getPlateNo(), true, "CARRYING", 0.84, "retrieve");
             deviceService.recordDispatchTask(task);
         } else if (status == OrderStatus.TOUCHING) {
-            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "Touch-and-Go", "Touch", "02:10", false));
-            updateLeadAgv("Handoff delivery for " + saved.getPlateNo(), true, "CARRYING", 0.68, "handoff");
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "临停取物", "临取", "02:10", false));
+            updateLeadAgv("交接区送车 " + saved.getPlateNo(), true, "CARRYING", 0.68, "handoff");
             deviceService.recordDispatchTask(task);
         } else if (status == OrderStatus.FINISHED) {
-            updateLeadAgv("Release corridor clear", false, "IDLE", 0.00, "hold");
+            updateLeadAgv("放行走廊已清空", false, "IDLE", 0.00, "hold");
             deviceService.recordOrderClosed(saved);
         }
         return saved;

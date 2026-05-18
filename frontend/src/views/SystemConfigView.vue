@@ -2,31 +2,32 @@
 import { computed } from "vue";
 import DataTable from "../components/DataTable.vue";
 import { state } from "../stores/parkingStore";
+import { zhText } from "../utils/localize";
 
 const accessRows = computed(() =>
-  state.accessList.map((item) => [item.plateNo, item.listType, item.userType, item.validUntil, item.remark]),
+  state.accessList.map((item) => [item.plateNo, zhText(item.listType), zhText(item.userType), zhText(item.validUntil), zhText(item.remark)]),
 );
 
 const deviceRows = computed(() => [
   ...state.devices.cameras.map((camera) => [
     camera.cameraId,
-    "Camera",
+    "摄像头",
     camera.profile,
-    camera.status,
-    `${camera.fps} fps / ${camera.bitrateKbps} kbps`,
+    zhText(camera.status),
+    `${camera.fps} 帧/秒 / ${camera.bitrateKbps} kbps`,
   ]),
   ...state.devices.gates.map((gate) => [
     gate.gateId,
-    "Gate",
+    "闸机",
     gate.protocol,
-    gate.gateState,
-    `${gate.endpoint} | queue ${gate.queueDepth}`,
+    zhText(gate.gateState),
+    `${gate.endpoint} | 排队 ${gate.queueDepth}`,
   ]),
   ...state.devices.chargers.map((charger) => [
     charger.chargerId,
-    "Charger",
+    "充电桩",
     charger.protocol,
-    charger.connectorStatus,
+    zhText(charger.connectorStatus),
     `${charger.endpoint} | ${charger.powerKw} kW`,
   ]),
 ]);
@@ -37,19 +38,19 @@ const deviceRows = computed(() => [
     <article class="surface">
       <div class="section-head">
         <div>
-          <h2><i class="fa-solid fa-shield-halved" style="color:var(--brand); margin-right:8px;"></i>Access and trust list</h2>
-          <p>Whitelist, blacklist, and temporary-entry policies are persisted in the backend and shared with the admin console.</p>
+          <h2><i class="fa-solid fa-shield-halved" style="color:var(--brand); margin-right:8px;"></i>准入与信任名单</h2>
+          <p>白名单、黑名单和临时入场策略持久化在后端数据库，并与管理台共用。</p>
         </div>
       </div>
       <div class="table-wrap" style="margin-top:16px;">
-        <DataTable :headers="['Plate', 'List type', 'User type', 'Valid until', 'Remark']" :rows="accessRows" />
+        <DataTable :headers="['车牌', '名单类型', '用户类型', '有效期', '备注']" :rows="accessRows" />
       </div>
     </article>
 
     <aside>
       <article class="surface" style="height: 100%;">
         <div class="section-head compact">
-          <h2>Node health</h2>
+          <h2>节点健康</h2>
         </div>
         <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
           <div
@@ -65,10 +66,10 @@ const deviceRows = computed(() => [
             <div style="display:flex; justify-content:space-between; gap:12px;">
               <strong :style="node.level === 'warning' ? 'color:var(--danger-red);' : ''">{{ node.name }}</strong>
               <span class="status-pill" :class="node.level === 'warning' ? 'warning' : 'stable'" style="min-height:auto; padding:2px 8px;">
-                {{ node.latency }}
+                {{ zhText(node.latency) }}
               </span>
             </div>
-            <span :style="node.level === 'warning' ? 'color:var(--danger-red);' : ''">{{ node.detail }}</span>
+            <span :style="node.level === 'warning' ? 'color:var(--danger-red);' : ''">{{ zhText(node.detail) }}</span>
           </div>
         </div>
       </article>
@@ -77,30 +78,30 @@ const deviceRows = computed(() => [
     <article class="surface wide">
       <div class="section-head">
         <div>
-          <h2><i class="fa-solid fa-network-wired" style="color:var(--brand); margin-right:8px;"></i>Field devices</h2>
-          <p>Cameras, PLC gates, and OCPP chargers below are all read from the device overview endpoint.</p>
+          <h2><i class="fa-solid fa-network-wired" style="color:var(--brand); margin-right:8px;"></i>现场设备</h2>
+          <p>摄像头、PLC 闸机和 OCPP 充电桩都从设备总览接口读取。</p>
         </div>
       </div>
       <div class="table-wrap" style="margin-top:16px;">
-        <DataTable :headers="['Device', 'Type', 'Protocol', 'State', 'Telemetry']" :rows="deviceRows" />
+        <DataTable :headers="['设备', '类型', '协议', '状态', '遥测']" :rows="deviceRows" />
       </div>
     </article>
 
     <article class="surface wide">
       <div class="section-head compact">
-        <div>
-          <h2>Recent field events</h2>
-          <p>This event stream is persisted server-side and reflects device-side simulations, not frontend-only notes.</p>
+          <div>
+          <h2>近期现场事件</h2>
+          <p>事件流持久化在服务端，反映设备侧模拟结果，不是前端临时备注。</p>
         </div>
       </div>
       <div class="queue-list" style="margin-top:16px;">
         <div v-for="event in state.devices.events" :key="event.eventId" class="queue-item" style="grid-template-columns: minmax(0, 1fr) auto;">
           <div>
-            <b>{{ event.eventCode }} - {{ event.deviceId }}</b>
-            <span>{{ event.message }}</span>
+            <b>{{ zhText(event.eventCode) }} - {{ event.deviceId }}</b>
+            <span>{{ zhText(event.message) }}</span>
           </div>
           <span class="status-pill" :class="event.severity === 'critical' || event.severity === 'high' ? 'warning' : 'stable'">
-            {{ event.severity }}
+            {{ zhText(event.severity) }}
           </span>
         </div>
       </div>

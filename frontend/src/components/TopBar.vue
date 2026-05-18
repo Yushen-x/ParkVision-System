@@ -14,7 +14,7 @@ const clock = ref("--:--:--");
 let timer;
 
 function tick() {
-  clock.value = new Date().toLocaleTimeString("en-GB", { hour12: false });
+  clock.value = new Date().toLocaleTimeString("zh-CN", { hour12: false });
 }
 
 onMounted(() => {
@@ -28,25 +28,25 @@ onUnmounted(() => window.clearInterval(timer));
 <template>
   <header class="topbar">
     <div>
-      <p class="eyebrow"><i class="fa-solid fa-microchip"></i> Smart parking CPS with AI vision, dispatch, and fallback-safe APIs</p>
+      <p class="eyebrow"><i class="fa-solid fa-microchip"></i> AI 视觉、AGV 调度、设备联动和数据库驱动的智能停车系统</p>
       <h1>{{ title }}</h1>
     </div>
     <div class="topbar-actions">
       <div class="time-chip" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px;">
-        <span style="color:var(--text-muted); font-size:11px;">Local time</span>
+        <span style="color:var(--text-muted); font-size:11px;">本地时间</span>
         <strong style="color:#fff; font-family:'Orbitron', sans-serif;">{{ clock }}</strong>
       </div>
       <button class="ghost-button" :disabled="entryBusy" @click="$emit('entry')">
         <i class="fa-solid fa-car"></i>
-        {{ entryBusy ? "Submitting..." : "Simulate entry" }}
+        {{ entryBusy ? "提交中..." : "模拟入场" }}
       </button>
       <button class="primary-button" :disabled="dispatchBusy" @click="$emit('pre-dispatch')">
         <i class="fa-solid fa-forward-fast"></i>
-        {{ dispatchBusy ? "Dispatching..." : "Pre-dispatch" }}
+        {{ dispatchBusy ? "调度中..." : "触发预调度" }}
       </button>
       <button class="danger-button" @click="$emit('emergency')">
         <i class="fa-solid" :class="emergency ? 'fa-lock-open' : 'fa-triangle-exclamation'"></i>
-        {{ emergency ? "Clear stop" : "Emergency stop" }}
+        {{ emergency ? "解除急停" : "紧急停车" }}
       </button>
     </div>
   </header>

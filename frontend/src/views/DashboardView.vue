@@ -9,33 +9,33 @@ import { state } from "../stores/parkingStore";
 <template>
   <section>
     <div class="kpi-grid">
-      <MetricCard label="Occupancy" :value="`${state.summary.occupancyRate}%`" hint="Slot state is refreshed from the parking API." />
-      <MetricCard label="Vehicle throughput" :value="state.summary.trafficTotal" hint="Entry, retrieval, and reservation activity combined." />
-      <MetricCard label="AGV online" :value="state.summary.agvOnline" hint="Digital twin coordinates are refreshed with the dispatch feed." />
-      <MetricCard label="Live alerts" :value="state.summary.alertCount" hint="Safety, device, and order anomalies." tone="alert" />
+      <MetricCard label="车位占用率" :value="`${state.summary.occupancyRate}%`" hint="车位状态由停车 API 实时刷新。" />
+      <MetricCard label="今日车流量" :value="state.summary.trafficTotal" hint="统计入场、取车和预约出场活动。" />
+      <MetricCard label="AGV 在线" :value="state.summary.agvOnline" hint="坐标由调度接口同步到数字孪生。" />
+      <MetricCard label="实时告警" :value="state.summary.alertCount" hint="覆盖安全、设备和订单异常。" tone="alert" />
     </div>
 
     <div class="dashboard-layout">
       <article class="surface">
         <div class="section-head compact">
           <div>
-            <h2>Traffic forecasting</h2>
-            <p>Live traffic history and the next six prediction windows drive pre-dispatch decisions.</p>
+            <h2>车流预测</h2>
+            <p>历史车流和未来六个预测窗口会直接驱动高峰预调度决策。</p>
           </div>
-          <span class="status-pill stable">API online</span>
+          <span class="status-pill stable">API 已连接</span>
         </div>
         <TrafficChart :history="state.forecast.history" :prediction="state.forecast.prediction" />
       </article>
 
       <article class="surface">
         <div class="section-head compact">
-          <h2>Control loop</h2>
+          <h2>业务闭环</h2>
         </div>
         <div class="flow-stack" style="margin-top:16px;">
-          <div class="flow-step done"><b>Edge AI perception</b><span>Plate OCR and safety-zone recognition push structured events into the backend.</span></div>
-          <div class="flow-step done"><b>Order orchestration</b><span>Orders, billing, and owner actions are now API-backed instead of local-only mutations.</span></div>
-          <div class="flow-step active"><b>Dispatch decision</b><span>Pre-dispatch and VIP retrieval tasks are inserted into the live AGV queue.</span></div>
-          <div class="flow-step"><b>Digital twin sync</b><span>Slots, AGV positions, and alerts reflect the same source of truth used by the admin console.</span></div>
+          <div class="flow-step done"><b>边缘 AI 感知</b><span>车牌 OCR 和安全区识别会把结构化事件写入后端。</span></div>
+          <div class="flow-step done"><b>订单编排</b><span>订单、计费和车主操作都通过 API 落到数据库。</span></div>
+          <div class="flow-step active"><b>调度决策</b><span>预调度和 VIP 取车任务会插入实时 AGV 队列。</span></div>
+          <div class="flow-step"><b>孪生同步</b><span>车位、AGV 坐标和告警与管理台使用同一份后端数据。</span></div>
         </div>
       </article>
     </div>
@@ -43,15 +43,15 @@ import { state } from "../stores/parkingStore";
     <div class="dashboard-layout lower">
       <article class="surface">
         <div class="section-head compact">
-          <h2>Slot overview</h2>
-          <RouterLink class="text-button" to="/twin">Open twin ></RouterLink>
+          <h2>车位概览</h2>
+          <RouterLink class="text-button" to="/twin">打开数字孪生 ></RouterLink>
         </div>
         <SlotGrid :slots="state.slots" />
       </article>
       <article class="surface">
         <div class="section-head compact">
-          <h2>Event stream</h2>
-          <span class="status-pill">Live</span>
+          <h2>事件流</h2>
+          <span class="status-pill">实时</span>
         </div>
         <EventStream :events="state.events" />
       </article>

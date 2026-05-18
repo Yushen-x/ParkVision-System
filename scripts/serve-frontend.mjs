@@ -4,6 +4,7 @@ import { extname, join, resolve } from "node:path";
 
 const root = resolve("frontend/dist");
 const port = Number(process.env.PORT || 5173);
+const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -24,7 +25,31 @@ function resolveFile(url) {
   return join(root, "index.html");
 }
 
+async function proxyApi(request, response) {
+  const targetUrl = new URL(request.url || "/", backendUrl);
+  const headers = { ...request.headers };
+  delete headers.host;
+
+  const proxied = await fetch(targetUrl, {
+    method: request.method,
+    headers,
+    body: request.method === "GET" || request.method === "HEAD" ? undefined : request,
+    duplex: "half",
+  });
+
+  response.writeHead(proxied.status, Object.fromEntries(proxied.headers.entries()));
+  response.end(Buffer.from(await proxied.arrayBuffer()));
+}
+
 createServer((request, response) => {
+  if ((request.url || "").startsWith("/api") || (request.url || "").startsWith("/actuator")) {
+    proxyApi(request, response).catch((error) => {
+      response.writeHead(502, { "Content-Type": "application/json; charset=utf-8" });
+      response.end(JSON.stringify({ success: false, code: "PROXY_ERROR", message: error.message }));
+    });
+    return;
+  }
+
   const file = resolveFile(request.url || "/");
   const type = contentTypes[extname(file)] || "application/octet-stream";
   response.writeHead(200, { "Content-Type": type });

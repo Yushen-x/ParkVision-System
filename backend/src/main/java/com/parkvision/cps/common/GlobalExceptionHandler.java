@@ -3,6 +3,7 @@ package com.parkvision.cps.common;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,12 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .orElse("request validation failed");
+        return ResponseEntity.badRequest().body(ApiResponse.failed("VALIDATION_FAILED", message));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParameterException(MissingServletRequestParameterException exception) {
+        String message = exception.getParameterName() + " parameter is required";
         return ResponseEntity.badRequest().body(ApiResponse.failed("VALIDATION_FAILED", message));
     }
 

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="642" viewBox="0 0 1280 642" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="642" rx="28" fill="url(#bg)" />
+  <text x="40" y="48" font-size="34" font-weight="700" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">ParkVision API 性能测试结果</text>
+  <text x="40" y="78" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">蓝色为平均响应时间，黄色为 P95。测试基于本机预览环境与 H2 文件数据库。</text>
+  
+        <text x="40" y="108" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">运营首页汇总</text>
+        <text x="40" y="138" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 25.85 ms | P95 69.9 ms | 最大 157.52 ms</text>
+        <rect x="280" y="90" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="90" width="318.0400572246066" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="120" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="120" width="860" height="12" rx="6" fill="#f59e0b" />
+        <text x="610.0400572246066" y="106" font-size="14" fill="#bae6fd" font-family="Segoe UI">25.85 ms</text>
+        <text x="1152" y="131" font-size="14" fill="#fde68a" font-family="Segoe UI">69.9 ms</text>
+      
+
+        <text x="40" y="190" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">调度队列</text>
+        <text x="40" y="220" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 11.03 ms | P95 13.8 ms | 最大 24.56 ms</text>
+        <rect x="280" y="172" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="172" width="135.7052932761087" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="202" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="202" width="169.78540772532187" height="12" rx="6" fill="#f59e0b" />
+        <text x="427.7052932761087" y="188" font-size="14" fill="#bae6fd" font-family="Segoe UI">11.03 ms</text>
+        <text x="461.7854077253219" y="213" font-size="14" fill="#fde68a" font-family="Segoe UI">13.8 ms</text>
+      
+
+        <text x="40" y="272" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">设备总览</text>
+        <text x="40" y="302" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 12.08 ms | P95 14.52 ms | 最大 16.85 ms</text>
+        <rect x="280" y="254" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="254" width="148.62374821173103" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="284" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="284" width="178.64377682403432" height="12" rx="6" fill="#f59e0b" />
+        <text x="440.623748211731" y="270" font-size="14" fill="#bae6fd" font-family="Segoe UI">12.08 ms</text>
+        <text x="470.6437768240343" y="295" font-size="14" fill="#fde68a" font-family="Segoe UI">14.52 ms</text>
+      
+
+        <text x="40" y="354" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">计费预览</text>
+        <text x="40" y="384" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 12.97 ms | P95 15.87 ms | 最大 16.92 ms</text>
+        <rect x="280" y="336" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="336" width="159.5736766809728" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="366" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="366" width="195.25321888412014" height="12" rx="6" fill="#f59e0b" />
+        <text x="451.57367668097277" y="352" font-size="14" fill="#bae6fd" font-family="Segoe UI">12.97 ms</text>
+        <text x="487.25321888412014" y="377" font-size="14" fill="#fde68a" font-family="Segoe UI">15.87 ms</text>
+      
+
+        <text x="40" y="436" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">管理报表</text>
+        <text x="40" y="466" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 10.01 ms | P95 20.1 ms | 最大 21.09 ms</text>
+        <rect x="280" y="418" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="418" width="123.15593705293276" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="448" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="448" width="247.29613733905578" height="12" rx="6" fill="#f59e0b" />
+        <text x="415.15593705293276" y="434" font-size="14" fill="#bae6fd" font-family="Segoe UI">10.01 ms</text>
+        <text x="539.2961373390558" y="459" font-size="14" fill="#fde68a" font-family="Segoe UI">20.1 ms</text>
+      
+
+        <text x="40" y="518" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">视觉推理</text>
+        <text x="40" y="548" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">平均 8.7 ms | P95 16.67 ms | 最大 18.18 ms</text>
+        <rect x="280" y="500" width="860" height="20" rx="10" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="500" width="107.03862660944203" height="20" rx="10" fill="#38bdf8" />
+        <rect x="280" y="530" width="860" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
+        <rect x="280" y="530" width="205.0958512160229" height="12" rx="6" fill="#f59e0b" />
+        <text x="399.038626609442" y="516" font-size="14" fill="#bae6fd" font-family="Segoe UI">8.7 ms</text>
+        <text x="497.0958512160229" y="541" font-size="14" fill="#fde68a" font-family="Segoe UI">16.67 ms</text>
+      
+  <rect x="40" y="604" width="16" height="16" rx="8" fill="#38bdf8" />
+  <text x="64" y="618" font-size="14" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">平均响应时间</text>
+  <rect x="220" y="604" width="16" height="16" rx="8" fill="#f59e0b" />
+  <text x="244" y="618" font-size="14" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">P95 响应时间</text>
+</svg>

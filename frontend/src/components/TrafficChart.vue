@@ -31,7 +31,7 @@ function draw() {
   ctx.fillRect(0, 0, width, height);
   ctx.strokeStyle = "#d8e1e7";
   ctx.lineWidth = 1;
-  ctx.font = "12px Inter";
+  ctx.font = "12px Microsoft YaHei";
   ctx.fillStyle = "#667782";
 
   for (let i = 0; i <= 4; i += 1) {
@@ -69,5 +69,5 @@ watch(() => [props.history, props.prediction], draw, { deep: true });
 </script>
 
 <template>
-  <canvas ref="canvas" width="920" height="320" aria-label="Traffic forecast chart"></canvas>
+  <canvas ref="canvas" width="920" height="320" aria-label="车流预测图表"></canvas>
 </template>

@@ -32,9 +32,9 @@ function resetState() {
   state.summary = { ...mockSummary };
   state.forecast = structuredClone(mockForecast);
   state.events = [
-    ["System online", "Dashboard and fallback data source were initialized."],
-    ["Vision edge node", "Latest plate OCR result is SH-A7686 with 0.982 confidence."],
-    ["Dispatch center", "AGV-03 is heading to the shallow buffer lane."],
+    ["系统上线", "运营首页和本地兜底数据源已初始化。"],
+    ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
+    ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
   ];
   state.slots = createMockSlots();
   state.agvs = structuredClone(mockAgvs);
@@ -49,9 +49,9 @@ function resetState() {
   state.pricingPreview = createPricingPreview();
   state.indoorRoute = createIndoorRoute();
   state.ownerTimeline = [
-    ["Vehicle stored", "AGV placed the vehicle in slot E06."],
-    ["Billing active", "Dynamic parking fee started after the entry workflow closed."],
-    ["Owner ready", "Retrieve, touch-and-go, and VIP pickup are available."],
+    ["车辆已入库", "AGV 已将车辆放入 E06 车位。"],
+    ["计费已启动", "入场流程结束后，动态停车费开始计算。"],
+    ["车主服务就绪", "取车、临停取物和 VIP 优先取车均可使用。"],
   ];
   state.visionResult = { ...mockVisionResult };
   state.adminReport = buildMockReport();
@@ -76,7 +76,7 @@ describe("parkingStore", () => {
     const eventCount = state.events.length;
 
     await toggleEmergency();
-    addEvent("Manual note", "Operator confirmed the stop state.");
+    addEvent("人工备注", "操作员已确认急停状态。");
 
     expect(state.emergency).toBe(true);
     expect(state.visionResult.action).toBe("ESTOP_AND_REVIEW");

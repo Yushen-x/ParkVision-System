@@ -1,0 +1,11 @@
+{
+  "name": "parkvision-testing-tools",
+  "private": true,
+  "scripts": {
+    "capture-screenshots": "node ./capture-screenshots.mjs"
+  },
+  "devDependencies": {
+    "marked": "^16.4.1",
+    "playwright": "^1.60.0"
+  }
+}

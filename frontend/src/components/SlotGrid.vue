@@ -1,4 +1,6 @@
 <script setup>
+import { zhText } from "../utils/localize";
+
 defineProps({
   slots: {
     type: Array,
@@ -19,15 +21,15 @@ defineProps({
         :key="slot.id"
         class="slot-dot"
         :class="slot.status"
-        :title="`${slot.id} ${slot.status}`"
+        :title="`${slot.id} ${zhText(slot.status)}`"
       ></span>
     </div>
     <div class="legend-row">
-      <span><i class="legend empty"></i>Empty</span>
-      <span><i class="legend occupied"></i>Occupied</span>
-      <span><i class="legend charging"></i>Charging</span>
-      <span><i class="legend buffer"></i>Buffer</span>
-      <span><i class="legend maintenance"></i>Maintenance</span>
+      <span><i class="legend empty"></i>空闲</span>
+      <span><i class="legend occupied"></i>已停放</span>
+      <span><i class="legend charging"></i>充电中</span>
+      <span><i class="legend buffer"></i>周转区</span>
+      <span><i class="legend maintenance"></i>维护中</span>
     </div>
   </div>
 </template>

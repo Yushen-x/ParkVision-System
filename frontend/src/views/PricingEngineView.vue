@@ -1,17 +1,18 @@
 <script setup>
 import { computed } from "vue";
 import { getters, state } from "../stores/parkingStore";
+import { zhMoney, zhText } from "../utils/localize";
 
 const currentOrder = getters.currentOrder;
 const preview = computed(() => state.pricingPreview);
 const formulaChips = computed(() => [
-  { label: "Base", accent: "rgba(255,255,255,0.1)", color: "#fff" },
+  { label: "基础费", accent: "rgba(255,255,255,0.1)", color: "#fff" },
   {
-    label: `Peak (${Number(preview.value.peakMultiplier || 1).toFixed(2)}x)`,
+    label: `高峰 (${Number(preview.value.peakMultiplier || 1).toFixed(2)}x)`,
     accent: "rgba(239,68,68,0.2)",
     color: "var(--danger-red)",
   },
-  { label: "EV", accent: "rgba(16,185,129,0.2)", color: "var(--safety-green)" },
+  { label: "新能源", accent: "rgba(16,185,129,0.2)", color: "var(--safety-green)" },
   { label: "VIP", accent: "rgba(245,158,11,0.2)", color: "var(--warning-yellow)" },
 ]);
 
@@ -30,15 +31,15 @@ const durationLabel = computed(() => {
     <article class="surface wide" style="background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9)); border-color:var(--brand);">
       <div class="section-head compact">
         <div>
-          <h2>Dynamic pricing engine</h2>
-          <p>{{ preview.explanation }}</p>
+          <h2>动态计费引擎</h2>
+          <p>{{ zhText(preview.explanation) }}</p>
         </div>
-        <span class="status-pill stable">{{ preview.pricingWindow }}</span>
+        <span class="status-pill stable">{{ zhText(preview.pricingWindow) }}</span>
       </div>
       <div style="padding: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin-top: 16px; border: 1px solid rgba(255,255,255,0.05);">
-        <p style="color:var(--text-muted); font-size:13px; margin-bottom:10px; text-transform:uppercase;">Backend-calculated invoice preview</p>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:10px; text-transform:uppercase;">后端计算的费用预览</p>
         <div style="font-size: 28px; font-family:'Orbitron', sans-serif; color: #fff; display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-          <span style="color:var(--brand);">TOTAL</span>
+          <span style="color:var(--brand);">合计</span>
           <span>=</span>
           <span
             v-for="chip in formulaChips"
@@ -55,24 +56,24 @@ const durationLabel = computed(() => {
       <article class="surface">
         <div class="section-head">
           <div>
-            <h2><i class="fa-solid fa-receipt"></i> Live order context</h2>
-            <p>The pricing page now reads the active order, charger session, and dispatch priority from backend state.</p>
+            <h2><i class="fa-solid fa-receipt"></i> 实时订单上下文</h2>
+            <p>计费页面读取后端订单、充电会话和调度优先级，不再使用静态占位。</p>
           </div>
         </div>
         <div class="metric-list" style="grid-template-columns: 1fr;">
-          <div><span>Order</span><strong>{{ preview.orderNo || currentOrder?.orderNo || "N/A" }}</strong></div>
-          <div><span>Plate</span><strong>{{ preview.plateNo || currentOrder?.plateNo || "N/A" }}</strong></div>
-          <div><span>Duration</span><strong>{{ durationLabel }}</strong></div>
-          <div><span>Base amount</span><strong>CNY {{ Number(preview.baseAmount || 0).toFixed(2) }}</strong></div>
-          <div><span>Current estimate</span><strong style="color:var(--brand);">CNY {{ Number(preview.totalAmount || 0).toFixed(2) }}</strong></div>
+          <div><span>订单号</span><strong>{{ preview.orderNo || currentOrder?.orderNo || "暂无" }}</strong></div>
+          <div><span>车牌号</span><strong>{{ preview.plateNo || currentOrder?.plateNo || "暂无" }}</strong></div>
+          <div><span>停车时长</span><strong>{{ durationLabel }}</strong></div>
+          <div><span>基础金额</span><strong>{{ zhMoney(preview.baseAmount) }}</strong></div>
+          <div><span>当前预估</span><strong style="color:var(--brand);">{{ zhMoney(preview.totalAmount) }}</strong></div>
         </div>
       </article>
 
       <article class="surface">
         <div class="section-head">
           <div>
-            <h2><i class="fa-solid fa-layer-group"></i> Applied components</h2>
-            <p>Each component below is returned from the pricing preview endpoint instead of being hard-coded in the view.</p>
+            <h2><i class="fa-solid fa-layer-group"></i> 费用组成</h2>
+            <p>下方每一项都由计费预览接口返回，而不是页面硬编码。</p>
           </div>
         </div>
         <div class="queue-list">
@@ -89,11 +90,11 @@ const durationLabel = computed(() => {
                         : ''
                 "
               >
-                {{ component.label }}
+                {{ zhText(component.label) }}
               </b>
-              <span>{{ component.formula }}</span>
+              <span>{{ zhText(component.formula) }}</span>
             </div>
-            <strong style="color:#fff;">CNY {{ Number(component.amount || 0).toFixed(2) }}</strong>
+            <strong style="color:#fff;">{{ zhMoney(component.amount) }}</strong>
           </div>
         </div>
       </article>
@@ -102,17 +103,17 @@ const durationLabel = computed(() => {
     <article class="surface wide">
       <div class="section-head compact">
         <div>
-          <h2>Rule source of truth</h2>
-          <p>The operational preview above is explained by the same rule dataset shown in the admin console.</p>
+          <h2>规则数据源</h2>
+          <p>上方费用预览由管理台展示的同一套计费规则解释。</p>
         </div>
       </div>
       <div class="queue-list" style="margin-top:16px;">
         <div v-for="rule in state.pricingRules" :key="rule.name" class="queue-item" style="grid-template-columns: minmax(0, 1fr) auto;">
           <div>
-            <b>{{ rule.name }}</b>
-            <span>{{ rule.timeRange }} | {{ rule.method }} | {{ rule.extraPolicy }}</span>
+            <b>{{ zhText(rule.name) }}</b>
+            <span>{{ zhText(rule.timeRange) }} | {{ zhText(rule.method) }} | {{ zhText(rule.extraPolicy) }}</span>
           </div>
-          <span class="status-pill stable">{{ rule.status }}</span>
+          <span class="status-pill stable">{{ zhText(rule.status) }}</span>
         </div>
       </div>
     </article>

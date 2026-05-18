@@ -46,7 +46,7 @@ public class AdminService {
 
     public AdminReport buildReport(String query) {
         String normalizedQuery = query == null || query.isBlank()
-                ? "VIP service trend in the last 7 days"
+                ? "最近 7 天 VIP 服务趋势"
                 : query.trim();
         long vipTasks = repository.findDispatchQueue().stream().filter(DispatchTask::isVip).count();
         long occupiedSlots = repository.findSlots().stream().filter(slot -> slot.getStatus() != SlotStatus.EMPTY).count();
@@ -58,13 +58,13 @@ public class AdminService {
                 .setScale(0, RoundingMode.HALF_UP)
                 .intValue();
 
-        String summary = "%d live alerts, %d queued dispatch tasks, %d occupied slots, realized revenue %d CNY. VIP and pre-dispatch actions currently account for %d priority jobs."
+        String summary = "当前 %d 条实时告警、%d 个调度排队任务、%d 个占用车位、已确认收入 %d 元。VIP 与预调度动作当前贡献 %d 个优先任务。"
                 .formatted(liveAlerts, queuedTasks, occupiedSlots, realizedRevenue, vipTasks);
 
         return new AdminReport(
                 normalizedQuery,
                 summary,
-                List.of("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+                List.of("周一", "周二", "周三", "周四", "周五", "周六", "周日"),
                 List.of(120, 132, 101, 134, 290, 430, 410),
                 List.of(220, 182, 191, 234, 490, 530, 610)
         );
@@ -83,27 +83,27 @@ public class AdminService {
 
     private String eventOf(ParkingOrder order) {
         return switch (order.getStatus()) {
-            case PARKED -> "Vehicle entry";
-            case RETRIEVING -> "Retrieve request";
-            case TOUCHING -> "Touch-and-go";
-            case PAYING -> "Pending payment";
-            case FINISHED -> "Completed exit";
-            case ABNORMAL -> "Exception review";
+            case PARKED -> "车辆入场";
+            case RETRIEVING -> "取车请求";
+            case TOUCHING -> "临停取物";
+            case PAYING -> "待支付";
+            case FINISHED -> "完成离场";
+            case ABNORMAL -> "异常复核";
         };
     }
 
     private String statusLabel(ParkingOrder order) {
         return switch (order.getStatus()) {
-            case PARKED -> "Active parking";
-            case RETRIEVING -> "Dispatching";
-            case TOUCHING -> "At handoff bay";
-            case PAYING -> "Awaiting payment";
-            case FINISHED -> "Closed";
-            case ABNORMAL -> "Needs review";
+            case PARKED -> "停车中";
+            case RETRIEVING -> "调度中";
+            case TOUCHING -> "交接区等待";
+            case PAYING -> "等待支付";
+            case FINISHED -> "已关闭";
+            case ABNORMAL -> "需要复核";
         };
     }
 
     private String formatAmount(BigDecimal amount) {
-        return "CNY " + amount.setScale(2, RoundingMode.HALF_UP);
+        return "￥" + amount.setScale(2, RoundingMode.HALF_UP);
     }
 }

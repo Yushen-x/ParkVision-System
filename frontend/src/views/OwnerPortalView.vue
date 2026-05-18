@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { enqueueVip, getters, runOwnerAction, state } from "../stores/parkingStore";
+import { zhMoney, zhText } from "../utils/localize";
 
 const currentOrder = getters.currentOrder;
 const showOverlay = ref(false);
@@ -11,15 +12,15 @@ const ownerStatus = computed(() => {
   const status = currentOrder.value?.status;
   switch (status) {
     case "PARKED":
-      return "Stored";
+      return "已入库";
     case "RETRIEVING":
-      return "Retrieving";
+      return "取车中";
     case "TOUCHING":
-      return "Touch-and-go";
+      return "临停取物";
     case "FINISHED":
-      return "Closed";
+      return "已关闭";
     default:
-      return "Idle";
+      return "待命";
   }
 });
 
@@ -34,9 +35,9 @@ const duration = computed(() => {
   return `${hours}:${remain}`;
 });
 
-const fee = computed(() => Number(currentOrder.value?.amount || 0).toFixed(2));
-const plate = computed(() => currentOrder.value?.plateNo || "No active order");
-const slotLabel = computed(() => currentOrder.value?.slotId || "N/A");
+const fee = computed(() => zhMoney(currentOrder.value?.amount || 0));
+const plate = computed(() => currentOrder.value?.plateNo || "暂无活跃订单");
+const slotLabel = computed(() => currentOrder.value?.slotId || "暂无");
 
 async function doAction(action) {
   if (!currentOrder.value) return;
@@ -88,7 +89,7 @@ function formatTime(seconds) {
             <span class="c-plate">{{ plate }}</span>
             <i class="fa-regular fa-bell" style="font-size: 18px;"></i>
           </div>
-          <h2>My vehicle</h2>
+          <h2>我的车辆</h2>
         </div>
 
         <div class="c-status-card">
@@ -96,35 +97,35 @@ function formatTime(seconds) {
             <div class="c-pulse-ring"></div>
             <div class="c-inner-circle">{{ ownerStatus }}</div>
           </div>
-          <div class="c-location"><i class="fa-solid fa-location-dot"></i> Slot {{ slotLabel }} | backend-backed order flow</div>
+          <div class="c-location"><i class="fa-solid fa-location-dot"></i> 车位 {{ slotLabel }} | 后端订单流</div>
           <div class="c-info-grid">
-            <div class="c-info-item"><span>Parking duration</span><strong>{{ duration }}</strong></div>
-            <div class="c-info-item"><span>Current fee</span><strong style="color: #10b981;">CNY {{ fee }}</strong></div>
+            <div class="c-info-item"><span>停车时长</span><strong>{{ duration }}</strong></div>
+            <div class="c-info-item"><span>当前费用</span><strong style="color: #10b981;">{{ fee }}</strong></div>
           </div>
         </div>
 
         <div class="c-actions">
           <button class="c-btn c-btn-primary" :disabled="state.busy.ownerAction" @click="doAction('retrieve')">
-            <i class="fa-solid fa-truck-ramp-box" style="font-size: 20px;"></i> Retrieve
+            <i class="fa-solid fa-truck-ramp-box" style="font-size: 20px;"></i> 取车
           </button>
           <button class="c-btn c-btn-secondary" :disabled="state.busy.ownerAction" @click="doAction('touch')">
-            <i class="fa-solid fa-box-open" style="font-size: 20px; color: #f59e0b;"></i> Touch-and-Go
-            <span class="c-badge">No checkout</span>
+            <i class="fa-solid fa-box-open" style="font-size: 20px; color: #f59e0b;"></i> 临停取物
+            <span class="c-badge">不结单</span>
           </button>
         </div>
 
         <div class="c-vip-card" @click="doVip">
           <div class="c-vip-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
           <div class="c-vip-text">
-            <h4>VIP retrieval</h4>
-            <p>Insert the current order at the head of the AGV queue.</p>
+            <h4>VIP 优先取车</h4>
+            <p>把当前订单插入 AGV 队列最前面。</p>
           </div>
-          <div class="c-vip-price">+CNY 5.00</div>
+          <div class="c-vip-price">+￥5.00</div>
         </div>
 
         <div style="padding: 0 1.5rem; margin-top: 1rem;">
           <button class="ghost-button" style="width:100%;" :disabled="state.busy.ownerAction" @click="doAction('pay')">
-            Mark paid and close order
+            标记已支付并关闭订单
           </button>
         </div>
 
@@ -133,12 +134,12 @@ function formatTime(seconds) {
           style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); backdrop-filter:blur(5px); z-index:50; display:flex; flex-direction:column; justify-content:center; align-items:center;"
         >
           <div style="background: rgba(30, 41, 59, 0.95); width: 85%; border-radius: 20px; padding: 2.5rem 1.5rem; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1);">
-            <h3 style="margin:0 0 10px; font-size:18px;">Touch-and-go active</h3>
-            <p style="color:#94a3b8; font-size:13px; margin:0;">Finish collecting items before the countdown expires.</p>
+            <h3 style="margin:0 0 10px; font-size:18px;">临停取物已开启</h3>
+            <p style="color:#94a3b8; font-size:13px; margin:0;">请在倒计时结束前完成物品拿取。</p>
             <div style="font-size: 48px; font-weight:700; font-family:'Orbitron', sans-serif; color: #10b981; margin: 30px 0;">
               {{ formatTime(timer) }}
             </div>
-            <button class="primary-button full" @click="finishTouch">Dismiss</button>
+            <button class="primary-button full" @click="finishTouch">关闭</button>
           </div>
         </div>
       </div>
@@ -147,14 +148,14 @@ function formatTime(seconds) {
     <div class="surface owner-detail" style="border:none; box-shadow:none; background:transparent;">
       <div class="section-head">
         <div>
-          <h2 style="font-size:24px; margin-bottom:10px;">Owner journey</h2>
-          <p style="font-size:15px; max-width:500px;">Retrieve, touch-and-go, pay, and VIP queue insertion now call real backend endpoints when available.</p>
+          <h2 style="font-size:24px; margin-bottom:10px;">车主服务流程</h2>
+          <p style="font-size:15px; max-width:500px;">取车、临停取物、支付和 VIP 插队都会优先调用真实后端接口。</p>
         </div>
       </div>
       <div class="module-row" style="grid-template-columns: 1fr;">
         <div v-for="([title, detail], index) in state.ownerTimeline" :key="`${title}-${index}`">
-          <b>{{ title }}</b>
-          <span>{{ detail }}</span>
+          <b>{{ zhText(title) }}</b>
+          <span>{{ zhText(detail) }}</span>
         </div>
       </div>
     </div>

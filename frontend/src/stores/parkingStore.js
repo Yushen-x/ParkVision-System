@@ -30,9 +30,9 @@ export const state = reactive({
   summary: { ...mockSummary },
   forecast: structuredClone(mockForecast),
   events: [
-    ["System online", "Dashboard and fallback data source were initialized."],
-    ["Vision edge node", "Latest plate OCR result is SH-A7686 with 0.982 confidence."],
-    ["Dispatch center", "AGV-03 is heading to the shallow buffer lane."],
+    ["系统上线", "运营首页和本地兜底数据源已初始化。"],
+    ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
+    ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
   ],
   slots: createMockSlots(),
   agvs: structuredClone(mockAgvs),
@@ -47,9 +47,9 @@ export const state = reactive({
   pricingPreview: buildMockPricingPreview(),
   indoorRoute: buildMockIndoorRoute(),
   ownerTimeline: [
-    ["Vehicle stored", "AGV placed the vehicle in slot E06."],
-    ["Billing active", "Dynamic parking fee started after the entry workflow closed."],
-    ["Owner ready", "Retrieve, touch-and-go, and VIP pickup are available."],
+    ["车辆已入库", "AGV 已将车辆放入 E06 车位。"],
+    ["计费已启动", "入场流程结束后，动态停车费开始计算。"],
+    ["车主服务就绪", "取车、临停取物和 VIP 优先取车均可使用。"],
   ],
   visionResult: { ...mockVisionResult },
   adminReport: buildMockReport(),
@@ -120,7 +120,7 @@ export async function simulateEntry() {
   state.busy.entry = true;
   try {
     const order = await parkvisionApi.simulateEntry();
-    addEvent("Vehicle admitted", `${order.plateNo} was assigned to slot ${order.slotId}.`);
+    addEvent("车辆入场", `${order.plateNo} 已分配到车位 ${order.slotId}。`);
     state.activePlate = order.plateNo;
     await refreshCore();
     await refreshAdminData();
@@ -135,7 +135,7 @@ export async function triggerPreDispatch() {
   state.busy.preDispatch = true;
   try {
     const task = await parkvisionApi.triggerPreDispatch();
-    addEvent("Pre-dispatch queued", `${task.plateNo} was moved into the pre-dispatch queue.`);
+    addEvent("预调度入队", `${task.plateNo} 已进入预调度队列。`);
     await refreshCore();
   } catch {
     fallbackPreDispatch();
@@ -148,8 +148,8 @@ export async function enqueueVip(orderNo = getters.currentOrder.value?.orderNo) 
   state.busy.ownerAction = true;
   try {
     const task = await parkvisionApi.triggerVip(orderNo);
-    addEvent("VIP retrieval", `${task.plateNo} was inserted at the top of the queue.`);
-    pushOwnerTimeline("VIP retrieval", "Priority AGV dispatch was created for the current order.");
+    addEvent("VIP 优先取车", `${task.plateNo} 已插入队首。`);
+    pushOwnerTimeline("VIP 优先取车", "当前订单已创建优先 AGV 调度任务。");
     await refreshCore();
     await refreshAdminData();
   } catch {
@@ -166,10 +166,10 @@ export async function runVision(options = {}) {
     state.visionResult = result;
     state.activePlate = result.plate;
     addEvent(
-      "Vision inference complete",
+      "视觉推理完成",
       result.intrusion
-        ? "Intrusion detected in the handoff zone. Review is required."
-        : `${result.plate} passed OCR with ${result.confidence} confidence.`,
+        ? "交接区检测到入侵，需要复核。"
+        : `${result.plate} 已通过 OCR，置信度 ${result.confidence}。`,
     );
     await refreshCore();
     return state.visionResult;
@@ -187,16 +187,16 @@ export async function runOwnerAction(action, orderNo = getters.currentOrder.valu
   try {
     if (action === "retrieve") {
       await parkvisionApi.retrieveOrder(orderNo);
-      pushOwnerTimeline("Retrieve started", "An AGV retrieval job was added to the live dispatch queue.");
-      addEvent("Owner request", `Retrieve request submitted for ${orderNo}.`);
+      pushOwnerTimeline("取车已启动", "AGV 取车任务已加入实时调度队列。");
+      addEvent("车主请求", `订单 ${orderNo} 已提交取车请求。`);
     } else if (action === "touch") {
       await parkvisionApi.touchOrder(orderNo);
-      pushOwnerTimeline("Touch-and-go", "The vehicle was routed to the handoff bay without closing the billing session.");
-      addEvent("Owner request", `Touch-and-go request submitted for ${orderNo}.`);
+      pushOwnerTimeline("临停取物", "车辆已被调度到交接区，计费会话保持开启。");
+      addEvent("车主请求", `订单 ${orderNo} 已提交临停取物请求。`);
     } else if (action === "pay") {
       await parkvisionApi.payOrder(orderNo);
-      pushOwnerTimeline("Payment complete", "The order was closed and the slot was released.");
-      addEvent("Owner request", `Payment completed for ${orderNo}.`);
+      pushOwnerTimeline("支付完成", "订单已关闭，车位已释放。");
+      addEvent("车主请求", `订单 ${orderNo} 已完成支付。`);
     }
 
     await refreshCore();
@@ -223,10 +223,10 @@ export async function toggleEmergency() {
   try {
     await parkvisionApi.setEmergency(nextState);
     addEvent(
-      nextState ? "Emergency stop" : "Emergency cleared",
+      nextState ? "紧急停车" : "急停解除",
       nextState
-        ? "Dispatch release was locked from the backend safety layer."
-        : "Safety lock was released and field devices resumed automatic mode.",
+        ? "后端安全层已锁定调度放行。"
+        : "安全锁已解除，现场设备恢复自动模式。",
     );
     await refreshCore();
   } catch {
@@ -330,7 +330,7 @@ function fallbackSimulateEntry() {
   state.activePlate = plateNo;
   recomputeSummary();
   syncFallbackExperience(order);
-  addEvent("Vehicle admitted", `${plateNo} was assigned to slot ${slot.id} in fallback mode.`);
+  addEvent("车辆入场", `${plateNo} 已在本地兜底模式下分配到车位 ${slot.id}。`);
 }
 
 function fallbackPreDispatch() {
@@ -342,15 +342,15 @@ function fallbackPreDispatch() {
   if (activeOrder) {
     state.queue.unshift({
       plateNo: activeOrder.plateNo,
-      type: "Pre-dispatch relocation",
-      tag: "PRE",
+      type: "高峰预调度移位",
+      tag: "预调度",
       wait: "00:48",
       vip: true,
     });
     state.agvs[0] = {
       ...state.agvs[0],
       loaded: true,
-      task: `Relocating ${activeOrder.plateNo}`,
+      task: `移动车辆 ${activeOrder.plateNo}`,
       mode: "TRANSIT",
       velocityMps: 0.78,
       lastCommand: "relocate",
@@ -358,7 +358,7 @@ function fallbackPreDispatch() {
   }
   recomputeSummary();
   syncFallbackExperience(activeOrder);
-  addEvent("Pre-dispatch queued", "Fallback pre-dispatch moved a deep slot vehicle into the buffer lane.");
+  addEvent("预调度入队", "本地兜底预调度已将深层车位车辆移入缓冲车道。");
 }
 
 function fallbackVip(orderNo) {
@@ -368,7 +368,7 @@ function fallbackVip(orderNo) {
   syncOrderStatus(order);
   state.queue.unshift({
     plateNo: order.plateNo,
-    type: "VIP retrieval",
+    type: "VIP 优先取车",
     tag: "VIP",
     wait: "00:30",
     vip: true,
@@ -376,15 +376,15 @@ function fallbackVip(orderNo) {
   state.agvs[0] = {
     ...state.agvs[0],
     loaded: true,
-    task: `VIP pickup for ${order.plateNo}`,
+    task: `VIP 优先取车 ${order.plateNo}`,
     mode: "CARRYING",
     velocityMps: 0.92,
     lastCommand: "vip-priority",
   };
   recomputeSummary();
   syncFallbackExperience(order);
-  pushOwnerTimeline("VIP retrieval", "Fallback dispatch inserted the order at the top of the queue.");
-  addEvent("VIP retrieval", `${order.plateNo} was inserted at the top of the fallback queue.`);
+  pushOwnerTimeline("VIP 优先取车", "本地兜底调度已将订单插入队首。");
+  addEvent("VIP 优先取车", `${order.plateNo} 已插入本地兜底队列队首。`);
 }
 
 function fallbackVision(options = {}) {
@@ -402,8 +402,8 @@ function fallbackVision(options = {}) {
   state.emergency = intrusion;
   syncFallbackExperience(getters.currentOrder.value);
   addEvent(
-    "Vision inference complete",
-    intrusion ? "Fallback safety rule triggered an emergency review." : `${plate} passed fallback OCR inference.`,
+    "视觉推理完成",
+    intrusion ? "本地兜底安全规则已触发急停复核。" : `${plate} 已通过本地 OCR 推理。`,
   );
   return state.visionResult;
 }
@@ -414,21 +414,21 @@ function fallbackOwnerAction(action, orderNo) {
 
   if (action === "retrieve") {
     order.status = "RETRIEVING";
-    pushOwnerTimeline("Retrieve started", "Fallback dispatch created a retrieval job for the current order.");
+    pushOwnerTimeline("取车已启动", "本地兜底调度已为当前订单创建取车任务。");
   } else if (action === "touch") {
     order.status = "TOUCHING";
-    pushOwnerTimeline("Touch-and-go", "Fallback dispatch routed the vehicle to the handoff bay.");
+    pushOwnerTimeline("临停取物", "本地兜底调度已将车辆送往交接区。");
   } else if (action === "pay") {
     order.status = "FINISHED";
     order.amount = calculateFallbackAmount(order);
-    pushOwnerTimeline("Payment complete", "Fallback billing closed the order and released the slot.");
+    pushOwnerTimeline("支付完成", "本地兜底计费已关闭订单并释放车位。");
   }
 
   syncOrderStatus(order);
   state.adminOrders = state.orders.map(toAdminOrderRow);
   recomputeSummary();
   syncFallbackExperience(order);
-  addEvent("Owner request", `${action} was processed locally for ${order.orderNo}.`);
+  addEvent("车主请求", `订单 ${order.orderNo} 已在本地处理 ${action} 操作。`);
 }
 
 function fallbackToggleEmergency(nextState) {
@@ -440,10 +440,10 @@ function fallbackToggleEmergency(nextState) {
   };
   syncFallbackExperience(getters.currentOrder.value);
   addEvent(
-    nextState ? "Emergency stop" : "Emergency cleared",
+    nextState ? "紧急停车" : "急停解除",
     nextState
-      ? "Dispatch visuals were frozen after a simulated safety event."
-      : "Safety lock was released and AGV motion resumed.",
+      ? "模拟安全事件触发后，调度画面已冻结。"
+      : "安全锁已解除，AGV 运动恢复。",
   );
 }
 
@@ -478,7 +478,7 @@ function recomputeSummary() {
     alertCount: state.alerts.length,
     revenue: Math.round(revenue),
     avgWait: state.queue[0]?.wait || "03:30",
-    chargingTurnover: "7.4 / day",
+    chargingTurnover: "7.4 次/日",
   };
 }
 
@@ -498,9 +498,9 @@ function syncFallbackExperience(order = getters.currentOrder.value) {
   state.indoorRoute = buildMockIndoorRoute(activeOrder);
   state.systemNodes = structuredClone(mockSystemNodes).map((node) =>
     state.emergency && node.name !== "Edge-Cam-01"
-      ? { ...node, latency: "LOCK", level: "warning", detail: "Fallback safety lock is active across the control plane" }
+      ? { ...node, latency: "锁定", level: "warning", detail: "本地兜底安全锁已在控制平面生效" }
       : state.emergency && node.name === "Edge-Cam-01"
-        ? { ...node, latency: "ALARM", level: "warning", detail: "Fallback safety ROI escalated and blocked dispatch release" }
+        ? { ...node, latency: "告警", level: "warning", detail: "本地兜底安全区告警已升级并阻止调度放行" }
         : node,
   );
 
@@ -522,8 +522,8 @@ function syncFallbackExperience(order = getters.currentOrder.value) {
     eventCode: state.emergency ? "ESTOP_ACTIVE" : "ORDER_SYNC",
     severity: state.emergency ? "critical" : "info",
     message: state.emergency
-      ? "Fallback emergency stop is active across simulated field devices"
-      : `Fallback state synced for ${activeOrder?.plateNo || "the active order"}`,
+      ? "本地兜底急停已在模拟现场设备中生效"
+      : `本地兜底状态已同步：${activeOrder?.plateNo || "当前订单"}`,
     eventTime: new Date().toISOString(),
     acknowledged: false,
   });

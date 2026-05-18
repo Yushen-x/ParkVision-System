@@ -40,7 +40,7 @@ export const mockSummary = {
   alertCount: 3,
   revenue: 102,
   avgWait: "04:12",
-  chargingTurnover: "7.4 / day",
+  chargingTurnover: "7.4 次/日",
 };
 
 export const mockForecast = {
@@ -81,86 +81,86 @@ export function createMockOrders() {
 export const mockAlerts = [
   {
     alertNo: "AL2026050601",
-    type: "Safety",
-    content: "Person intrusion detected in transfer zone",
-    status: "Emergency stop",
-    level: "High",
+    type: "安全",
+    content: "交接区检测到人员入侵",
+    status: "急停中",
+    level: "高",
   },
   {
     alertNo: "AL2026050602",
-    type: "Device",
-    content: "AGV-04 battery below 20%",
-    status: "Processing",
-    level: "Medium",
+    type: "设备",
+    content: "AGV-04 电量低于 20%",
+    status: "处理中",
+    level: "中",
   },
   {
     alertNo: "AL2026050603",
-    type: "Order",
-    content: "Secondary plate recognition mismatch",
-    status: "Pending review",
-    level: "Medium",
+    type: "订单",
+    content: "二次车牌识别结果不一致",
+    status: "待复核",
+    level: "中",
   },
 ];
 
 export const mockPricingRules = [
   {
-    name: "Workday hourly",
+    name: "工作日阶梯计费",
     timeRange: "07:00-22:00",
-    method: "First hour 6, then 4/hour",
-    extraPolicy: "Cap 48",
-    status: "Active",
+    method: "首小时 6 元，之后 4 元/小时",
+    extraPolicy: "封顶 48 元",
+    status: "启用",
   },
   {
-    name: "Night package",
+    name: "夜间包时",
     timeRange: "22:00-07:00",
-    method: "12 flat rate",
-    extraPolicy: "Monthly pass exempt",
-    status: "Active",
+    method: "夜间统一 12 元",
+    extraPolicy: "月卡免收",
+    status: "启用",
   },
   {
-    name: "VIP retrieval",
-    timeRange: "All day",
-    method: "Base fee + 8",
-    extraPolicy: "Queue weight +40",
-    status: "Active",
+    name: "VIP 优先取车",
+    timeRange: "全天",
+    method: "基础费 + 8 元",
+    extraPolicy: "队列权重 +40",
+    status: "启用",
   },
   {
-    name: "EV charging",
-    timeRange: "All day",
-    method: "1.2/kWh",
-    extraPolicy: "Auto release when full",
-    status: "Active",
+    name: "新能源充电",
+    timeRange: "全天",
+    method: "1.2 元/千瓦时",
+    extraPolicy: "充满自动释放",
+    status: "启用",
   },
 ];
 
 export const mockAccessList = [
   {
     plateNo: "SH-A7686",
-    listType: "Whitelist",
-    userType: "Monthly member",
+    listType: "白名单",
+    userType: "月卡用户",
     validUntil: "2026-12-31",
-    remark: "Auto pass",
+    remark: "自动放行",
   },
   {
     plateNo: "SH-D5218",
-    listType: "Whitelist",
-    userType: "EV owner",
+    listType: "白名单",
+    userType: "新能源车主",
     validUntil: "2026-09-01",
-    remark: "Charging priority",
+    remark: "充电优先",
   },
   {
     plateNo: "SU-M9021",
-    listType: "Normal",
-    userType: "Temporary visitor",
-    validUntil: "Single order",
-    remark: "Supports contactless pay",
+    listType: "普通名单",
+    userType: "临时访客",
+    validUntil: "单次订单",
+    remark: "支持无接触支付",
   },
   {
     plateNo: "SH-B9001",
-    listType: "Blacklist",
-    userType: "Payment exception",
-    validUntil: "Manual review",
-    remark: "Entry blocked",
+    listType: "黑名单",
+    userType: "支付异常",
+    validUntil: "人工复核",
+    remark: "禁止入场",
   },
 ];
 
@@ -168,35 +168,35 @@ export const mockSystemNodes = [
   {
     name: "Edge-Cam-01",
     latency: "98ms",
-    detail: "South gate vision pre-processing node is healthy and forwarding OCR metadata",
+    detail: "南门视觉预处理节点运行正常，正在转发 OCR 元数据",
     level: "stable",
   },
   {
     name: "PLC-Master-Controller",
     latency: "12ms",
-    detail: "Barrier controller and AGV fleet gateway heartbeats are stable",
+    detail: "道闸控制器与 AGV 网关心跳稳定",
     level: "stable",
   },
   {
     name: "Redis-Sync-Cluster",
     latency: "28ms",
-    detail: "Operational cache and report fan-out are synchronized",
+    detail: "运营缓存与报表分发数据已同步",
     level: "stable",
   },
 ];
 
 export const mockAgvs = [
-  { id: "AGV-01", x: 10, y: 12, loaded: false, task: "Patrolling Zone A", batteryPct: 91, mode: "IDLE", velocityMps: 0.42, lastCommand: "patrol" },
-  { id: "AGV-02", x: 45, y: 32, loaded: true, task: "Carrying SH-A7686", batteryPct: 74, mode: "CARRYING", velocityMps: 0.86, lastCommand: "deliver" },
-  { id: "AGV-03", x: 72, y: 58, loaded: false, task: "Heading to shallow buffer", batteryPct: 68, mode: "TRANSIT", velocityMps: 0.65, lastCommand: "relocate" },
-  { id: "AGV-04", x: 28, y: 76, loaded: false, task: "Charging standby", batteryPct: 19, mode: "CHARGING", velocityMps: 0, lastCommand: "dock" },
+  { id: "AGV-01", x: 10, y: 12, loaded: false, task: "A 区巡检", batteryPct: 91, mode: "IDLE", velocityMps: 0.42, lastCommand: "patrol" },
+  { id: "AGV-02", x: 45, y: 32, loaded: true, task: "搬运车辆 SH-A7686", batteryPct: 74, mode: "CARRYING", velocityMps: 0.86, lastCommand: "deliver" },
+  { id: "AGV-03", x: 72, y: 58, loaded: false, task: "前往浅层缓冲区", batteryPct: 68, mode: "TRANSIT", velocityMps: 0.65, lastCommand: "relocate" },
+  { id: "AGV-04", x: 28, y: 76, loaded: false, task: "充电待命", batteryPct: 19, mode: "CHARGING", velocityMps: 0, lastCommand: "dock" },
 ];
 
 export const mockQueue = [
-  { plateNo: "SH-A7686", type: "Standard retrieval", tag: "FIFO", wait: "04:12", vip: false },
-  { plateNo: "SH-D5218", type: "Charging bay release", tag: "Charging done", wait: "03:40", vip: false },
-  { plateNo: "SU-M9021", type: "Touch-and-Go", tag: "Touch", wait: "02:10", vip: false },
-  { plateNo: "SH-V7780", type: "Reserved outbound", tag: "Booking", wait: "01:58", vip: false },
+  { plateNo: "SH-A7686", type: "标准取车", tag: "先到先取", wait: "04:12", vip: false },
+  { plateNo: "SH-D5218", type: "充电车位放行", tag: "充电完成", wait: "03:40", vip: false },
+  { plateNo: "SU-M9021", type: "临停取物", tag: "临取", wait: "02:10", vip: false },
+  { plateNo: "SH-V7780", type: "预约出场", tag: "预约", wait: "01:58", vip: false },
 ];
 
 export const mockDeviceOverview = {
@@ -213,7 +213,7 @@ export const mockDeviceOverview = {
       lastSeen: "2026-05-18T10:11:52",
       tamperAlarm: false,
       intrusionState: false,
-      detail: "South gate edge camera with OCR and handoff-zone intrusion ROI",
+      detail: "南门边缘摄像头，支持车牌 OCR 和交接区入侵检测",
     },
     {
       cameraId: "CAM-HANDOFF-02",
@@ -227,7 +227,7 @@ export const mockDeviceOverview = {
       lastSeen: "2026-05-18T10:11:57",
       tamperAlarm: false,
       intrusionState: false,
-      detail: "Transfer-bay safety camera with person intrusion alarm",
+      detail: "交接区安全摄像头，支持人员入侵告警",
     },
   ],
   gates: [
@@ -242,7 +242,7 @@ export const mockDeviceOverview = {
       estopArmed: false,
       lastDecision: "ACCESS_GRANTED",
       lastSeen: "2026-05-18T10:11:59",
-      detail: "Inbound barrier with loop detector and PLC relay control",
+      detail: "入场道闸，带地感线圈和 PLC 继电器控制",
     },
     {
       gateId: "GATE-OUT-01",
@@ -255,7 +255,7 @@ export const mockDeviceOverview = {
       estopArmed: false,
       lastDecision: "READY",
       lastSeen: "2026-05-18T10:11:55",
-      detail: "Outbound handoff gate synchronized with AGV release window",
+      detail: "出场交接闸机，与 AGV 放行窗口同步",
     },
   ],
   chargers: [
@@ -269,7 +269,7 @@ export const mockDeviceOverview = {
       vehiclePlate: "SH-D5218",
       authStatus: "Accepted",
       lastSeen: "2026-05-18T10:11:50",
-      detail: "AC charger in premium bay C05",
+      detail: "C05 优先车位交流充电桩",
     },
     {
       chargerId: "EVSE-02",
@@ -281,7 +281,7 @@ export const mockDeviceOverview = {
       vehiclePlate: null,
       authStatus: "Idle",
       lastSeen: "2026-05-18T10:11:58",
-      detail: "AC charger near handoff zone for short dwell sessions",
+      detail: "交接区附近交流充电桩，适合短停补能",
     },
   ],
   events: [
@@ -291,7 +291,7 @@ export const mockDeviceOverview = {
       deviceId: "CAM-SOUTH-01",
       eventCode: "PLATE_READ",
       severity: "info",
-      message: "OCR recognized SH-A7686 and forwarded metadata to the entry service",
+      message: "OCR 识别车牌 SH-A7686，并已转发入场服务",
       eventTime: "2026-05-18T10:07:00",
       acknowledged: true,
     },
@@ -301,7 +301,7 @@ export const mockDeviceOverview = {
       deviceId: "GATE-IN-01",
       eventCode: "LOOP_OCCUPIED",
       severity: "info",
-      message: "Induction loop detected a vehicle at the inbound barrier",
+      message: "入场道闸地感线圈检测到车辆",
       eventTime: "2026-05-18T10:08:00",
       acknowledged: true,
     },
@@ -311,7 +311,7 @@ export const mockDeviceOverview = {
       deviceId: "EVSE-01",
       eventCode: "ENERGY_DELIVERY",
       severity: "info",
-      message: "Charging session for SH-D5218 reached 18.40 kWh",
+      message: "SH-D5218 的充电会话已达到 18.40 千瓦时",
       eventTime: "2026-05-18T10:09:00",
       acknowledged: false,
     },
@@ -325,7 +325,7 @@ export function toAdminOrderRow(order) {
     event: eventOf(order.status),
     slotId: order.slotId,
     status: statusOf(order.status),
-    amount: `CNY ${Number(order.amount || 0).toFixed(2)}`,
+    amount: `￥${Number(order.amount || 0).toFixed(2)}`,
   };
 }
 
@@ -333,12 +333,12 @@ export function createMockAdminOrders() {
   return createMockOrders().map(toAdminOrderRow);
 }
 
-export function buildMockReport(query = "VIP service trend in the last 7 days") {
+export function buildMockReport(query = "最近 7 天 VIP 服务趋势") {
   return {
     query,
     summary:
-      "3 live alerts, 4 queued dispatch tasks, 49 occupied slots, realized revenue 102 CNY. VIP and pre-dispatch actions currently account for 1 priority job.",
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      "当前 3 条实时告警、4 个调度排队任务、49 个占用车位、已确认收入 102 元。VIP 与预调度动作当前贡献 1 个优先任务。",
+    labels: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
     previousWeekRevenue: [120, 132, 101, 134, 290, 430, 410],
     currentWeekRevenue: [220, 182, 191, 234, 490, 530, 610],
   };
@@ -348,18 +348,18 @@ export function buildMockPricingPreview(order = baseOrders[0]) {
   return {
     orderNo: order.orderNo,
     plateNo: order.plateNo,
-    pricingWindow: "Workday peak window",
+    pricingWindow: "工作日高峰时段",
     durationMinutes: 132,
     baseAmount: 14,
     peakMultiplier: 1.5,
     components: [
-      { label: "Base parking", formula: "3h ladder", amount: 14, accent: "base" },
-      { label: "Peak shaping", formula: "1.50x congestion multiplier", amount: 7, accent: "peak" },
-      { label: "EV charging", formula: "1.20 CNY/kWh", amount: order.plateNo.startsWith("SH-D") ? 22.08 : 0, accent: "charging" },
-      { label: "VIP retrieval", formula: "Fixed dispatch priority surcharge", amount: 5, accent: "vip" },
+      { label: "基础停车费", formula: "3 小时阶梯计费", amount: 14, accent: "base" },
+      { label: "高峰调节费", formula: "1.50 倍拥堵调节", amount: 7, accent: "peak" },
+      { label: "新能源充电", formula: "1.20 元/千瓦时", amount: order.plateNo.startsWith("SH-D") ? 22.08 : 0, accent: "charging" },
+      { label: "VIP 优先取车", formula: "固定调度优先费", amount: 5, accent: "vip" },
     ],
     totalAmount: order.plateNo.startsWith("SH-D") ? 48.08 : 26,
-    explanation: "Preview is generated from the order, dispatch priority, and live charger telemetry.",
+    explanation: "费用预览来自订单、调度优先级和实时充电桩遥测。",
   };
 }
 
@@ -368,16 +368,16 @@ export function buildMockIndoorRoute(order = baseOrders[0]) {
     orderNo: order.orderNo,
     plateNo: order.plateNo,
     slotId: order.slotId,
-    handoffZone: "Zone A handoff",
+    handoffZone: "A 区交接点",
     targetGate: "GATE-OUT-01",
     remainingMeters: 120,
     etaSeconds: 180,
     agvEtaSeconds: 96,
     walkingSpeedKph: 6,
     completedSegments: 2,
-    nextInstruction: "Keep straight past the inbound lane, then turn right toward the handoff corridor",
-    status: "AGV-01 is approaching the release corridor",
-    safetyMessage: "Indoor route is clear and synchronized with live AGV and gate telemetry.",
+    nextInstruction: "沿入场车道直行后右转，前往交接走廊",
+    status: "AGV-01 正在接近放行走廊",
+    safetyMessage: "室内路线安全，已与实时 AGV 和闸机遥测同步。",
   };
 }
 
@@ -391,33 +391,33 @@ function setSlotStatus(slots, slotId, status) {
 function eventOf(status) {
   switch (status) {
     case "PARKED":
-      return "Vehicle entry";
+      return "车辆入场";
     case "RETRIEVING":
-      return "Retrieve request";
+      return "取车请求";
     case "TOUCHING":
-      return "Touch-and-go";
+      return "临停取物";
     case "PAYING":
-      return "Pending payment";
+      return "待支付";
     case "FINISHED":
-      return "Completed exit";
+      return "完成离场";
     default:
-      return "Exception review";
+      return "异常复核";
   }
 }
 
 function statusOf(status) {
   switch (status) {
     case "PARKED":
-      return "Active parking";
+      return "停车中";
     case "RETRIEVING":
-      return "Dispatching";
+      return "调度中";
     case "TOUCHING":
-      return "At handoff bay";
+      return "交接区等待";
     case "PAYING":
-      return "Awaiting payment";
+      return "等待支付";
     case "FINISHED":
-      return "Closed";
+      return "已关闭";
     default:
-      return "Needs review";
+      return "需要复核";
   }
 }

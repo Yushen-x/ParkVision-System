@@ -6,7 +6,7 @@ import TopBar from "./components/TopBar.vue";
 import { hydrate, pollRealtime, simulateEntry, state, toggleEmergency, triggerPreDispatch } from "./stores/parkingStore";
 
 const route = useRoute();
-const title = computed(() => route.meta.title || "Operations Dashboard");
+const title = computed(() => route.meta.title || "运营首页");
 const timer = ref(null);
 
 onMounted(async () => {

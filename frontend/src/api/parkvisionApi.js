@@ -29,6 +29,9 @@ async function request(path, options = {}) {
   if (!response.ok) {
     throw new Error(payload?.message || `API ${path} failed with ${response.status}`);
   }
+  if (!payload) {
+    throw new Error(`API ${path} returned a non-JSON or empty response`);
+  }
 
   return payload?.data ?? payload;
 }

@@ -21,6 +21,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class DeviceService {
@@ -67,8 +68,8 @@ public class DeviceService {
                         camera.tamperAlarm(),
                         active,
                         active
-                                ? "Emergency intrusion override is active for the handoff safety ROI"
-                                : "Safety ROI is clear and the edge camera has resumed normal operation"
+                                ? "交接区安全 ROI 的急停入侵覆盖已生效"
+                                : "安全 ROI 已清空，边缘摄像头恢复正常运行"
                 ))
         );
 
@@ -85,8 +86,8 @@ public class DeviceService {
                         active ? "ESTOP_ACTIVE" : "RECOVERY_READY",
                         now,
                         active
-                                ? "Safety lock engaged. PLC relay output is inhibited until manual clearance."
-                                : "Barrier controller returned to automatic mode after safety review."
+                                ? "安全锁已生效，PLC 继电器输出在人工确认前保持禁止。"
+                                : "安全复核结束后，道闸控制器已恢复自动模式。"
                 ))
         );
 
@@ -99,8 +100,8 @@ public class DeviceService {
                 active ? "ESTOP_ACTIVE" : "ESTOP_RELEASED",
                 active ? "critical" : "info",
                 active
-                        ? "Emergency stop latched from the operator console and propagated to the PLC layer"
-                        : "Emergency stop released and field devices returned to automatic service",
+                        ? "操作台触发的急停已锁存，并下发到 PLC 层"
+                        : "急停已解除，现场设备恢复自动服务",
                 now,
                 false
         ));
@@ -108,10 +109,10 @@ public class DeviceService {
         if (active) {
             repository.saveAlert(new AlertEvent(
                     "AL" + now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
-                    "Safety",
-                    "Operator-triggered emergency stop is active across the handoff corridor",
-                    "Emergency stop",
-                    "High"
+                    "安全",
+                    "操作员触发的急停已在交接走廊生效",
+                    "急停中",
+                    "高"
             ));
         }
 
@@ -136,8 +137,8 @@ public class DeviceService {
                     false,
                     result.intrusion(),
                     result.intrusion()
-                            ? "Person intrusion was detected inside the handoff ROI"
-                            : "Latest plate OCR result was accepted by the edge inference pipeline"
+                            ? "交接区 ROI 内检测到人员入侵"
+                            : "最新车牌 OCR 结果已被边缘推理流水线接受"
             ));
         }
 
@@ -148,8 +149,8 @@ public class DeviceService {
                 result.intrusion() ? "INTRUSION_DETECTED" : "PLATE_READ",
                 result.intrusion() ? "high" : "info",
                 result.intrusion()
-                        ? "Camera " + result.cameraId() + " detected a safety intrusion and requested ESTOP"
-                        : "Camera " + result.cameraId() + " recognized plate " + result.plate() + " with confidence " + result.confidence(),
+                        ? "摄像头 " + result.cameraId() + " 检测到安全入侵并请求急停"
+                        : "摄像头 " + result.cameraId() + " 识别车牌 " + result.plate() + "，置信度 " + result.confidence(),
                 now,
                 false
         ));
@@ -171,7 +172,7 @@ public class DeviceService {
                             false,
                             "OCR_OK",
                             now,
-                            "Inbound PLC accepted the OCR decision and is ready for barrier release"
+                            "入场 PLC 已接受 OCR 决策，准备放行道闸"
                     )));
             updateSystemNodes(false);
         }
@@ -193,7 +194,7 @@ public class DeviceService {
                         false,
                         "ACCESS_GRANTED",
                         now,
-                        "Inbound barrier opened after OCR verification and slot reservation"
+                        "OCR 校验和车位预留完成后，入场道闸已开启"
                 )));
 
         repository.saveDeviceEvent(new DeviceEvent(
@@ -202,7 +203,7 @@ public class DeviceService {
                 "GATE-IN-01",
                 "ORDER_CREATED",
                 "info",
-                "Entry workflow created order " + order.getOrderNo() + " for plate " + order.getPlateNo(),
+                "入场流程已为车牌 " + order.getPlateNo() + " 创建订单 " + order.getOrderNo(),
                 now,
                 false
         ));
@@ -225,7 +226,7 @@ public class DeviceService {
                         emergencyActive(),
                         task.isVip() ? "VIP_RELEASE" : "QUEUE_RELEASE",
                         now,
-                        "Outbound barrier is synchronized with the latest AGV dispatch intent"
+                        "出场道闸已与最新 AGV 调度意图同步"
                 )));
 
         repository.saveDeviceEvent(new DeviceEvent(
@@ -234,7 +235,7 @@ public class DeviceService {
                 task.isVip() ? "VIP-QUEUE" : "STANDARD-QUEUE",
                 task.isVip() ? "VIP_INSERT" : "TASK_QUEUED",
                 task.isVip() ? "medium" : "info",
-                task.getType() + " queued for plate " + task.getPlateNo(),
+                task.getType() + " 已为车牌 " + task.getPlateNo() + " 入队",
                 now,
                 false
         ));
@@ -257,7 +258,7 @@ public class DeviceService {
                         emergencyActive(),
                         "EXIT_CONFIRMED",
                         now,
-                        "Outbound barrier confirmed payment and vehicle release"
+                        "出场道闸已确认支付和车辆放行"
                 )));
 
         repository.findChargingStations().stream()
@@ -273,7 +274,7 @@ public class DeviceService {
                         null,
                         "Idle",
                         now,
-                        "Charging session closed after the owner completed payment and exit"
+                        "车主完成支付和离场后，充电会话已关闭"
                 )));
 
         repository.saveDeviceEvent(new DeviceEvent(
@@ -282,7 +283,7 @@ public class DeviceService {
                 order.getOrderNo(),
                 "EXIT_CONFIRMED",
                 "info",
-                "Order " + order.getOrderNo() + " was closed and the release gate was confirmed",
+                "订单 " + order.getOrderNo() + " 已关闭，放行闸机已确认",
                 now,
                 false
         ));
@@ -307,7 +308,7 @@ public class DeviceService {
             agv.setVelocityMps(agv.isLoaded() ? 0.86 : agv.getMode().equals("CHARGING") ? 0.00 : 0.58);
             if (agv.getBatteryPct() <= 20) {
                 agv.setMode("CHARGING");
-                agv.setTask("Battery recovery cycle");
+                agv.setTask("电池恢复充电");
                 agv.setLastCommand("dock");
             } else if (agv.isLoaded()) {
                 agv.setMode("CARRYING");
@@ -334,7 +335,7 @@ public class DeviceService {
                     queueDepth >= 4 ? "QUEUE_BUILDUP" : gate.lastDecision(),
                     now,
                     queueDepth >= 4
-                            ? "Queue buildup detected. The PLC can request a pre-dispatch release window."
+                            ? "检测到排队积压，PLC 可请求预调度放行窗口。"
                             : gate.detail()
             ));
         });
@@ -354,7 +355,7 @@ public class DeviceService {
                         station.vehiclePlate(),
                         "Accepted",
                         now,
-                        "OCPP telemetry heartbeat received from the active charging connector"
+                        "已从活跃充电枪接收 OCPP 遥测心跳"
                 ));
             } else {
                 repository.saveChargingStation(new ChargingStation(
@@ -395,30 +396,30 @@ public class DeviceService {
                 "Edge-Cam-01",
                 emergency ? "ALARM" : (90 + random.nextInt(18)) + "ms",
                 emergency
-                        ? "Camera safety ROI escalated and the edge node is holding dispatch release"
-                        : "South gate vision pre-processing node is healthy and forwarding OCR metadata",
+                        ? "摄像头安全 ROI 已升级告警，边缘节点正在阻止调度放行"
+                        : "南门视觉预处理节点运行正常，正在转发 OCR 元数据",
                 emergency ? "warning" : "stable"
         ));
         repository.saveSystemNode(new SystemNodeStatus(
                 "PLC-Master-Controller",
                 emergency ? "LOCK" : (12 + random.nextInt(6)) + "ms",
                 emergency
-                        ? "PLC master has inhibited field outputs because ESTOP is active"
-                        : "Barrier controller and AGV fleet gateway heartbeats are stable",
+                        ? "急停生效，PLC 主控已禁止现场输出"
+                        : "道闸控制器与 AGV 网关心跳稳定",
                 emergency ? "warning" : "stable"
         ));
         repository.saveSystemNode(new SystemNodeStatus(
                 "Redis-Sync-Cluster",
                 emergency ? "DEGRADED" : (24 + random.nextInt(10)) + "ms",
                 emergency
-                        ? "Event fan-out is paused while the safety workflow is under review"
-                        : "Operational cache and report fan-out are synchronized",
+                        ? "安全流程复核期间，事件分发已暂停"
+                        : "运营缓存与报表分发数据已同步",
                 emergency ? "warning" : "stable"
         ));
     }
 
     private String eventId(String prefix) {
-        return prefix + System.currentTimeMillis();
+        return prefix + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private String nextGateState(int queueDepth, boolean emergency) {

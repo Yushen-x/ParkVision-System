@@ -267,56 +267,56 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     private void seedAdminData() {
-        alerts.add(new AlertEvent("AL20260518001", "Safety", "Person intrusion detected in transfer zone", "Emergency stop", "High"));
-        alerts.add(new AlertEvent("AL20260518002", "Device", "AGV-04 battery below 20%", "Processing", "Medium"));
-        alerts.add(new AlertEvent("AL20260518003", "Order", "Secondary plate recognition mismatch", "Pending review", "Medium"));
-        alerts.add(new AlertEvent("AL20260518004", "Gate", "Inbound barrier queue depth exceeded dispatch threshold", "Open", "Medium"));
-        alerts.add(new AlertEvent("AL20260518005", "Charging", "EVSE-03 handshake retried after connector wake-up timeout", "Resolved", "Low"));
-        alerts.add(new AlertEvent("AL20260518006", "Vision", "North camera bitrate degraded below expected edge profile", "Monitoring", "Low"));
-        alerts.add(new AlertEvent("AL20260518007", "Billing", "One finished order is pending settlement confirmation", "Processing", "Medium"));
-        alerts.add(new AlertEvent("AL20260518008", "Dispatch", "Manual review requested for abnormal slot release on A04", "Escalated", "High"));
+        alerts.add(new AlertEvent("AL20260518001", "安全", "交接区检测到人员入侵", "急停中", "高"));
+        alerts.add(new AlertEvent("AL20260518002", "设备", "AGV-04 电量低于 20%", "处理中", "中"));
+        alerts.add(new AlertEvent("AL20260518003", "订单", "二次车牌识别结果不一致", "待复核", "中"));
+        alerts.add(new AlertEvent("AL20260518004", "闸机", "入场道闸排队深度超过调度阈值", "已开启", "中"));
+        alerts.add(new AlertEvent("AL20260518005", "充电", "EVSE-03 连接器唤醒超时后已重试握手", "已恢复", "低"));
+        alerts.add(new AlertEvent("AL20260518006", "视觉", "北侧摄像头码率低于预期边缘配置", "监控中", "低"));
+        alerts.add(new AlertEvent("AL20260518007", "计费", "一笔已完成订单等待结算回调确认", "处理中", "中"));
+        alerts.add(new AlertEvent("AL20260518008", "调度", "A04 异常车位释放需要人工复核", "已升级", "高"));
 
-        pricingRules.add(new PricingRule("Workday hourly", "07:00-22:00", "First hour 6, then 4/hour", "Cap 48", "Active"));
-        pricingRules.add(new PricingRule("Night package", "22:00-07:00", "12 flat rate", "Monthly pass exempt", "Active"));
-        pricingRules.add(new PricingRule("VIP retrieval", "All day", "Base fee + 8", "Queue weight +40", "Active"));
-        pricingRules.add(new PricingRule("EV charging", "All day", "1.2/kWh", "Auto release when full", "Active"));
+        pricingRules.add(new PricingRule("工作日阶梯计费", "07:00-22:00", "首小时 6 元，之后 4 元/小时", "封顶 48 元", "启用"));
+        pricingRules.add(new PricingRule("夜间包时", "22:00-07:00", "夜间统一 12 元", "月卡免收", "启用"));
+        pricingRules.add(new PricingRule("VIP 优先取车", "全天", "基础费 + 8 元", "队列权重 +40", "启用"));
+        pricingRules.add(new PricingRule("新能源充电", "全天", "1.2 元/千瓦时", "充满自动释放", "启用"));
 
-        accessList.add(new AccessListItem("SH-A7686", "Whitelist", "Monthly member", "2026-12-31", "Auto pass"));
-        accessList.add(new AccessListItem("SH-D5218", "Whitelist", "EV owner", "2026-09-01", "Charging priority"));
-        accessList.add(new AccessListItem("SU-M9021", "Normal", "Temporary visitor", "Single order", "Supports contactless pay"));
-        accessList.add(new AccessListItem("SH-B9001", "Blacklist", "Payment exception", "Manual review", "Entry blocked"));
-        accessList.add(new AccessListItem("SH-P3308", "Whitelist", "Corporate account", "2026-11-15", "Peak-hour inbound priority"));
-        accessList.add(new AccessListItem("SH-D9082", "Whitelist", "EV monthly member", "2026-10-20", "Charging fee discount"));
-        accessList.add(new AccessListItem("SH-V7780", "Whitelist", "Reserved retrieval user", "2026-08-31", "Supports advance outbound booking"));
-        accessList.add(new AccessListItem("SH-T6502", "Normal", "Retail visitor", "Single order", "Self-service payment enabled"));
-        accessList.add(new AccessListItem("SH-C8871", "Watchlist", "Exception review", "Manual review", "Route release requires staff approval"));
-        accessList.add(new AccessListItem("SH-H3819", "Whitelist", "Night-package member", "2026-12-01", "Night cap applies automatically"));
-        accessList.add(new AccessListItem("SU-A7005", "Normal", "Temporary visitor", "Single order", "Invoice requested"));
-        accessList.add(new AccessListItem("SH-X2204", "Blacklist", "Repeated overtime exit", "Manual review", "Outbound confirmation required"));
+        accessList.add(new AccessListItem("SH-A7686", "白名单", "月卡用户", "2026-12-31", "自动放行"));
+        accessList.add(new AccessListItem("SH-D5218", "白名单", "新能源车主", "2026-09-01", "充电优先"));
+        accessList.add(new AccessListItem("SU-M9021", "普通名单", "临时访客", "单次订单", "支持无接触支付"));
+        accessList.add(new AccessListItem("SH-B9001", "黑名单", "支付异常", "人工复核", "禁止入场"));
+        accessList.add(new AccessListItem("SH-P3308", "白名单", "企业账户", "2026-11-15", "高峰入场优先"));
+        accessList.add(new AccessListItem("SH-D9082", "白名单", "新能源月卡", "2026-10-20", "充电费用优惠"));
+        accessList.add(new AccessListItem("SH-V7780", "白名单", "预约取车用户", "2026-08-31", "支持提前预约出场"));
+        accessList.add(new AccessListItem("SH-T6502", "普通名单", "散客访客", "单次订单", "已开通自助缴费"));
+        accessList.add(new AccessListItem("SH-C8871", "观察名单", "异常复核", "人工复核", "路线放行需人工确认"));
+        accessList.add(new AccessListItem("SH-H3819", "白名单", "夜间套餐用户", "2026-12-01", "自动应用夜间封顶"));
+        accessList.add(new AccessListItem("SU-A7005", "普通名单", "临时访客", "单次订单", "已申请发票"));
+        accessList.add(new AccessListItem("SH-X2204", "黑名单", "多次超时离场", "人工复核", "出场需确认"));
 
-        systemNodes.add(new SystemNodeStatus("Edge-Cam-01", "98ms", "South gate vision pre-processing node is healthy and forwarding OCR metadata", "stable"));
-        systemNodes.add(new SystemNodeStatus("PLC-Master-Controller", "12ms", "Barrier controller and AGV fleet gateway heartbeats are stable", "stable"));
-        systemNodes.add(new SystemNodeStatus("Redis-Sync-Cluster", "31ms", "Operational cache and report fan-out are synchronized", "stable"));
-        systemNodes.add(new SystemNodeStatus("Billing-Service", "44ms", "Invoice and settlement projection jobs are completing on schedule", "stable"));
-        systemNodes.add(new SystemNodeStatus("Device-Simulator", "21ms", "Camera, gate, charger, and AGV telemetry simulation loops are healthy", "stable"));
+        systemNodes.add(new SystemNodeStatus("Edge-Cam-01", "98ms", "南门视觉预处理节点运行正常，正在转发 OCR 元数据", "stable"));
+        systemNodes.add(new SystemNodeStatus("PLC-Master-Controller", "12ms", "道闸控制器与 AGV 网关心跳稳定", "stable"));
+        systemNodes.add(new SystemNodeStatus("Redis-Sync-Cluster", "31ms", "运营缓存与报表分发数据已同步", "stable"));
+        systemNodes.add(new SystemNodeStatus("Billing-Service", "44ms", "发票与结算投影任务按计划完成", "stable"));
+        systemNodes.add(new SystemNodeStatus("Device-Simulator", "21ms", "摄像头、闸机、充电桩与 AGV 遥测模拟循环正常", "stable"));
     }
 
     private void seedDispatchData() {
-        agvUnits.add(new AgvUnit("AGV-01", 10, 12, false, "Patrolling Zone A", 91, "IDLE", 0.42, "patrol"));
-        agvUnits.add(new AgvUnit("AGV-02", 45, 32, true, "Carrying SH-A7686", 74, "CARRYING", 0.86, "deliver"));
-        agvUnits.add(new AgvUnit("AGV-03", 72, 58, false, "Heading to shallow buffer", 68, "TRANSIT", 0.65, "relocate"));
-        agvUnits.add(new AgvUnit("AGV-04", 28, 76, false, "Charging standby", 19, "CHARGING", 0.00, "dock"));
+        agvUnits.add(new AgvUnit("AGV-01", 10, 12, false, "A 区巡检", 91, "IDLE", 0.42, "patrol"));
+        agvUnits.add(new AgvUnit("AGV-02", 45, 32, true, "搬运车辆 SH-A7686", 74, "CARRYING", 0.86, "deliver"));
+        agvUnits.add(new AgvUnit("AGV-03", 72, 58, false, "前往浅层缓冲区", 68, "TRANSIT", 0.65, "relocate"));
+        agvUnits.add(new AgvUnit("AGV-04", 28, 76, false, "充电待命", 19, "CHARGING", 0.00, "dock"));
 
-        dispatchQueue.add(new DispatchTask("SH-A7686", "Standard retrieval", "FIFO", "04:12", false));
-        dispatchQueue.add(new DispatchTask("SH-D5218", "Charging bay release", "Charging done", "03:40", false));
-        dispatchQueue.add(new DispatchTask("SU-M9021", "Touch-and-Go", "Touch", "02:10", false));
-        dispatchQueue.add(new DispatchTask("SH-V7780", "Reserved outbound", "Booking", "01:58", false));
-        dispatchQueue.add(new DispatchTask("SH-P3308", "Pre-dispatch relocation", "PRE", "00:48", true));
-        dispatchQueue.add(new DispatchTask("SH-M4401", "VIP retrieval", "VIP", "00:30", true));
-        dispatchQueue.add(new DispatchTask("SH-D9082", "Charging connector release", "EV", "02:42", false));
-        dispatchQueue.add(new DispatchTask("SH-T6502", "Payment confirmation hold", "PAY", "01:24", false));
-        dispatchQueue.add(new DispatchTask("SH-C8871", "Manual review transfer", "RISK", "05:36", false));
-        dispatchQueue.add(new DispatchTask("SH-H3819", "Night package outbound", "Night", "03:06", false));
+        dispatchQueue.add(new DispatchTask("SH-A7686", "标准取车", "先到先取", "04:12", false));
+        dispatchQueue.add(new DispatchTask("SH-D5218", "充电车位放行", "充电完成", "03:40", false));
+        dispatchQueue.add(new DispatchTask("SU-M9021", "临停取物", "临取", "02:10", false));
+        dispatchQueue.add(new DispatchTask("SH-V7780", "预约出场", "预约", "01:58", false));
+        dispatchQueue.add(new DispatchTask("SH-P3308", "高峰预调度移位", "预调度", "00:48", true));
+        dispatchQueue.add(new DispatchTask("SH-M4401", "VIP 优先取车", "VIP", "00:30", true));
+        dispatchQueue.add(new DispatchTask("SH-D9082", "充电枪释放", "新能源", "02:42", false));
+        dispatchQueue.add(new DispatchTask("SH-T6502", "支付确认等待", "支付", "01:24", false));
+        dispatchQueue.add(new DispatchTask("SH-C8871", "人工复核转运", "风控", "05:36", false));
+        dispatchQueue.add(new DispatchTask("SH-H3819", "夜间套餐出场", "夜间", "03:06", false));
     }
 
     private void seedDeviceData() {
@@ -333,7 +333,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 now.minusSeconds(12),
                 false,
                 false,
-                "South gate edge camera with OCR and handoff-zone intrusion ROI"
+                "南门边缘摄像头，支持车牌 OCR 和交接区入侵检测"
         ));
         cameraDevices.add(new CameraDevice(
                 "CAM-HANDOFF-02",
@@ -347,7 +347,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 now.minusSeconds(7),
                 false,
                 false,
-                "Transfer-bay safety camera with person intrusion alarm"
+                "交接区安全摄像头，支持人员入侵告警"
         ));
         cameraDevices.add(new CameraDevice(
                 "CAM-NORTH-03",
@@ -361,7 +361,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 now.minusSeconds(15),
                 false,
                 false,
-                "North ramp camera used for outbound queue observation and secondary plate read"
+                "北侧坡道摄像头，用于出场队列观察和二次车牌识别"
         ));
 
         gateDevices.add(new GateDevice(
@@ -375,7 +375,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 false,
                 "ACCESS_GRANTED",
                 now.minusSeconds(5),
-                "Inbound barrier with loop detector and PLC relay control"
+                "入场道闸，带地感线圈和 PLC 继电器控制"
         ));
         gateDevices.add(new GateDevice(
                 "GATE-OUT-01",
@@ -388,7 +388,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 false,
                 "READY",
                 now.minusSeconds(8),
-                "Outbound handoff gate synchronized with AGV release window"
+                "出场交接闸机，与 AGV 放行窗口同步"
         ));
         gateDevices.add(new GateDevice(
                 "GATE-SERVICE-01",
@@ -401,7 +401,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 false,
                 "MAINTENANCE_READY",
                 now.minusSeconds(11),
-                "Service corridor gate used for manual review and maintenance detours"
+                "服务通道闸机，用于人工复核和维护绕行"
         ));
 
         chargingStations.add(new ChargingStation(
@@ -414,7 +414,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 "SH-D5218",
                 "Accepted",
                 now.minusSeconds(10),
-                "AC charger in premium bay C05"
+                "C05 优先车位交流充电桩"
         ));
         chargingStations.add(new ChargingStation(
                 "EVSE-02",
@@ -426,7 +426,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 null,
                 "Idle",
                 now.minusSeconds(4),
-                "AC charger near handoff zone for short dwell sessions"
+                "交接区附近交流充电桩，适合短停补能"
         ));
         chargingStations.add(new ChargingStation(
                 "EVSE-03",
@@ -438,34 +438,34 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
                 "SH-D3015",
                 "Authorizing",
                 now.minusSeconds(9),
-                "Fast-turnover charger waiting for connector lock confirmation"
+                "快周转充电桩，等待连接器锁止确认"
         ));
 
         String[][] eventSpecs = {
-                {"camera", "CAM-SOUTH-01", "PLATE_READ", "info", "OCR recognized SH-A7686 and forwarded metadata to the entry service"},
-                {"gate", "GATE-IN-01", "LOOP_OCCUPIED", "info", "Induction loop detected a vehicle at the inbound barrier"},
-                {"charger", "EVSE-01", "ENERGY_DELIVERY", "info", "Charging session for SH-D5218 reached 18.40 kWh"},
-                {"agv", "AGV-02", "TASK_ASSIGNED", "info", "AGV-02 accepted a loaded retrieval task for SH-A7686"},
-                {"camera", "CAM-HANDOFF-02", "ROI_CLEAR", "info", "Transfer-bay safety ROI cleared after pedestrian departure"},
-                {"gate", "GATE-OUT-01", "RELEASE_READY", "info", "Outbound gate is synchronized with the next handoff slot"},
-                {"agv", "AGV-04", "BATTERY_LOW", "medium", "AGV-04 entered charging standby below the configured battery threshold"},
-                {"charger", "EVSE-03", "AUTHORIZE_START", "info", "Connector EVSE-03 started an authorization handshake for SH-D3015"},
-                {"camera", "CAM-NORTH-03", "SECONDARY_READ", "info", "North ramp camera confirmed outbound plate SH-P3308"},
-                {"gate", "GATE-IN-01", "QUEUE_BUILDUP", "medium", "Inbound queue depth crossed the pre-dispatch planning threshold"},
-                {"dispatch", "VIP-QUEUE", "VIP_INSERT", "medium", "VIP retrieval for SH-M4401 was inserted at the head of the queue"},
-                {"order", "PV20260506010", "MANUAL_REVIEW", "high", "Order PV20260506010 is waiting for manual release approval"},
-                {"charger", "EVSE-01", "SESSION_UPDATE", "info", "Delivered energy increased by 0.8 kWh during the active session"},
-                {"agv", "AGV-03", "RELOCATE_START", "info", "AGV-03 started pre-dispatch relocation from a deep-slot aisle"},
-                {"camera", "CAM-HANDOFF-02", "PERSON_DETECTED", "low", "A short-lived pedestrian detection was logged outside the protected ROI"},
-                {"gate", "GATE-SERVICE-01", "SERVICE_READY", "info", "Service corridor gate is idle and ready for exception routing"},
-                {"dispatch", "PRE-DISPATCH", "TASK_QUEUED", "info", "Forecast-driven relocation task queued for SH-P3308"},
-                {"billing", "INVOICE-SVC", "SETTLEMENT_PENDING", "medium", "One finished order is pending settlement callback confirmation"},
-                {"charger", "EVSE-02", "HEARTBEAT", "info", "Idle charger EVSE-02 sent a normal heartbeat frame"},
-                {"camera", "CAM-SOUTH-01", "BITRATE_DIP", "low", "Bitrate dipped briefly below the preferred edge profile before recovery"},
-                {"agv", "AGV-01", "PATROL_TICK", "info", "AGV-01 completed a perimeter patrol cycle near Zone A"},
-                {"gate", "GATE-OUT-01", "EXIT_CONFIRMED", "info", "Outbound barrier confirmed a completed handoff release"},
-                {"charger", "EVSE-03", "LOCK_RETRY", "medium", "Connector lock on EVSE-03 retried once before engagement"},
-                {"dispatch", "RISK-QUEUE", "HOLD_ACTIVE", "high", "Manual-review transfer remains blocked until staff clearance"}
+                {"camera", "CAM-SOUTH-01", "PLATE_READ", "info", "OCR 识别车牌 SH-A7686，并已转发入场服务"},
+                {"gate", "GATE-IN-01", "LOOP_OCCUPIED", "info", "入场道闸地感线圈检测到车辆"},
+                {"charger", "EVSE-01", "ENERGY_DELIVERY", "info", "SH-D5218 的充电会话已达到 18.40 千瓦时"},
+                {"agv", "AGV-02", "TASK_ASSIGNED", "info", "AGV-02 已接收 SH-A7686 的载车取车任务"},
+                {"camera", "CAM-HANDOFF-02", "ROI_CLEAR", "info", "行人离开后，交接区安全 ROI 已清空"},
+                {"gate", "GATE-OUT-01", "RELEASE_READY", "info", "出场闸机已与下一个交接车位同步"},
+                {"agv", "AGV-04", "BATTERY_LOW", "medium", "AGV-04 电量低于阈值，已进入充电待命"},
+                {"charger", "EVSE-03", "AUTHORIZE_START", "info", "EVSE-03 已为 SH-D3015 启动授权握手"},
+                {"camera", "CAM-NORTH-03", "SECONDARY_READ", "info", "北侧坡道摄像头确认出场车牌 SH-P3308"},
+                {"gate", "GATE-IN-01", "QUEUE_BUILDUP", "medium", "入场排队深度超过预调度规划阈值"},
+                {"dispatch", "VIP-QUEUE", "VIP_INSERT", "medium", "SH-M4401 的 VIP 取车任务已插入队首"},
+                {"order", "PV20260506010", "MANUAL_REVIEW", "high", "订单 PV20260506010 正等待人工放行审批"},
+                {"charger", "EVSE-01", "SESSION_UPDATE", "info", "当前充电会话电量增加 0.8 千瓦时"},
+                {"agv", "AGV-03", "RELOCATE_START", "info", "AGV-03 已从深层车道启动预调度移位"},
+                {"camera", "CAM-HANDOFF-02", "PERSON_DETECTED", "low", "受保护 ROI 外记录到一次短时行人识别"},
+                {"gate", "GATE-SERVICE-01", "SERVICE_READY", "info", "服务通道闸机空闲，可用于异常路线"},
+                {"dispatch", "PRE-DISPATCH", "TASK_QUEUED", "info", "预测驱动的移位任务已为 SH-P3308 入队"},
+                {"billing", "INVOICE-SVC", "SETTLEMENT_PENDING", "medium", "一笔已完成订单等待结算回调确认"},
+                {"charger", "EVSE-02", "HEARTBEAT", "info", "空闲充电桩 EVSE-02 已发送正常心跳帧"},
+                {"camera", "CAM-SOUTH-01", "BITRATE_DIP", "low", "码率短暂低于首选边缘配置，随后恢复"},
+                {"agv", "AGV-01", "PATROL_TICK", "info", "AGV-01 已完成 A 区周界巡检"},
+                {"gate", "GATE-OUT-01", "EXIT_CONFIRMED", "info", "出场闸机已确认交接放行完成"},
+                {"charger", "EVSE-03", "LOCK_RETRY", "medium", "EVSE-03 连接器锁止重试一次后成功"},
+                {"dispatch", "RISK-QUEUE", "HOLD_ACTIVE", "high", "人工复核转运在工作人员确认前保持拦截"}
         };
         for (int index = 0; index < eventSpecs.length; index++) {
             String[] spec = eventSpecs[index];
