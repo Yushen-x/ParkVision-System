@@ -24,24 +24,72 @@ public class DatabaseSeeder implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         Integer slotCount = jdbcTemplate.queryForObject("select count(*) from parking_slot", Integer.class);
-        if (slotCount != null && slotCount > 0) {
-            return;
-        }
-
         FallbackParkVisionRepository seed = new FallbackParkVisionRepository();
 
-        seed.findSlots().forEach(repository::saveSlot);
-        seed.findOrders().forEach(repository::saveOrder);
-        seed.findAlerts().forEach(repository::saveAlert);
-        seed.findSystemNodes().forEach(repository::saveSystemNode);
-        seed.findAgvUnits().forEach(repository::saveAgvUnit);
-        seed.findDispatchQueue().forEach(repository::enqueueDispatchTask);
-        seed.findCameraDevices().forEach(repository::saveCameraDevice);
-        seed.findGateDevices().forEach(repository::saveGateDevice);
-        seed.findChargingStations().forEach(repository::saveChargingStation);
-        seed.findDeviceEvents().forEach(repository::saveDeviceEvent);
-        seed.findPricingRules().forEach(this::insertPricingRule);
-        seed.findAccessList().forEach(this::insertAccessListItem);
+        boolean freshDatabase = slotCount == null || slotCount == 0;
+        if (freshDatabase) {
+            seed.findSlots().forEach(repository::saveSlot);
+        }
+
+        seed.findOrders().forEach(order -> insertIfMissing(
+                "select count(*) from parking_order where order_no = ?",
+                () -> repository.saveOrder(order),
+                order.getOrderNo()
+        ));
+        seed.findAlerts().forEach(alert -> insertIfMissing(
+                "select count(*) from alert_event where alert_no = ?",
+                () -> repository.saveAlert(alert),
+                alert.alertNo()
+        ));
+        seed.findSystemNodes().forEach(node -> insertIfMissing(
+                "select count(*) from system_node_status where node_name = ?",
+                () -> repository.saveSystemNode(node),
+                node.name()
+        ));
+        seed.findAgvUnits().forEach(agv -> insertIfMissing(
+                "select count(*) from agv_unit where agv_id = ?",
+                () -> repository.saveAgvUnit(agv),
+                agv.getId()
+        ));
+        seed.findDispatchQueue().forEach(task -> insertIfMissing(
+                "select count(*) from dispatch_task where plate_no = ? and task_type = ? and tag_name = ? and wait_time = ? and vip = ?",
+                () -> repository.enqueueDispatchTask(task),
+                task.getPlateNo(),
+                task.getType(),
+                task.getTag(),
+                task.getWait(),
+                task.isVip()
+        ));
+        seed.findCameraDevices().forEach(camera -> insertIfMissing(
+                "select count(*) from vision_camera where camera_id = ?",
+                () -> repository.saveCameraDevice(camera),
+                camera.cameraId()
+        ));
+        seed.findGateDevices().forEach(gate -> insertIfMissing(
+                "select count(*) from gate_device where gate_id = ?",
+                () -> repository.saveGateDevice(gate),
+                gate.gateId()
+        ));
+        seed.findChargingStations().forEach(station -> insertIfMissing(
+                "select count(*) from charging_station where charger_id = ?",
+                () -> repository.saveChargingStation(station),
+                station.chargerId()
+        ));
+        seed.findDeviceEvents().forEach(event -> insertIfMissing(
+                "select count(*) from device_event where event_id = ?",
+                () -> repository.saveDeviceEvent(event),
+                event.eventId()
+        ));
+        seed.findPricingRules().forEach(rule -> insertIfMissing(
+                "select count(*) from pricing_rule where rule_name = ?",
+                () -> insertPricingRule(rule),
+                rule.name()
+        ));
+        seed.findAccessList().forEach(item -> insertIfMissing(
+                "select count(*) from access_list_item where plate_no = ?",
+                () -> insertAccessListItem(item),
+                item.plateNo()
+        ));
     }
 
     private void insertPricingRule(PricingRule rule) {
@@ -64,5 +112,12 @@ public class DatabaseSeeder implements ApplicationRunner {
                 item.validUntil(),
                 item.remark()
         );
+    }
+
+    private void insertIfMissing(String existsSql, Runnable action, Object... args) {
+        Integer count = jdbcTemplate.queryForObject(existsSql, Integer.class, args);
+        if (count == null || count == 0) {
+            action.run();
+        }
     }
 }
