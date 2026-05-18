@@ -23,10 +23,11 @@ defineProps({
       ></span>
     </div>
     <div class="legend-row">
-      <span><i class="legend empty"></i>空闲</span>
-      <span><i class="legend occupied"></i>占用</span>
-      <span><i class="legend charging"></i>充电</span>
-      <span><i class="legend buffer"></i>浅层缓存</span>
+      <span><i class="legend empty"></i>Empty</span>
+      <span><i class="legend occupied"></i>Occupied</span>
+      <span><i class="legend charging"></i>Charging</span>
+      <span><i class="legend buffer"></i>Buffer</span>
+      <span><i class="legend maintenance"></i>Maintenance</span>
     </div>
   </div>
 </template>

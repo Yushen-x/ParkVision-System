@@ -7,6 +7,7 @@ import com.parkvision.cps.service.DispatchService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class DispatchController {
     }
 
     @PostMapping("/vip")
-    public ApiResponse<DispatchTask> vip() {
-        return ApiResponse.created(dispatchService.vip());
+    public ApiResponse<DispatchTask> vip(@RequestParam(required = false) String orderNo) {
+        return ApiResponse.created(dispatchService.vip(orderNo));
     }
 }

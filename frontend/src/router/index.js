@@ -10,15 +10,15 @@ import PricingEngineView from "../views/PricingEngineView.vue";
 import SystemConfigView from "../views/SystemConfigView.vue";
 
 const routes = [
-  { path: "/", name: "dashboard", component: DashboardView, meta: { title: "总览驾驶舱" } },
-  { path: "/twin", name: "twin", component: TwinView, meta: { title: "数字孪生" } },
-  { path: "/ai", name: "ai", component: AiVisionView, meta: { title: "AI 感知" } },
-  { path: "/dispatch", name: "dispatch", component: DispatchCenterView, meta: { title: "调度中枢" } },
-  { path: "/admin", name: "admin", component: AdminConsoleView, meta: { title: "报表与记录" } },
-  { path: "/pricing", name: "pricing", component: PricingEngineView, meta: { title: "动态定价" } },
-  { path: "/system", name: "system", component: SystemConfigView, meta: { title: "网关与配置" } },
-  { path: "/owner", name: "owner", component: OwnerPortalView, meta: { title: "车主主页" } },
-  { path: "/indoor-map", name: "indoor-map", component: IndoorMapView, meta: { title: "接续导航" } },
+  { path: "/", name: "dashboard", component: DashboardView, meta: { title: "Operations Dashboard" } },
+  { path: "/twin", name: "twin", component: TwinView, meta: { title: "Digital Twin" } },
+  { path: "/ai", name: "ai", component: AiVisionView, meta: { title: "AI Vision" } },
+  { path: "/dispatch", name: "dispatch", component: DispatchCenterView, meta: { title: "Dispatch Center" } },
+  { path: "/admin", name: "admin", component: AdminConsoleView, meta: { title: "Reports and Records" } },
+  { path: "/pricing", name: "pricing", component: PricingEngineView, meta: { title: "Pricing Engine" } },
+  { path: "/system", name: "system", component: SystemConfigView, meta: { title: "System Gateway" } },
+  { path: "/owner", name: "owner", component: OwnerPortalView, meta: { title: "Owner Portal" } },
+  { path: "/indoor-map", name: "indoor-map", component: IndoorMapView, meta: { title: "Indoor Navigation" } },
 ];
 
 export default createRouter({

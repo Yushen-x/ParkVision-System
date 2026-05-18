@@ -34,6 +34,17 @@ function Test-Command {
     return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
+function Resolve-MavenCommand {
+    $wrapper = Join-Path $BackendDir "mvnw.cmd"
+    if (Test-Path $wrapper) {
+        return $wrapper
+    }
+    if (Test-Command "mvn") {
+        return "mvn.cmd"
+    }
+    return $null
+}
+
 function Test-Port {
     param([int]$Port)
     return $null -ne (Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue)
@@ -84,19 +95,22 @@ if (-not $NoInstall -and -not (Test-Path (Join-Path $FrontendDir "node_modules")
 if (-not $SkipBackend) {
     if (Test-Port $BackendPort) {
         Write-Warn "Backend port $BackendPort is already in use. Skip backend startup."
-    } elseif (Test-Command "mvn") {
+    } else {
+        $mavenCommand = Resolve-MavenCommand
+        if ($mavenCommand) {
         $backendOut = Join-Path $LogsDir "backend.out.log"
         $backendErr = Join-Path $LogsDir "backend.err.log"
         Start-LoggedProcess `
             -Name "Spring Boot backend" `
-            -FilePath "mvn.cmd" `
+            -FilePath $mavenCommand `
             -ArgumentList @("spring-boot:run") `
             -WorkingDirectory $BackendDir `
             -OutFile $backendOut `
             -ErrFile $backendErr
-    } else {
-        Write-Warn "Maven was not found. Backend will not start. Frontend will use mock fallback data."
-        Write-Warn "Install Maven or open backend/pom.xml in IDEA, then run Spring Boot manually."
+        } else {
+            Write-Warn "Neither Maven Wrapper nor global Maven was found. Backend will not start."
+            Write-Warn "Frontend will use fallback data until the backend toolchain is available."
+        }
     }
 }
 
@@ -156,7 +170,7 @@ Write-Host "Backend:  http://localhost:$BackendPort"
 Write-Host "Logs:     $LogsDir"
 Write-Host ""
 Write-Host "Useful commands:"
-Write-Host "  .\start.ps1                 Start frontend + backend when Maven exists"
+Write-Host "  .\start.ps1                 Start frontend + backend with Maven Wrapper when available"
 Write-Host "  .\start.ps1 -SkipBackend    Start frontend only"
 Write-Host "  .\start.ps1 -Mode preview   Build frontend and serve dist"
 Write-Host "  .\start.ps1 -Detached       Start frontend in background and write logs"

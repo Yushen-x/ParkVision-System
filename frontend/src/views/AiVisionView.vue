@@ -5,32 +5,32 @@ import { getters, runVision, state } from "../stores/parkingStore";
 const freeCount = getters.freeCount;
 const occupiedCount = getters.occupiedCount;
 
-const modelCards = [
+const modelCards = computed(() => [
   {
-    label: "视觉识别",
-    title: "车牌 OCR",
-    metric: "98.7%",
-    detail: "YOLOv8 定位车牌区域，OCR 输出车牌号与置信度。",
+    label: "Vision model",
+    title: "Plate OCR",
+    metric: `${Math.round(state.visionResult.confidence * 1000) / 10}%`,
+    detail: "The latest OCR result comes from the backend inference endpoint before falling back locally.",
   },
   {
-    label: "安全检测",
-    title: "人员闯入",
-    metric: "< 1s",
-    detail: "交接区 ROI 实时检测，异常时联动 AGV 急停与人工复核。",
+    label: "Safety check",
+    title: "Intrusion detection",
+    metric: state.visionResult.intrusion ? "ALERT" : "CLEAR",
+    detail: "The handoff zone can raise an emergency review signal without leaving the AI page isolated from the backend.",
   },
   {
-    label: "库容感知",
-    title: "车位占用",
+    label: "Slot telemetry",
+    title: "Occupancy feed",
     metric: `${occupiedCount.value}/${state.slots.length}`,
-    detail: "识别空闲、占用、充电、缓冲车位，驱动数字孪生刷新。",
+    detail: "Slot states refresh from the same source consumed by the dashboard and the digital twin.",
   },
   {
-    label: "预测决策",
-    title: "潮汐预测",
-    metric: "+30min",
-    detail: "预测未来取车峰值，提前触发 Pre-Dispatch 移库策略。",
+    label: "Forecast window",
+    title: "Pre-dispatch lead",
+    metric: "+30 min",
+    detail: "Traffic prediction feeds the dispatch center so deep-slot vehicles can be moved ahead of the surge.",
   },
-];
+]);
 
 const forecastBars = computed(() =>
   state.forecast.prediction.map((value, index) => ({
@@ -44,9 +44,9 @@ const forecastBars = computed(() =>
 const visionJson = computed(() =>
   JSON.stringify(
     {
-      requestId: `edge-${Date.now().toString().slice(-6)}`,
-      cameraId: "gate-A-01",
-      modelPipeline: ["YOLOv8-detector", "HyperLPR-OCR", "ROI-safety-check"],
+      requestId: state.visionResult.requestId || `edge-${Date.now().toString().slice(-6)}`,
+      cameraId: state.visionResult.cameraId || "gate-A-01",
+      modelPipeline: ["YOLOv8-detector", "Plate-OCR", "ROI-safety-check"],
       plate: state.visionResult.plate,
       confidence: state.visionResult.confidence,
       detections: [
@@ -55,7 +55,7 @@ const visionJson = computed(() =>
         { type: "person_intrusion", confidence: state.visionResult.intrusion ? 0.91 : 0.02 },
       ],
       slotOccupancy: { free: freeCount.value, occupied: occupiedCount.value },
-      action: state.visionResult.intrusion ? "AGV_EMERGENCY_STOP" : "ALLOW_ENTRY_AND_CREATE_ORDER",
+      action: state.visionResult.action,
     },
     null,
     2,
@@ -63,18 +63,18 @@ const visionJson = computed(() =>
 );
 
 const assistantItems = [
-  ["用户意图", "我要现在取车，能不能快一点？"],
-  ["意图识别", "retrieve_car + vip_priority"],
-  ["工具调用", "POST /api/dispatch/vip"],
-  ["系统反馈", "已插入高优先级 AGV 队列，预计等待 00:48"],
+  ["User intent", "I want my car now, can you make it faster?"],
+  ["Detected intent", "retrieve_car + vip_priority"],
+  ["Tool call", "POST /api/dispatch/vip"],
+  ["System response", "Priority AGV job inserted at the head of the queue"],
 ];
 
 const pipeline = [
-  "摄像头采集",
-  "边缘 AI 推理",
-  "结构化 JSON",
-  "Java 业务决策",
-  "AGV 调度联动",
+  "Camera capture",
+  "Edge AI inference",
+  "Structured JSON",
+  "Backend decision",
+  "Dispatch update",
 ];
 </script>
 
@@ -93,23 +93,21 @@ const pipeline = [
       <article class="surface camera-panel">
         <div class="section-head">
           <div>
-            <h2>边缘视觉模型实时推理</h2>
-            <p>车牌识别、车辆检测、交接区人员闯入检测统一输出结构化结果。</p>
+            <h2>Live edge inference</h2>
+            <p>Plate OCR, vehicle detection, and handoff-zone safety checks all write into the same operational story.</p>
           </div>
-          <button class="primary-button small" @click="runVision">
-            <i class="fa-solid fa-play"></i>
-            捕获一帧
+          <button class="primary-button small" :disabled="state.busy.vision" @click="runVision()">
+            <i class="fa-solid" :class="state.busy.vision ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+            {{ state.busy.vision ? "Running..." : "Capture frame" }}
           </button>
         </div>
 
         <div class="camera-view ai-camera">
           <div class="camera-grid"></div>
-          <div class="camera-tag">EDGE CAM A-01 · LIVE</div>
+          <div class="camera-tag">EDGE CAM A-01 | LIVE</div>
           <div class="lane-line left"></div>
           <div class="lane-line right"></div>
-          <div class="safety-zone" :class="{ danger: state.visionResult.intrusion }">
-            ROI SAFETY ZONE
-          </div>
+          <div class="safety-zone" :class="{ danger: state.visionResult.intrusion }">ROI SAFETY ZONE</div>
           <div class="vehicle-shape">
             <span class="plate">{{ state.visionResult.plate }}</span>
           </div>
@@ -120,7 +118,7 @@ const pipeline = [
           </div>
           <div class="ai-overlay">
             <span>YOLOv8</span>
-            <span>HyperLPR</span>
+            <span>Plate OCR</span>
             <span>ROI Safety</span>
           </div>
         </div>
@@ -129,7 +127,7 @@ const pipeline = [
       <aside class="side-stack">
         <article class="surface">
           <div class="section-head compact">
-            <h2>AI 推理结果 JSON</h2>
+            <h2>Inference JSON</h2>
             <span class="status-pill" :class="state.visionResult.intrusion ? 'warning' : 'stable'">
               {{ state.visionResult.intrusion ? "ESTOP" : "VERIFIED" }}
             </span>
@@ -143,10 +141,10 @@ const pipeline = [
       <article class="surface">
         <div class="section-head compact">
           <div>
-            <h2>潮汐预测与预调度</h2>
-            <p>预测未来出库压力，高峰前将深层车辆提前迁移至浅层缓冲区。</p>
+            <h2>Forecast and pre-dispatch</h2>
+            <p>The prediction window below is what feeds the relocation strategy used by the dispatch center.</p>
           </div>
-          <span class="status-pill stable">Pre-Dispatch Ready</span>
+          <span class="status-pill stable">Pre-dispatch ready</span>
         </div>
         <div class="forecast-panel">
           <div v-for="bar in forecastBars" :key="bar.label" class="forecast-column">
@@ -158,18 +156,18 @@ const pipeline = [
           </div>
         </div>
         <div class="decision-strip">
-          <b>AI 决策</b>
-          <span>未来 30 分钟出库请求超过阈值，建议提前迁移 6 辆深层车辆，平均等待时间预计下降 42%。</span>
+          <b>Decision</b>
+          <span>When the next 30-minute outbound window crosses the threshold, the backend can enqueue a relocation task before the handoff zone becomes congested.</span>
         </div>
       </article>
 
       <article class="surface">
         <div class="section-head compact">
           <div>
-            <h2>智能助手意图识别</h2>
-            <p>自然语言转业务动作，连接取车、加急、缴费与报表查询。</p>
+            <h2>Assistant intent routing</h2>
+            <p>Natural-language requests can resolve into retrieval, VIP priority, billing, or reporting actions.</p>
           </div>
-          <span class="status-pill stable">LLM Agent</span>
+          <span class="status-pill stable">LLM ready</span>
         </div>
         <div class="intent-flow">
           <div v-for="[label, value] in assistantItems" :key="label" class="intent-row">
@@ -182,8 +180,8 @@ const pipeline = [
       <article class="surface wide">
         <div class="section-head compact">
           <div>
-            <h2>云边协同 AI 链路</h2>
-            <p>AI 不只停留在页面展示，而是将推理结果接入后端订单、告警与调度流程。</p>
+            <h2>Cloud-edge path</h2>
+            <p>The AI page is no longer a decorative shell. It now feeds the same backend flow that updates orders, alerts, and dispatch state.</p>
           </div>
         </div>
         <div class="pipeline">

@@ -5,12 +5,16 @@ cd /d "%~dp0"
 echo Starting ParkVision...
 echo.
 
-where mvn >nul 2>nul
-if errorlevel 1 (
-  echo [WARN] Maven was not found. Backend will be skipped.
-  echo [WARN] Frontend will use mock fallback data.
-) else (
+if exist "%~dp0backend\mvnw.cmd" (
   start "ParkVision Backend" cmd /k ""%~dp0scripts\run-backend.bat""
+) else (
+  where mvn >nul 2>nul
+  if errorlevel 1 (
+    echo [WARN] Maven Wrapper and global Maven were not found. Backend will be skipped.
+    echo [WARN] Frontend will use mock fallback data.
+  ) else (
+    start "ParkVision Backend" cmd /k ""%~dp0scripts\run-backend.bat""
+  )
 )
 
 start "ParkVision Frontend" cmd /k ""%~dp0scripts\run-frontend-preview.bat""

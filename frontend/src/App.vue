@@ -6,7 +6,7 @@ import TopBar from "./components/TopBar.vue";
 import { hydrate, moveAgvs, simulateEntry, state, toggleEmergency, triggerPreDispatch } from "./stores/parkingStore";
 
 const route = useRoute();
-const title = computed(() => route.meta.title || "总览驾驶舱");
+const title = computed(() => route.meta.title || "Operations Dashboard");
 const timer = ref(null);
 
 onMounted(async () => {
@@ -21,11 +21,13 @@ onUnmounted(() => {
 
 <template>
   <div class="app-shell">
-    <AppSidebar :mode="state.emergency ? '安全急停' : '联调演示中'" />
+    <AppSidebar :mode="state.onlineMode" />
     <main class="main">
       <TopBar
         :title="title"
         :emergency="state.emergency"
+        :entry-busy="state.busy.entry"
+        :dispatch-busy="state.busy.preDispatch"
         @entry="simulateEntry"
         @pre-dispatch="triggerPreDispatch"
         @emergency="toggleEmergency"

@@ -1,54 +1,66 @@
 # ParkVision-System
 
-ParkVision 智慧停车综合管理平台系统实现项目。
+ParkVision-System is a smart parking demo project with a Vue 3 frontend and a Spring Boot backend. The repository is now wired so the frontend prefers live APIs first, while still keeping fallback data available when the backend is offline.
 
-## 项目结构
+## Project layout
 
 ```text
 ParkVision-System/
-  frontend/     Vue3 + Vite 前端工程
-  backend/      Spring Boot 后端工程
-  docs/         架构说明、接口清单、答辩材料
-  deploy/       Docker Compose 部署草案
-  scripts/      本地启动与辅助脚本
-  start.bat     Windows 一键启动入口
-  start.ps1     PowerShell 一键启动入口
-  stop.bat      Windows 停止服务入口
-  stop.ps1      PowerShell 停止服务入口
+  frontend/     Vue 3 + Vite application
+  backend/      Spring Boot backend with Maven Wrapper
+  docs/         architecture notes and demo material
+  deploy/       Docker Compose draft
+  scripts/      local startup helpers
+  start.bat     Windows one-click launcher
+  start.ps1     PowerShell launcher
+  stop.bat      Windows stop helper
+  stop.ps1      PowerShell stop helper
 ```
 
-## 快速启动
+## Quick start
 
-双击根目录的 `start.bat`，或在 PowerShell 中运行：
+PowerShell:
 
 ```powershell
 .\start.ps1
 ```
 
-启动后访问：
+Command Prompt:
 
-```text
-http://localhost:5173
+```bat
+start.bat
 ```
 
-如果本机没有 Maven，启动脚本会跳过后端，只启动前端 fallback 演示模式。
+Default URLs:
 
-停止服务：
+```text
+Frontend: http://localhost:5173
+Backend:  http://localhost:8080
+```
+
+The backend no longer depends on a globally installed Maven. The repository includes `backend/mvnw.cmd`, and the startup scripts prefer it automatically.
+
+## What is complete now
+
+- Frontend pages for dashboard, AI vision, dispatch, admin console, owner portal, digital twin, system gateway, pricing, and indoor navigation
+- Backend APIs for slots, raw orders, admin order rows, alerts, pricing rules, access list, system nodes, dispatch queue, AGVs, pre-dispatch, VIP retrieval, and vision inference
+- Fallback repository data that keeps the demo usable even if the backend is not running
+- Minimal backend tests plus a Maven Wrapper so the backend can be built on a clean machine
+
+## Manual commands
+
+Frontend:
 
 ```powershell
-.\stop.ps1
+cd frontend
+npm install
+npm run dev
 ```
 
-## 当前完成度
+Backend:
 
-- 前端：Vue3 工程，包含总览驾驶舱、车主端 H5、运营后台、数字孪生、AI 感知、调度中心、动态定价、系统配置等页面。
-- 后端：Spring Boot 标准分层结构，包含 `controller`、`service`、`repository`、`domain`、`dto`、`common`、`config`。
-- 数据：当前使用 fallback 数据源，后续可替换为 MySQL、Redis、RabbitMQ。
-- AI：当前完成 AI 感知展示、结构化 JSON、视觉接口、预测调度与业务联动演示。
-
-## 答辩演示主线
-
-```text
-模拟入场 -> AI 识别车牌 -> 生成订单 -> 更新车位与大屏
--> 高峰预测 -> 预调度 -> 车主取车/支付 -> 安全急停演示
+```powershell
+cd backend
+.\mvnw.cmd test
+.\mvnw.cmd spring-boot:run
 ```

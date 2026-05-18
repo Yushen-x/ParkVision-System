@@ -1,7 +1,9 @@
 package com.parkvision.cps.repository;
 
 import com.parkvision.cps.domain.admin.AlertEvent;
+import com.parkvision.cps.domain.admin.AccessListItem;
 import com.parkvision.cps.domain.admin.PricingRule;
+import com.parkvision.cps.domain.admin.SystemNodeStatus;
 import com.parkvision.cps.domain.dispatch.AgvUnit;
 import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.ParkingOrder;
@@ -12,6 +14,8 @@ import java.util.Optional;
 
 public interface ParkVisionRepository {
     List<ParkingSlot> findSlots();
+
+    Optional<ParkingSlot> findSlotById(String slotId);
 
     Optional<ParkingSlot> findFirstAvailableSlot();
 
@@ -26,6 +30,10 @@ public interface ParkVisionRepository {
     List<AlertEvent> findAlerts();
 
     List<PricingRule> findPricingRules();
+
+    List<AccessListItem> findAccessList();
+
+    List<SystemNodeStatus> findSystemNodes();
 
     List<AgvUnit> findAgvUnits();
 

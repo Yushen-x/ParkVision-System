@@ -9,7 +9,7 @@ import java.util.Random;
 
 @Service
 public class VisionService {
-    private static final List<String> PLATES = List.of("沪A·P7686", "沪D·E5218", "苏E·M9021", "浙A·K1314", "沪B·V7780");
+    private static final List<String> PLATES = List.of("SH-A7686", "SH-D5218", "SU-M9021", "SH-K1314", "SH-V7780");
 
     private final Random random = new Random();
 
