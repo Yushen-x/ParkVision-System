@@ -6,6 +6,8 @@ import {
   toggleEmergency,
 } from "./parkingStore";
 import {
+  buildMockIndoorRoute as createIndoorRoute,
+  buildMockPricingPreview as createPricingPreview,
   buildMockReport,
   createMockAdminOrders,
   createMockOrders,
@@ -13,6 +15,7 @@ import {
   mockAccessList,
   mockAgvs,
   mockAlerts,
+  mockDeviceOverview,
   mockForecast,
   mockPricingRules,
   mockQueue,
@@ -42,6 +45,9 @@ function resetState() {
   state.accessList = structuredClone(mockAccessList);
   state.systemNodes = structuredClone(mockSystemNodes);
   state.queue = structuredClone(mockQueue);
+  state.devices = structuredClone(mockDeviceOverview);
+  state.pricingPreview = createPricingPreview();
+  state.indoorRoute = createIndoorRoute();
   state.ownerTimeline = [
     ["Vehicle stored", "AGV placed the vehicle in slot E06."],
     ["Billing active", "Dynamic parking fee started after the entry workflow closed."],
@@ -66,10 +72,10 @@ describe("parkingStore", () => {
     expect(state.slots.some((slot) => slot.available === false && slot.id === state.orders[0].slotId)).toBe(true);
   });
 
-  it("toggles emergency state and appends a new event", () => {
+  it("toggles emergency state and appends a new event", async () => {
     const eventCount = state.events.length;
 
-    toggleEmergency();
+    await toggleEmergency();
     addEvent("Manual note", "Operator confirmed the stop state.");
 
     expect(state.emergency).toBe(true);

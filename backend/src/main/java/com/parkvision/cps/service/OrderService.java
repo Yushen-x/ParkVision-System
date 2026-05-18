@@ -2,6 +2,7 @@ package com.parkvision.cps.service;
 
 import com.parkvision.cps.common.BusinessException;
 import com.parkvision.cps.domain.order.OrderStatus;
+import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.ParkingOrder;
 import com.parkvision.cps.domain.parking.ParkingSlot;
 import com.parkvision.cps.domain.parking.SlotStatus;
@@ -20,10 +21,12 @@ public class OrderService {
     private static final List<String> PLATES = List.of("SH-A7686", "SH-D5218", "SU-M9021", "SH-K1314", "SH-V7780");
 
     private final ParkVisionRepository repository;
+    private final DeviceService deviceService;
     private final Random random = new Random();
 
-    public OrderService(ParkVisionRepository repository) {
+    public OrderService(ParkVisionRepository repository, DeviceService deviceService) {
         this.repository = repository;
+        this.deviceService = deviceService;
     }
 
     public List<ParkingOrder> listOrders() {
@@ -35,6 +38,7 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException("NO_AVAILABLE_SLOT", "No slot is currently available"));
         String plate = PLATES.get(random.nextInt(PLATES.size()));
         slot.setStatus(isChargingPlate(plate) ? SlotStatus.CHARGING : SlotStatus.OCCUPIED);
+        repository.saveSlot(slot);
 
         ParkingOrder order = new ParkingOrder(
                 "PV" + String.valueOf(System.currentTimeMillis()).substring(4),
@@ -44,7 +48,14 @@ public class OrderService {
                 OrderStatus.PARKED,
                 BigDecimal.ZERO
         );
-        return repository.saveOrder(order);
+        ParkingOrder saved = repository.saveOrder(order);
+        DispatchTask inboundTask = repository.enqueueDispatchTask(
+                new DispatchTask(saved.getPlateNo(), "Inbound storage", "IN", "00:36", false)
+        );
+        updateLeadAgv("Storing " + saved.getPlateNo() + " into " + saved.getSlotId(), true, "TRANSIT", 0.72, "store");
+        deviceService.recordEntry(saved);
+        deviceService.recordDispatchTask(inboundTask);
+        return saved;
     }
 
     public ParkingOrder changeStatus(String orderNo, OrderStatus status) {
@@ -55,7 +66,20 @@ public class OrderService {
         if (status == OrderStatus.FINISHED) {
             order.setAmount(calculateAmount(order));
         }
-        return repository.saveOrder(order);
+        ParkingOrder saved = repository.saveOrder(order);
+        if (status == OrderStatus.RETRIEVING) {
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "Standard retrieval", "FIFO", "04:12", false));
+            updateLeadAgv("Retrieving " + saved.getPlateNo(), true, "CARRYING", 0.84, "retrieve");
+            deviceService.recordDispatchTask(task);
+        } else if (status == OrderStatus.TOUCHING) {
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "Touch-and-Go", "Touch", "02:10", false));
+            updateLeadAgv("Handoff delivery for " + saved.getPlateNo(), true, "CARRYING", 0.68, "handoff");
+            deviceService.recordDispatchTask(task);
+        } else if (status == OrderStatus.FINISHED) {
+            updateLeadAgv("Release corridor clear", false, "IDLE", 0.00, "hold");
+            deviceService.recordOrderClosed(saved);
+        }
+        return saved;
     }
 
     private void syncSlotState(ParkingOrder order, OrderStatus status) {
@@ -67,6 +91,7 @@ public class OrderService {
             } else if (status == OrderStatus.PARKED) {
                 slot.setStatus(isChargingPlate(order.getPlateNo()) ? SlotStatus.CHARGING : SlotStatus.OCCUPIED);
             }
+            repository.saveSlot(slot);
         });
     }
 
@@ -85,5 +110,16 @@ public class OrderService {
             amount = amount.add(new BigDecimal("12.50"));
         }
         return amount.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void updateLeadAgv(String task, boolean loaded, String mode, double velocityMps, String command) {
+        repository.findAgvUnits().stream().findFirst().ifPresent(agv -> {
+            agv.setTask(task);
+            agv.setLoaded(loaded);
+            agv.setMode(mode);
+            agv.setVelocityMps(velocityMps);
+            agv.setLastCommand(command);
+            repository.saveAgvUnit(agv);
+        });
     }
 }

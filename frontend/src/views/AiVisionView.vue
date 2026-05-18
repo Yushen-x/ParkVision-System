@@ -4,31 +4,35 @@ import { getters, runVision, state } from "../stores/parkingStore";
 
 const freeCount = getters.freeCount;
 const occupiedCount = getters.occupiedCount;
+const activeCamera = computed(
+  () => state.devices.cameras.find((camera) => camera.cameraId === state.visionResult.cameraId) || state.devices.cameras[0],
+);
+const deviceEvents = computed(() => state.devices.events.slice(0, 3));
 
 const modelCards = computed(() => [
   {
     label: "Vision model",
     title: "Plate OCR",
     metric: `${Math.round(state.visionResult.confidence * 1000) / 10}%`,
-    detail: "The latest OCR result comes from the backend inference endpoint before falling back locally.",
+      detail: "The latest OCR result comes from the backend inference endpoint before falling back locally.",
   },
   {
     label: "Safety check",
     title: "Intrusion detection",
     metric: state.visionResult.intrusion ? "ALERT" : "CLEAR",
-    detail: "The handoff zone can raise an emergency review signal without leaving the AI page isolated from the backend.",
+      detail: "The handoff zone can raise an emergency review signal without leaving the AI page isolated from the backend.",
   },
   {
     label: "Slot telemetry",
     title: "Occupancy feed",
     metric: `${occupiedCount.value}/${state.slots.length}`,
-    detail: "Slot states refresh from the same source consumed by the dashboard and the digital twin.",
+      detail: "Slot states refresh from the same source consumed by the dashboard and the digital twin.",
   },
   {
     label: "Forecast window",
     title: "Pre-dispatch lead",
     metric: "+30 min",
-    detail: "Traffic prediction feeds the dispatch center so deep-slot vehicles can be moved ahead of the surge.",
+      detail: "Traffic prediction feeds the dispatch center so deep-slot vehicles can be moved ahead of the surge.",
   },
 ]);
 
@@ -104,7 +108,7 @@ const pipeline = [
 
         <div class="camera-view ai-camera">
           <div class="camera-grid"></div>
-          <div class="camera-tag">EDGE CAM A-01 | LIVE</div>
+          <div class="camera-tag">{{ activeCamera?.cameraId || state.visionResult.cameraId }} | {{ activeCamera?.profile || "LIVE" }}</div>
           <div class="lane-line left"></div>
           <div class="lane-line right"></div>
           <div class="safety-zone" :class="{ danger: state.visionResult.intrusion }">ROI SAFETY ZONE</div>
@@ -120,6 +124,7 @@ const pipeline = [
             <span>YOLOv8</span>
             <span>Plate OCR</span>
             <span>ROI Safety</span>
+            <span>{{ activeCamera?.codec || "H.265" }}</span>
           </div>
         </div>
       </article>
@@ -173,6 +178,21 @@ const pipeline = [
           <div v-for="[label, value] in assistantItems" :key="label" class="intent-row">
             <span>{{ label }}</span>
             <b>{{ value }}</b>
+          </div>
+        </div>
+      </article>
+
+      <article class="surface">
+        <div class="section-head compact">
+          <div>
+            <h2>Field device events</h2>
+            <p>Recent camera and gate events are read from the device telemetry stream.</p>
+          </div>
+        </div>
+        <div class="intent-flow">
+          <div v-for="event in deviceEvents" :key="event.eventId" class="intent-row">
+            <span>{{ event.deviceId }}</span>
+            <b>{{ event.eventCode }} | {{ event.message }}</b>
           </div>
         </div>
       </article>

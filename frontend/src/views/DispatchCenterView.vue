@@ -1,5 +1,10 @@
 <script setup>
+import { computed } from "vue";
 import { state } from "../stores/parkingStore";
+
+const inboundGate = computed(() => state.devices.gates.find((gate) => gate.gateId.includes("IN")) || null);
+const outboundGate = computed(() => state.devices.gates.find((gate) => gate.gateId.includes("OUT")) || null);
+const activeCharger = computed(() => state.devices.chargers.find((charger) => charger.connectorStatus !== "Available") || null);
 </script>
 
 <template>
@@ -8,7 +13,7 @@ import { state } from "../stores/parkingStore";
       <div class="section-head">
         <div>
           <h2>Live dispatch queue</h2>
-          <p>Tasks are sourced from the backend queue first, including pre-dispatch and VIP insertions.</p>
+          <p>Tasks are sourced from the backend queue first, including pre-dispatch, inbound storage, and VIP insertions.</p>
         </div>
       </div>
       <div class="queue-list" style="margin-top:16px;">
@@ -26,20 +31,26 @@ import { state } from "../stores/parkingStore";
     <aside>
       <article class="surface" style="height: 100%;">
         <div class="section-head compact">
-          <h2>Active policies</h2>
+          <h2>Field release conditions</h2>
         </div>
         <div style="margin-top:16px;">
           <div class="strategy-card">
-            <strong><i class="fa-solid fa-bolt" style="color:var(--warning-yellow); margin-right:6px;"></i>VIP queue override</strong>
-            <span>Priority retrieval tasks are inserted at the head of the queue and immediately claim the lead AGV.</span>
+            <strong><i class="fa-solid fa-right-to-bracket" style="color:var(--brand); margin-right:6px;"></i>{{ inboundGate?.gateId || "Inbound gate" }}</strong>
+            <span>State {{ inboundGate?.gateState || "N/A" }} | queue {{ inboundGate?.queueDepth ?? 0 }} | decision {{ inboundGate?.lastDecision || "N/A" }}</span>
           </div>
           <div class="strategy-card">
-            <strong><i class="fa-solid fa-plug-circle-check" style="color:var(--safety-green); margin-right:6px;"></i>Charging bay release</strong>
-            <span>Charging vehicles can be rotated out of premium bays when load is high and the queue length rises.</span>
+            <strong><i class="fa-solid fa-right-from-bracket" style="color:var(--warning-yellow); margin-right:6px;"></i>{{ outboundGate?.gateId || "Outbound gate" }}</strong>
+            <span>State {{ outboundGate?.gateState || "N/A" }} | queue {{ outboundGate?.queueDepth ?? 0 }} | ESTOP {{ outboundGate?.estopArmed ? "armed" : "clear" }}</span>
           </div>
           <div class="strategy-card">
-            <strong><i class="fa-solid fa-forward-step" style="color:var(--brand); margin-right:6px;"></i>Pre-dispatch relocation</strong>
-            <span>Forecast-driven relocation pulls deep-slot vehicles toward the shallow buffer before the next surge window.</span>
+            <strong><i class="fa-solid fa-plug-circle-check" style="color:var(--safety-green); margin-right:6px;"></i>{{ activeCharger?.chargerId || "No active charger" }}</strong>
+            <span>
+              {{
+                activeCharger
+                  ? `${activeCharger.vehiclePlate || "No vehicle"} | ${activeCharger.powerKw} kW | ${activeCharger.sessionKwh} kWh`
+                  : "Charging bays are currently idle."
+              }}
+            </span>
           </div>
         </div>
       </article>

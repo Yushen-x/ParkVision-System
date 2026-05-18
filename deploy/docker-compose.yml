@@ -5,7 +5,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: demo
+      PARKVISION_PERSISTENCE_MODE: jdbc
+      PARKVISION_DATASOURCE_URL: jdbc:h2:file:/data/parkvision;MODE=MySQL;DB_CLOSE_DELAY=-1
+    volumes:
+      - backend-data:/data
 
   frontend:
     build:
@@ -14,3 +17,6 @@ services:
       - "5173:80"
     depends_on:
       - backend
+
+volumes:
+  backend-data:

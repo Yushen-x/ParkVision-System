@@ -4,6 +4,10 @@ import com.parkvision.cps.domain.admin.AccessListItem;
 import com.parkvision.cps.domain.admin.AlertEvent;
 import com.parkvision.cps.domain.admin.PricingRule;
 import com.parkvision.cps.domain.admin.SystemNodeStatus;
+import com.parkvision.cps.domain.device.CameraDevice;
+import com.parkvision.cps.domain.device.ChargingStation;
+import com.parkvision.cps.domain.device.DeviceEvent;
+import com.parkvision.cps.domain.device.GateDevice;
 import com.parkvision.cps.domain.dispatch.AgvUnit;
 import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.OrderStatus;
@@ -31,12 +35,17 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     private final List<SystemNodeStatus> systemNodes = new ArrayList<>();
     private final List<AgvUnit> agvUnits = new ArrayList<>();
     private final List<DispatchTask> dispatchQueue = new ArrayList<>();
+    private final List<CameraDevice> cameraDevices = new ArrayList<>();
+    private final List<GateDevice> gateDevices = new ArrayList<>();
+    private final List<ChargingStation> chargingStations = new ArrayList<>();
+    private final List<DeviceEvent> deviceEvents = new ArrayList<>();
 
     public FallbackParkVisionRepository() {
         seedParkingSlots();
         seedOrders();
         seedAdminData();
         seedDispatchData();
+        seedDeviceData();
     }
 
     @Override
@@ -63,6 +72,13 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public ParkingSlot saveSlot(ParkingSlot slot) {
+        slots.removeIf(existing -> existing.getId().equals(slot.getId()));
+        slots.add(slot);
+        return slot;
+    }
+
+    @Override
     public List<ParkingOrder> findOrders() {
         return Collections.unmodifiableList(orders);
     }
@@ -85,6 +101,13 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public AlertEvent saveAlert(AlertEvent alert) {
+        alerts.removeIf(existing -> existing.alertNo().equals(alert.alertNo()));
+        alerts.add(0, alert);
+        return alert;
+    }
+
+    @Override
     public List<PricingRule> findPricingRules() {
         return Collections.unmodifiableList(pricingRules);
     }
@@ -100,8 +123,27 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public SystemNodeStatus saveSystemNode(SystemNodeStatus node) {
+        systemNodes.removeIf(existing -> existing.name().equals(node.name()));
+        systemNodes.add(node);
+        return node;
+    }
+
+    @Override
     public List<AgvUnit> findAgvUnits() {
         return Collections.unmodifiableList(agvUnits);
+    }
+
+    @Override
+    public Optional<AgvUnit> findAgvById(String agvId) {
+        return agvUnits.stream().filter(agv -> agv.getId().equals(agvId)).findFirst();
+    }
+
+    @Override
+    public AgvUnit saveAgvUnit(AgvUnit agv) {
+        agvUnits.removeIf(existing -> existing.getId().equals(agv.getId()));
+        agvUnits.add(agv);
+        return agv;
     }
 
     @Override
@@ -113,6 +155,69 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     public DispatchTask enqueueDispatchTask(DispatchTask task) {
         dispatchQueue.add(0, task);
         return task;
+    }
+
+    @Override
+    public List<CameraDevice> findCameraDevices() {
+        return Collections.unmodifiableList(cameraDevices);
+    }
+
+    @Override
+    public Optional<CameraDevice> findCameraDeviceById(String cameraId) {
+        return cameraDevices.stream().filter(camera -> camera.cameraId().equals(cameraId)).findFirst();
+    }
+
+    @Override
+    public CameraDevice saveCameraDevice(CameraDevice camera) {
+        cameraDevices.removeIf(existing -> existing.cameraId().equals(camera.cameraId()));
+        cameraDevices.add(camera);
+        return camera;
+    }
+
+    @Override
+    public List<GateDevice> findGateDevices() {
+        return Collections.unmodifiableList(gateDevices);
+    }
+
+    @Override
+    public Optional<GateDevice> findGateDeviceById(String gateId) {
+        return gateDevices.stream().filter(gate -> gate.gateId().equals(gateId)).findFirst();
+    }
+
+    @Override
+    public GateDevice saveGateDevice(GateDevice gate) {
+        gateDevices.removeIf(existing -> existing.gateId().equals(gate.gateId()));
+        gateDevices.add(gate);
+        return gate;
+    }
+
+    @Override
+    public List<ChargingStation> findChargingStations() {
+        return Collections.unmodifiableList(chargingStations);
+    }
+
+    @Override
+    public Optional<ChargingStation> findChargingStationById(String chargerId) {
+        return chargingStations.stream().filter(station -> station.chargerId().equals(chargerId)).findFirst();
+    }
+
+    @Override
+    public ChargingStation saveChargingStation(ChargingStation station) {
+        chargingStations.removeIf(existing -> existing.chargerId().equals(station.chargerId()));
+        chargingStations.add(station);
+        return station;
+    }
+
+    @Override
+    public List<DeviceEvent> findDeviceEvents() {
+        return Collections.unmodifiableList(deviceEvents);
+    }
+
+    @Override
+    public DeviceEvent saveDeviceEvent(DeviceEvent event) {
+        deviceEvents.removeIf(existing -> existing.eventId().equals(event.eventId()));
+        deviceEvents.add(0, event);
+        return event;
     }
 
     private void seedParkingSlots() {
@@ -161,15 +266,130 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     private void seedDispatchData() {
-        agvUnits.add(new AgvUnit("AGV-01", 10, 12, false, "Patrolling Zone A"));
-        agvUnits.add(new AgvUnit("AGV-02", 45, 32, true, "Carrying SH-A7686"));
-        agvUnits.add(new AgvUnit("AGV-03", 72, 58, false, "Heading to shallow buffer"));
-        agvUnits.add(new AgvUnit("AGV-04", 28, 76, false, "Charging standby"));
+        agvUnits.add(new AgvUnit("AGV-01", 10, 12, false, "Patrolling Zone A", 91, "IDLE", 0.42, "patrol"));
+        agvUnits.add(new AgvUnit("AGV-02", 45, 32, true, "Carrying SH-A7686", 74, "CARRYING", 0.86, "deliver"));
+        agvUnits.add(new AgvUnit("AGV-03", 72, 58, false, "Heading to shallow buffer", 68, "TRANSIT", 0.65, "relocate"));
+        agvUnits.add(new AgvUnit("AGV-04", 28, 76, false, "Charging standby", 19, "CHARGING", 0.00, "dock"));
 
         dispatchQueue.add(new DispatchTask("SH-A7686", "Standard retrieval", "FIFO", "04:12", false));
         dispatchQueue.add(new DispatchTask("SH-D5218", "Charging bay release", "Charging done", "03:40", false));
         dispatchQueue.add(new DispatchTask("SU-M9021", "Touch-and-Go", "Touch", "02:10", false));
         dispatchQueue.add(new DispatchTask("SH-V7780", "Reserved outbound", "Booking", "01:58", false));
+    }
+
+    private void seedDeviceData() {
+        LocalDateTime now = LocalDateTime.now();
+        cameraDevices.add(new CameraDevice(
+                "CAM-SOUTH-01",
+                "ONVIF Profile T",
+                "H.265",
+                "rtsp://10.10.1.21:554/Streaming/Channels/101",
+                25,
+                4096,
+                "ONLINE",
+                "SH-A7686",
+                now.minusSeconds(12),
+                false,
+                false,
+                "South gate edge camera with OCR and handoff-zone intrusion ROI"
+        ));
+        cameraDevices.add(new CameraDevice(
+                "CAM-HANDOFF-02",
+                "ONVIF Profile T",
+                "H.264",
+                "rtsp://10.10.1.33:554/Streaming/Channels/101",
+                20,
+                3072,
+                "ONLINE",
+                "SU-M9021",
+                now.minusSeconds(7),
+                false,
+                false,
+                "Transfer-bay safety camera with person intrusion alarm"
+        ));
+
+        gateDevices.add(new GateDevice(
+                "GATE-IN-01",
+                "Modbus/TCP",
+                "10.10.20.11:502",
+                "00017",
+                2,
+                "OPEN",
+                true,
+                false,
+                "ACCESS_GRANTED",
+                now.minusSeconds(5),
+                "Inbound barrier with loop detector and PLC relay control"
+        ));
+        gateDevices.add(new GateDevice(
+                "GATE-OUT-01",
+                "Modbus/TCP",
+                "10.10.20.12:502",
+                "00021",
+                1,
+                "CLOSED",
+                false,
+                false,
+                "READY",
+                now.minusSeconds(8),
+                "Outbound handoff gate synchronized with AGV release window"
+        ));
+
+        chargingStations.add(new ChargingStation(
+                "EVSE-01",
+                "OCPP 1.6J",
+                "ws://10.10.30.41:9000/ocpp/EVSE-01",
+                "Charging",
+                new BigDecimal("11.00"),
+                new BigDecimal("18.40"),
+                "SH-D5218",
+                "Accepted",
+                now.minusSeconds(10),
+                "AC charger in premium bay C05"
+        ));
+        chargingStations.add(new ChargingStation(
+                "EVSE-02",
+                "OCPP 1.6J",
+                "ws://10.10.30.42:9000/ocpp/EVSE-02",
+                "Available",
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
+                "Idle",
+                now.minusSeconds(4),
+                "AC charger near handoff zone for short dwell sessions"
+        ));
+
+        deviceEvents.add(new DeviceEvent(
+                "DV20260506001",
+                "camera",
+                "CAM-SOUTH-01",
+                "PLATE_READ",
+                "info",
+                "OCR recognized SH-A7686 and forwarded metadata to the entry service",
+                now.minusMinutes(4),
+                true
+        ));
+        deviceEvents.add(new DeviceEvent(
+                "DV20260506002",
+                "gate",
+                "GATE-IN-01",
+                "LOOP_OCCUPIED",
+                "info",
+                "Induction loop detected a vehicle at the inbound barrier",
+                now.minusMinutes(3),
+                true
+        ));
+        deviceEvents.add(new DeviceEvent(
+                "DV20260506003",
+                "charger",
+                "EVSE-01",
+                "ENERGY_DELIVERY",
+                "info",
+                "Charging session for SH-D5218 reached 18.40 kWh",
+                now.minusMinutes(2),
+                false
+        ));
     }
 
     private void updateSlot(String slotId, SlotStatus status) {

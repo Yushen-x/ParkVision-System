@@ -27,6 +27,8 @@ const gridCells = computed(() => {
   }
   return cells;
 });
+
+const safetyGate = computed(() => state.devices.gates.find((gate) => gate.gateId.includes("OUT")) || null);
 </script>
 
 <template>
@@ -50,8 +52,9 @@ const gridCells = computed(() => {
         </div>
         <div class="agv-list" style="margin-top:16px;">
           <div v-for="agv in state.agvs" :key="agv.id" class="agv-card">
-            <b><i class="fa-solid fa-robot" style="color:var(--brand); margin-right:8px;"></i>{{ agv.id }} | {{ agv.loaded ? "Loaded" : "Idle" }}</b>
+            <b><i class="fa-solid fa-robot" style="color:var(--brand); margin-right:8px;"></i>{{ agv.id }} | {{ agv.mode }}</b>
             <span>Position [{{ Math.round(agv.x) }}, {{ Math.round(agv.y) }}] | {{ agv.task }}</span>
+            <span>Battery {{ agv.batteryPct }}% | Velocity {{ Number(agv.velocityMps || 0).toFixed(2) }} m/s | Cmd {{ agv.lastCommand }}</span>
           </div>
         </div>
       </article>
@@ -62,8 +65,8 @@ const gridCells = computed(() => {
           <span>
             {{
               state.emergency
-                ? "A simulated safety event paused AGV motion and locked the dispatch visualization."
-                : "No intrusion is present in the handoff zone and the AGV fleet is moving under normal constraints."
+                ? "A backend safety lock is active. PLC-controlled gates are inhibited until the review clears."
+                : `No intrusion is present in the handoff zone and ${safetyGate?.gateId || "the release gate"} is ${safetyGate?.gateState || "ready"}.`
             }}
           </span>
         </div>

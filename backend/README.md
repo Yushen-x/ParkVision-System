@@ -6,15 +6,17 @@ The backend is a Spring Boot 3 application built around a simple layered structu
 controller -> service -> repository
 ```
 
-It ships with a fallback repository implementation so the demo can run without external infrastructure, but the service layer is already structured so the repository can be replaced later by MySQL, Redis, or other integrations.
+The default runtime path is now a JDBC repository backed by a persistent H2 file database. A fallback repository implementation is still available so the demo can run without external infrastructure, and the datasource can later be pointed at MySQL by overriding environment variables.
 
 ## Tech stack
 
 - Java 17 target
 - Spring Boot 3
 - Spring Web
+- Spring JDBC
 - Spring Validation
 - Spring Actuator
+- H2 file database
 - Maven Wrapper
 
 ## Main endpoints
@@ -38,6 +40,10 @@ It ships with a fallback repository implementation so the demo can run without e
 - `POST /api/admin/report`
 - `GET /api/system/nodes`
 - `POST /api/edge/vision/infer`
+- `GET /api/devices/overview`
+- `POST /api/devices/emergency`
+- `GET /api/pricing/preview`
+- `GET /api/navigation/indoor`
 
 ## Run locally
 
@@ -57,4 +63,10 @@ Health check:
 
 ```text
 GET http://localhost:8080/actuator/health
+```
+
+Default database:
+
+```text
+jdbc:h2:file:./data/parkvision
 ```

@@ -1,3 +1,17 @@
+<script setup>
+import { computed } from "vue";
+import { state } from "../stores/parkingStore";
+
+const route = computed(() => state.indoorRoute);
+const leadGate = computed(() => state.devices.gates.find((gate) => gate.gateId === route.value.targetGate) || state.devices.gates[0]);
+const progressSegments = computed(() => {
+  const completed = Math.max(0, Math.min(3, Number(route.value.completedSegments || 0)));
+  return [0, 1, 2].map((index) => index < completed);
+});
+const etaLabel = computed(() => `${Math.floor((route.value.etaSeconds || 0) / 60)} min`);
+const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSeconds || 0) / 60))} min`);
+</script>
+
 <template>
   <section class="mobile-workbench">
     <div class="phone-frame">
@@ -8,7 +22,7 @@
       <div class="phone-screen" style="background: #0f172a;">
         <div style="padding: 2rem 1.5rem 1rem; color: #fff;">
           <h2 style="font-size:22px; font-weight:700;"><i class="fa-solid fa-location-arrow" style="color:var(--brand); margin-right:8px;"></i>Indoor handoff navigation</h2>
-          <p style="color:#94a3b8; font-size:13px; margin-top:5px;">120 meters remain before the AGV handoff bay.</p>
+          <p style="color:#94a3b8; font-size:13px; margin-top:5px;">{{ route.remainingMeters }} meters remain before {{ route.handoffZone }}.</p>
         </div>
 
         <div style="flex:1; position:relative; margin: 0 1rem 1rem; border-radius: 20px; background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); overflow:hidden;">
@@ -20,19 +34,29 @@
           </svg>
 
           <div style="position:absolute; bottom:40px; left:35px; width:30px; height:30px; background:#fff; border-radius:50%; display:grid; place-items:center; color:#0f172a; box-shadow:0 0 15px #fff;"><i class="fa-solid fa-car"></i></div>
-          <div style="position:absolute; top:35px; right:35px; width:40px; height:40px; background:var(--safety-green); border-radius:50%; display:grid; place-items:center; color:#fff; box-shadow:0 0 20px var(--safety-green);"><i class="fa-solid fa-flag-checkered"></i></div>
-          <div style="position:absolute; top:15px; right:20px; color:var(--safety-green); font-size:11px; font-weight:700;">Zone A handoff</div>
+          <div
+            style="position:absolute; top:35px; right:35px; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:#fff;"
+            :style="leadGate?.estopArmed ? 'background:var(--danger-red); box-shadow:0 0 20px var(--danger-red);' : 'background:var(--safety-green); box-shadow:0 0 20px var(--safety-green);'"
+          >
+            <i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-flag-checkered'"></i>
+          </div>
+          <div style="position:absolute; top:15px; right:20px; font-size:11px; font-weight:700;" :style="leadGate?.estopArmed ? 'color:var(--danger-red);' : 'color:var(--safety-green);'">
+            {{ route.handoffZone }}
+          </div>
         </div>
 
         <div style="padding: 1.5rem; background:rgba(255,255,255,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; backdrop-filter:blur(10px);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <div style="color:#fff; font-size:18px; font-weight:700;">Keep straight, then turn right</div>
-            <div style="color:var(--brand); font-size:24px; font-weight:800; font-family:'Orbitron', sans-serif;">15 km/h</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:12px;">
+            <div style="color:#fff; font-size:18px; font-weight:700;">{{ route.nextInstruction }}</div>
+            <div style="color:var(--brand); font-size:24px; font-weight:800; font-family:'Orbitron', sans-serif;">{{ route.walkingSpeedKph }} km/h</div>
           </div>
           <div style="display:flex; gap:10px;">
-            <div style="flex:1; height:6px; background:var(--brand); border-radius:3px;"></div>
-            <div style="flex:1; height:6px; background:var(--brand); border-radius:3px;"></div>
-            <div style="flex:1; height:6px; background:rgba(255,255,255,0.1); border-radius:3px;"></div>
+            <div
+              v-for="(filled, index) in progressSegments"
+              :key="index"
+              style="flex:1; height:6px; border-radius:3px;"
+              :style="filled ? 'background:var(--brand);' : 'background:rgba(255,255,255,0.1);'"
+            ></div>
           </div>
         </div>
       </div>
@@ -42,13 +66,26 @@
       <div class="section-head">
         <div>
           <h2 style="font-size:24px; margin-bottom:10px;">Indoor continuation routing</h2>
-          <p style="font-size:15px; max-width:500px;">Outdoor GPS can hand off into an indoor positioning path so the owner can walk directly to the AGV delivery zone.</p>
+          <p style="font-size:15px; max-width:500px;">This screen now uses the backend navigation snapshot, outbound gate status, and live AGV ETA instead of fixed placeholder copy.</p>
         </div>
       </div>
-      <div class="module-row" style="grid-template-columns: 1fr;">
-        <div style="background:rgba(56,189,248,0.1); border-color:var(--brand);">
-          <b><i class="fa-solid fa-satellite-dish"></i> Blind-spot-safe handoff</b>
-          <span>The routing layer can switch from outdoor navigation to indoor guidance without losing the last leg of the pickup experience.</span>
+      <div class="metric-list" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div><span>Current order</span><strong>{{ route.orderNo }}</strong></div>
+        <div><span>Plate / slot</span><strong>{{ route.plateNo }} / {{ route.slotId }}</strong></div>
+        <div><span>Owner ETA</span><strong>{{ etaLabel }}</strong></div>
+        <div><span>AGV ETA</span><strong>{{ agvLabel }}</strong></div>
+        <div><span>Target gate</span><strong>{{ route.targetGate }}</strong></div>
+        <div><span>Gate status</span><strong>{{ leadGate?.gateState || "N/A" }}</strong></div>
+      </div>
+
+      <div class="module-row" style="grid-template-columns: 1fr; margin-top:18px;">
+        <div :style="leadGate?.estopArmed ? 'background:rgba(239,68,68,0.1); border-color:var(--danger-red);' : 'background:rgba(56,189,248,0.1); border-color:var(--brand);'">
+          <b><i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-satellite-dish'"></i> Route safety</b>
+          <span>{{ route.safetyMessage }}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08);">
+          <b><i class="fa-solid fa-robot"></i> AGV sync</b>
+          <span>{{ route.status }}</span>
         </div>
       </div>
     </div>

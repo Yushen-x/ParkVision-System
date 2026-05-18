@@ -1,6 +1,8 @@
 import { computed, reactive } from "vue";
 import { parkvisionApi } from "../api/parkvisionApi";
 import {
+  buildMockIndoorRoute,
+  buildMockPricingPreview,
   buildMockReport,
   createMockAdminOrders,
   createMockOrders,
@@ -8,6 +10,7 @@ import {
   mockAccessList,
   mockAgvs,
   mockAlerts,
+  mockDeviceOverview,
   mockForecast,
   mockPricingRules,
   mockQueue,
@@ -40,6 +43,9 @@ export const state = reactive({
   accessList: structuredClone(mockAccessList),
   systemNodes: structuredClone(mockSystemNodes),
   queue: structuredClone(mockQueue),
+  devices: structuredClone(mockDeviceOverview),
+  pricingPreview: buildMockPricingPreview(),
+  indoorRoute: buildMockIndoorRoute(),
   ownerTimeline: [
     ["Vehicle stored", "AGV placed the vehicle in slot E06."],
     ["Billing active", "Dynamic parking fee started after the entry workflow closed."],
@@ -75,78 +81,34 @@ export async function hydrate() {
     state.onlineMode = "Fallback mode";
   }
 
-  const [
-    summary,
-    forecast,
-    slots,
-    orders,
-    adminOrders,
-    alerts,
-    pricingRules,
-    accessList,
-    systemNodes,
-    queue,
-    agvs,
-  ] = await Promise.all([
-    parkvisionApi.getSummary(),
+  const [forecast, operational, admin] = await Promise.all([
     parkvisionApi.getForecast(),
-    parkvisionApi.getSlots(),
-    parkvisionApi.getOrders(),
-    parkvisionApi.getAdminOrders(),
-    parkvisionApi.getAlerts(),
-    parkvisionApi.getPricingRules(),
-    parkvisionApi.getAccessList(),
-    parkvisionApi.getSystemNodes(),
-    parkvisionApi.getQueue(),
-    parkvisionApi.getAgvs(),
+    fetchOperationalData(),
+    fetchAdminData(),
   ]);
 
-  state.summary = summary;
   state.forecast = forecast;
-  state.slots = slots;
-  state.orders = orders;
-  state.adminOrders = adminOrders;
-  state.alerts = alerts;
-  state.pricingRules = pricingRules;
-  state.accessList = accessList;
-  state.systemNodes = systemNodes;
-  state.queue = queue;
-  state.agvs = normalizeAgvs(agvs);
-  state.activePlate = getters.currentOrder.value?.plateNo || state.activePlate;
+  applyOperationalData(operational);
+  applyAdminData(admin);
   state.loading = false;
 }
 
 export async function refreshCore() {
-  const [summary, slots, orders, queue, agvs] = await Promise.all([
-    parkvisionApi.getSummary(),
-    parkvisionApi.getSlots(),
-    parkvisionApi.getOrders(),
-    parkvisionApi.getQueue(),
-    parkvisionApi.getAgvs(),
-  ]);
-
-  state.summary = summary;
-  state.slots = slots;
-  state.orders = orders;
-  state.queue = queue;
-  state.agvs = normalizeAgvs(agvs);
-  state.activePlate = getters.currentOrder.value?.plateNo || state.activePlate;
+  const operational = await fetchOperationalData();
+  applyOperationalData(operational);
 }
 
 export async function refreshAdminData() {
-  const [adminOrders, alerts, pricingRules, accessList, systemNodes] = await Promise.all([
-    parkvisionApi.getAdminOrders(),
-    parkvisionApi.getAlerts(),
-    parkvisionApi.getPricingRules(),
-    parkvisionApi.getAccessList(),
-    parkvisionApi.getSystemNodes(),
-  ]);
+  const admin = await fetchAdminData();
+  applyAdminData(admin);
+}
 
-  state.adminOrders = adminOrders;
-  state.alerts = alerts;
-  state.pricingRules = pricingRules;
-  state.accessList = accessList;
-  state.systemNodes = systemNodes;
+export async function pollRealtime() {
+  try {
+    await refreshCore();
+  } catch {
+    state.onlineMode = "Fallback mode";
+  }
 }
 
 export function addEvent(title, detail) {
@@ -209,7 +171,8 @@ export async function runVision(options = {}) {
         ? "Intrusion detected in the handoff zone. Review is required."
         : `${result.plate} passed OCR with ${result.confidence} confidence.`,
     );
-    return result;
+    await refreshCore();
+    return state.visionResult;
   } catch {
     return fallbackVision(options);
   } finally {
@@ -255,32 +218,94 @@ export async function generateAdminReport(query) {
   }
 }
 
-export function toggleEmergency() {
-  state.emergency = !state.emergency;
-  state.visionResult = {
-    ...state.visionResult,
-    intrusion: state.emergency,
-    action: state.emergency ? "ESTOP_AND_REVIEW" : "ALLOW_ENTRY_AND_CREATE_ORDER",
-  };
-  addEvent(
-    state.emergency ? "Emergency stop" : "Emergency cleared",
-    state.emergency
-      ? "Dispatch visuals were frozen after a simulated safety event."
-      : "Safety lock was released and AGV motion resumed.",
-  );
+export async function toggleEmergency() {
+  const nextState = !state.emergency;
+  try {
+    await parkvisionApi.setEmergency(nextState);
+    addEvent(
+      nextState ? "Emergency stop" : "Emergency cleared",
+      nextState
+        ? "Dispatch release was locked from the backend safety layer."
+        : "Safety lock was released and field devices resumed automatic mode.",
+    );
+    await refreshCore();
+  } catch {
+    fallbackToggleEmergency(nextState);
+  }
 }
 
-export function moveAgvs() {
-  if (state.emergency) return;
-  state.agvs = state.agvs.map((agv, index) => {
-    const dx = index % 2 === 0 ? 3 : -2;
-    const dy = index % 2 === 0 ? -2 : 3;
-    return {
-      ...agv,
-      x: agv.x + dx > 88 ? 12 : agv.x + dx < 8 ? 86 : agv.x + dx,
-      y: agv.y + dy > 84 ? 14 : agv.y + dy < 10 ? 82 : agv.y + dy,
-    };
-  });
+async function fetchOperationalData() {
+  const [summary, slots, orders, queue, agvs, systemNodes, devices, pricingPreview, indoorRoute] = await Promise.all([
+    parkvisionApi.getSummary(),
+    parkvisionApi.getSlots(),
+    parkvisionApi.getOrders(),
+    parkvisionApi.getQueue(),
+    parkvisionApi.getAgvs(),
+    parkvisionApi.getSystemNodes(),
+    parkvisionApi.getDevicesOverview(),
+    parkvisionApi.getPricingPreview(),
+    parkvisionApi.getIndoorRoute(),
+  ]);
+
+  return { summary, slots, orders, queue, agvs, systemNodes, devices, pricingPreview, indoorRoute };
+}
+
+async function fetchAdminData() {
+  const [adminOrders, alerts, pricingRules, accessList] = await Promise.all([
+    parkvisionApi.getAdminOrders(),
+    parkvisionApi.getAlerts(),
+    parkvisionApi.getPricingRules(),
+    parkvisionApi.getAccessList(),
+  ]);
+
+  return { adminOrders, alerts, pricingRules, accessList };
+}
+
+function applyOperationalData(data) {
+  state.summary = data.summary;
+  state.slots = data.slots;
+  state.orders = data.orders;
+  state.queue = data.queue;
+  state.agvs = normalizeAgvs(data.agvs);
+  state.systemNodes = data.systemNodes;
+  state.devices = normalizeDevices(data.devices);
+  state.pricingPreview = data.pricingPreview;
+  state.indoorRoute = data.indoorRoute;
+  syncVisionFromDevices();
+  state.activePlate = getters.currentOrder.value?.plateNo || state.visionResult.plate || state.activePlate;
+  state.emergency = deriveEmergencyState();
+}
+
+function applyAdminData(data) {
+  state.adminOrders = data.adminOrders;
+  state.alerts = data.alerts;
+  state.pricingRules = data.pricingRules;
+  state.accessList = data.accessList;
+}
+
+function syncVisionFromDevices() {
+  const activeCamera =
+    state.devices.cameras.find((camera) => camera.intrusionState) ||
+    state.devices.cameras.find((camera) => camera.cameraId === state.visionResult.cameraId) ||
+    state.devices.cameras[0];
+
+  if (!activeCamera) return;
+
+  state.visionResult = {
+    ...state.visionResult,
+    cameraId: activeCamera.cameraId,
+    plate: activeCamera.lastPlate || state.visionResult.plate,
+    intrusion: activeCamera.intrusionState,
+    action: activeCamera.intrusionState ? "ESTOP_AND_REVIEW" : state.visionResult.action,
+  };
+}
+
+function deriveEmergencyState() {
+  return (
+    state.devices.cameras.some((camera) => camera.intrusionState) ||
+    state.devices.gates.some((gate) => gate.estopArmed) ||
+    state.visionResult.intrusion
+  );
 }
 
 function fallbackSimulateEntry() {
@@ -304,6 +329,7 @@ function fallbackSimulateEntry() {
   state.adminOrders.unshift(toAdminOrderRow(order));
   state.activePlate = plateNo;
   recomputeSummary();
+  syncFallbackExperience(order);
   addEvent("Vehicle admitted", `${plateNo} was assigned to slot ${slot.id} in fallback mode.`);
 }
 
@@ -321,9 +347,17 @@ function fallbackPreDispatch() {
       wait: "00:48",
       vip: true,
     });
-    state.agvs[0] = { ...state.agvs[0], loaded: true, task: `Relocating ${activeOrder.plateNo}` };
+    state.agvs[0] = {
+      ...state.agvs[0],
+      loaded: true,
+      task: `Relocating ${activeOrder.plateNo}`,
+      mode: "TRANSIT",
+      velocityMps: 0.78,
+      lastCommand: "relocate",
+    };
   }
   recomputeSummary();
+  syncFallbackExperience(activeOrder);
   addEvent("Pre-dispatch queued", "Fallback pre-dispatch moved a deep slot vehicle into the buffer lane.");
 }
 
@@ -339,8 +373,16 @@ function fallbackVip(orderNo) {
     wait: "00:30",
     vip: true,
   });
-  state.agvs[0] = { ...state.agvs[0], loaded: true, task: `VIP pickup for ${order.plateNo}` };
+  state.agvs[0] = {
+    ...state.agvs[0],
+    loaded: true,
+    task: `VIP pickup for ${order.plateNo}`,
+    mode: "CARRYING",
+    velocityMps: 0.92,
+    lastCommand: "vip-priority",
+  };
   recomputeSummary();
+  syncFallbackExperience(order);
   pushOwnerTimeline("VIP retrieval", "Fallback dispatch inserted the order at the top of the queue.");
   addEvent("VIP retrieval", `${order.plateNo} was inserted at the top of the fallback queue.`);
 }
@@ -350,13 +392,15 @@ function fallbackVision(options = {}) {
   const intrusion = Boolean(options.simulateIntrusion);
   state.visionResult = {
     requestId: `edge-${Date.now().toString().slice(-6)}`,
-    cameraId: options.cameraId || "gate-A-01",
+    cameraId: options.cameraId || (intrusion ? "CAM-HANDOFF-02" : "CAM-SOUTH-01"),
     plate,
     confidence: Number((0.94 + Math.random() * 0.05).toFixed(3)),
     intrusion,
     action: intrusion ? "ESTOP_AND_REVIEW" : "ALLOW_ENTRY_AND_CREATE_ORDER",
   };
   state.activePlate = plate;
+  state.emergency = intrusion;
+  syncFallbackExperience(getters.currentOrder.value);
   addEvent(
     "Vision inference complete",
     intrusion ? "Fallback safety rule triggered an emergency review." : `${plate} passed fallback OCR inference.`,
@@ -383,7 +427,24 @@ function fallbackOwnerAction(action, orderNo) {
   syncOrderStatus(order);
   state.adminOrders = state.orders.map(toAdminOrderRow);
   recomputeSummary();
+  syncFallbackExperience(order);
   addEvent("Owner request", `${action} was processed locally for ${order.orderNo}.`);
+}
+
+function fallbackToggleEmergency(nextState) {
+  state.emergency = nextState;
+  state.visionResult = {
+    ...state.visionResult,
+    intrusion: nextState,
+    action: nextState ? "ESTOP_AND_REVIEW" : "ALLOW_ENTRY_AND_CREATE_ORDER",
+  };
+  syncFallbackExperience(getters.currentOrder.value);
+  addEvent(
+    nextState ? "Emergency stop" : "Emergency cleared",
+    nextState
+      ? "Dispatch visuals were frozen after a simulated safety event."
+      : "Safety lock was released and AGV motion resumed.",
+  );
 }
 
 function syncOrderStatus(order) {
@@ -431,9 +492,60 @@ function calculateFallbackAmount(order) {
   return Number(amount.toFixed(2));
 }
 
+function syncFallbackExperience(order = getters.currentOrder.value) {
+  const activeOrder = order || state.orders[0];
+  state.pricingPreview = buildMockPricingPreview(activeOrder);
+  state.indoorRoute = buildMockIndoorRoute(activeOrder);
+  state.systemNodes = structuredClone(mockSystemNodes).map((node) =>
+    state.emergency && node.name !== "Edge-Cam-01"
+      ? { ...node, latency: "LOCK", level: "warning", detail: "Fallback safety lock is active across the control plane" }
+      : state.emergency && node.name === "Edge-Cam-01"
+        ? { ...node, latency: "ALARM", level: "warning", detail: "Fallback safety ROI escalated and blocked dispatch release" }
+        : node,
+  );
+
+  const overview = structuredClone(mockDeviceOverview);
+  overview.cameras = overview.cameras.map((camera, index) => ({
+    ...camera,
+    lastPlate: state.activePlate,
+    intrusionState: state.emergency && index === 1,
+  }));
+  overview.gates = overview.gates.map((gate) => ({
+    ...gate,
+    estopArmed: state.emergency,
+    gateState: state.emergency ? "LOCKDOWN" : gate.gateState,
+  }));
+  overview.events.unshift({
+    eventId: `FB${Date.now()}`,
+    deviceType: state.emergency ? "safety" : "dispatch",
+    deviceId: state.emergency ? "HandoffZone" : "FallbackQueue",
+    eventCode: state.emergency ? "ESTOP_ACTIVE" : "ORDER_SYNC",
+    severity: state.emergency ? "critical" : "info",
+    message: state.emergency
+      ? "Fallback emergency stop is active across simulated field devices"
+      : `Fallback state synced for ${activeOrder?.plateNo || "the active order"}`,
+    eventTime: new Date().toISOString(),
+    acknowledged: false,
+  });
+  state.devices = overview;
+}
+
 function normalizeAgvs(agvs) {
   return agvs.map((agv) => ({
     ...agv,
     loaded: agv.loaded ?? agv.load ?? false,
+    batteryPct: agv.batteryPct ?? 100,
+    mode: agv.mode ?? "IDLE",
+    velocityMps: agv.velocityMps ?? 0,
+    lastCommand: agv.lastCommand ?? "hold",
   }));
+}
+
+function normalizeDevices(overview) {
+  return {
+    cameras: overview?.cameras || [],
+    gates: overview?.gates || [],
+    chargers: overview?.chargers || [],
+    events: overview?.events || [],
+  };
 }

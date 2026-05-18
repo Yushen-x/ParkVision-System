@@ -50,7 +50,7 @@ export const mockForecast = {
 
 export const mockVisionResult = {
   requestId: "edge-423188",
-  cameraId: "gate-A-01",
+  cameraId: "CAM-SOUTH-01",
   plate: "SH-A7686",
   confidence: 0.982,
   intrusion: false,
@@ -168,28 +168,28 @@ export const mockSystemNodes = [
   {
     name: "Edge-Cam-01",
     latency: "98ms",
-    detail: "South gate vision pre-processing node is healthy",
+    detail: "South gate vision pre-processing node is healthy and forwarding OCR metadata",
     level: "stable",
   },
   {
     name: "PLC-Master-Controller",
     latency: "12ms",
-    detail: "AGV fleet gateway heartbeat is stable",
+    detail: "Barrier controller and AGV fleet gateway heartbeats are stable",
     level: "stable",
   },
   {
     name: "Redis-Sync-Cluster",
-    latency: "TIMEOUT",
-    detail: "Cache sync timeout, degraded strategy enabled",
-    level: "warning",
+    latency: "28ms",
+    detail: "Operational cache and report fan-out are synchronized",
+    level: "stable",
   },
 ];
 
 export const mockAgvs = [
-  { id: "AGV-01", x: 10, y: 12, loaded: false, task: "Patrolling Zone A" },
-  { id: "AGV-02", x: 45, y: 32, loaded: true, task: "Carrying SH-A7686" },
-  { id: "AGV-03", x: 72, y: 58, loaded: false, task: "Heading to shallow buffer" },
-  { id: "AGV-04", x: 28, y: 76, loaded: false, task: "Charging standby" },
+  { id: "AGV-01", x: 10, y: 12, loaded: false, task: "Patrolling Zone A", batteryPct: 91, mode: "IDLE", velocityMps: 0.42, lastCommand: "patrol" },
+  { id: "AGV-02", x: 45, y: 32, loaded: true, task: "Carrying SH-A7686", batteryPct: 74, mode: "CARRYING", velocityMps: 0.86, lastCommand: "deliver" },
+  { id: "AGV-03", x: 72, y: 58, loaded: false, task: "Heading to shallow buffer", batteryPct: 68, mode: "TRANSIT", velocityMps: 0.65, lastCommand: "relocate" },
+  { id: "AGV-04", x: 28, y: 76, loaded: false, task: "Charging standby", batteryPct: 19, mode: "CHARGING", velocityMps: 0, lastCommand: "dock" },
 ];
 
 export const mockQueue = [
@@ -198,6 +198,125 @@ export const mockQueue = [
   { plateNo: "SU-M9021", type: "Touch-and-Go", tag: "Touch", wait: "02:10", vip: false },
   { plateNo: "SH-V7780", type: "Reserved outbound", tag: "Booking", wait: "01:58", vip: false },
 ];
+
+export const mockDeviceOverview = {
+  cameras: [
+    {
+      cameraId: "CAM-SOUTH-01",
+      profile: "ONVIF Profile T",
+      codec: "H.265",
+      streamUrl: "rtsp://10.10.1.21:554/Streaming/Channels/101",
+      fps: 25,
+      bitrateKbps: 4096,
+      status: "ONLINE",
+      lastPlate: "SH-A7686",
+      lastSeen: "2026-05-18T10:11:52",
+      tamperAlarm: false,
+      intrusionState: false,
+      detail: "South gate edge camera with OCR and handoff-zone intrusion ROI",
+    },
+    {
+      cameraId: "CAM-HANDOFF-02",
+      profile: "ONVIF Profile T",
+      codec: "H.264",
+      streamUrl: "rtsp://10.10.1.33:554/Streaming/Channels/101",
+      fps: 20,
+      bitrateKbps: 3072,
+      status: "ONLINE",
+      lastPlate: "SU-M9021",
+      lastSeen: "2026-05-18T10:11:57",
+      tamperAlarm: false,
+      intrusionState: false,
+      detail: "Transfer-bay safety camera with person intrusion alarm",
+    },
+  ],
+  gates: [
+    {
+      gateId: "GATE-IN-01",
+      protocol: "Modbus/TCP",
+      endpoint: "10.10.20.11:502",
+      coilAddress: "00017",
+      queueDepth: 2,
+      gateState: "OPEN",
+      loopOccupied: true,
+      estopArmed: false,
+      lastDecision: "ACCESS_GRANTED",
+      lastSeen: "2026-05-18T10:11:59",
+      detail: "Inbound barrier with loop detector and PLC relay control",
+    },
+    {
+      gateId: "GATE-OUT-01",
+      protocol: "Modbus/TCP",
+      endpoint: "10.10.20.12:502",
+      coilAddress: "00021",
+      queueDepth: 1,
+      gateState: "READY",
+      loopOccupied: false,
+      estopArmed: false,
+      lastDecision: "READY",
+      lastSeen: "2026-05-18T10:11:55",
+      detail: "Outbound handoff gate synchronized with AGV release window",
+    },
+  ],
+  chargers: [
+    {
+      chargerId: "EVSE-01",
+      protocol: "OCPP 1.6J",
+      endpoint: "ws://10.10.30.41:9000/ocpp/EVSE-01",
+      connectorStatus: "Charging",
+      powerKw: 11,
+      sessionKwh: 18.4,
+      vehiclePlate: "SH-D5218",
+      authStatus: "Accepted",
+      lastSeen: "2026-05-18T10:11:50",
+      detail: "AC charger in premium bay C05",
+    },
+    {
+      chargerId: "EVSE-02",
+      protocol: "OCPP 1.6J",
+      endpoint: "ws://10.10.30.42:9000/ocpp/EVSE-02",
+      connectorStatus: "Available",
+      powerKw: 0,
+      sessionKwh: 0,
+      vehiclePlate: null,
+      authStatus: "Idle",
+      lastSeen: "2026-05-18T10:11:58",
+      detail: "AC charger near handoff zone for short dwell sessions",
+    },
+  ],
+  events: [
+    {
+      eventId: "DV20260506001",
+      deviceType: "camera",
+      deviceId: "CAM-SOUTH-01",
+      eventCode: "PLATE_READ",
+      severity: "info",
+      message: "OCR recognized SH-A7686 and forwarded metadata to the entry service",
+      eventTime: "2026-05-18T10:07:00",
+      acknowledged: true,
+    },
+    {
+      eventId: "DV20260506002",
+      deviceType: "gate",
+      deviceId: "GATE-IN-01",
+      eventCode: "LOOP_OCCUPIED",
+      severity: "info",
+      message: "Induction loop detected a vehicle at the inbound barrier",
+      eventTime: "2026-05-18T10:08:00",
+      acknowledged: true,
+    },
+    {
+      eventId: "DV20260506003",
+      deviceType: "charger",
+      deviceId: "EVSE-01",
+      eventCode: "ENERGY_DELIVERY",
+      severity: "info",
+      message: "Charging session for SH-D5218 reached 18.40 kWh",
+      eventTime: "2026-05-18T10:09:00",
+      acknowledged: false,
+    },
+  ],
+};
 
 export function toAdminOrderRow(order) {
   return {
@@ -222,6 +341,43 @@ export function buildMockReport(query = "VIP service trend in the last 7 days") 
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     previousWeekRevenue: [120, 132, 101, 134, 290, 430, 410],
     currentWeekRevenue: [220, 182, 191, 234, 490, 530, 610],
+  };
+}
+
+export function buildMockPricingPreview(order = baseOrders[0]) {
+  return {
+    orderNo: order.orderNo,
+    plateNo: order.plateNo,
+    pricingWindow: "Workday peak window",
+    durationMinutes: 132,
+    baseAmount: 14,
+    peakMultiplier: 1.5,
+    components: [
+      { label: "Base parking", formula: "3h ladder", amount: 14, accent: "base" },
+      { label: "Peak shaping", formula: "1.50x congestion multiplier", amount: 7, accent: "peak" },
+      { label: "EV charging", formula: "1.20 CNY/kWh", amount: order.plateNo.startsWith("SH-D") ? 22.08 : 0, accent: "charging" },
+      { label: "VIP retrieval", formula: "Fixed dispatch priority surcharge", amount: 5, accent: "vip" },
+    ],
+    totalAmount: order.plateNo.startsWith("SH-D") ? 48.08 : 26,
+    explanation: "Preview is generated from the order, dispatch priority, and live charger telemetry.",
+  };
+}
+
+export function buildMockIndoorRoute(order = baseOrders[0]) {
+  return {
+    orderNo: order.orderNo,
+    plateNo: order.plateNo,
+    slotId: order.slotId,
+    handoffZone: "Zone A handoff",
+    targetGate: "GATE-OUT-01",
+    remainingMeters: 120,
+    etaSeconds: 180,
+    agvEtaSeconds: 96,
+    walkingSpeedKph: 6,
+    completedSegments: 2,
+    nextInstruction: "Keep straight past the inbound lane, then turn right toward the handoff corridor",
+    status: "AGV-01 is approaching the release corridor",
+    safetyMessage: "Indoor route is clear and synchronized with live AGV and gate telemetry.",
   };
 }
 

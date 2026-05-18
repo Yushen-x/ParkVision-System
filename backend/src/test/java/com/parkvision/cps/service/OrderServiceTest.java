@@ -13,7 +13,8 @@ class OrderServiceTest {
     @Test
     void simulateEntryCreatesOrderAndOccupiesSlot() {
         FallbackParkVisionRepository repository = new FallbackParkVisionRepository();
-        OrderService orderService = new OrderService(repository);
+        DeviceService deviceService = new DeviceService(repository, true);
+        OrderService orderService = new OrderService(repository, deviceService);
 
         int existingOrders = repository.findOrders().size();
         ParkingOrder order = orderService.simulateEntry();
@@ -29,7 +30,8 @@ class OrderServiceTest {
     @Test
     void finishingOrderReleasesSlotAndCalculatesAmount() {
         FallbackParkVisionRepository repository = new FallbackParkVisionRepository();
-        OrderService orderService = new OrderService(repository);
+        DeviceService deviceService = new DeviceService(repository, true);
+        OrderService orderService = new OrderService(repository, deviceService);
 
         ParkingOrder updatedOrder = orderService.changeStatus("PV20260506001", OrderStatus.FINISHED);
 

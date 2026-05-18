@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import AppSidebar from "./components/AppSidebar.vue";
 import TopBar from "./components/TopBar.vue";
-import { hydrate, moveAgvs, simulateEntry, state, toggleEmergency, triggerPreDispatch } from "./stores/parkingStore";
+import { hydrate, pollRealtime, simulateEntry, state, toggleEmergency, triggerPreDispatch } from "./stores/parkingStore";
 
 const route = useRoute();
 const title = computed(() => route.meta.title || "Operations Dashboard");
@@ -11,7 +11,9 @@ const timer = ref(null);
 
 onMounted(async () => {
   await hydrate();
-  timer.value = window.setInterval(moveAgvs, 900);
+  timer.value = window.setInterval(() => {
+    void pollRealtime();
+  }, 5000);
 });
 
 onUnmounted(() => {

@@ -4,6 +4,21 @@ server:
 spring:
   application:
     name: parkvision-backend
+  datasource:
+    url: ${PARKVISION_DATASOURCE_URL:jdbc:h2:file:./data/parkvision;MODE=MySQL;DB_CLOSE_DELAY=-1}
+    username: ${PARKVISION_DATASOURCE_USERNAME:sa}
+    password: ${PARKVISION_DATASOURCE_PASSWORD:}
+    driver-class-name: ${PARKVISION_DATASOURCE_DRIVER:org.h2.Driver}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
 management:
   endpoints:
@@ -13,6 +28,9 @@ management:
 
 parkvision:
   persistence:
-    mode: fallback
+    mode: ${PARKVISION_PERSISTENCE_MODE:jdbc}
   ai:
-    inference-mode: fallback
+    inference-mode: ${PARKVISION_AI_INFERENCE_MODE:device-simulated}
+  devices:
+    simulation-enabled: ${PARKVISION_DEVICE_SIMULATION_ENABLED:true}
+    simulation-interval-ms: ${PARKVISION_DEVICE_SIMULATION_INTERVAL_MS:4000}

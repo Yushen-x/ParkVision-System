@@ -6,7 +6,10 @@ import {
   mockAccessList,
   mockAgvs,
   mockAlerts,
+  mockDeviceOverview,
   mockForecast,
+  buildMockIndoorRoute,
+  buildMockPricingPreview,
   mockPricingRules,
   mockQueue,
   mockSummary,
@@ -85,6 +88,15 @@ export const parkvisionApi = {
   getAgvs() {
     return withFallback(() => request("/dispatch/agvs"), mockAgvs);
   },
+  getDevicesOverview() {
+    return withFallback(() => request("/devices/overview"), mockDeviceOverview);
+  },
+  getPricingPreview(orderNo) {
+    return withFallback(() => request(withQuery("/pricing/preview", { orderNo })), () => buildMockPricingPreview());
+  },
+  getIndoorRoute(orderNo) {
+    return withFallback(() => request(withQuery("/navigation/indoor", { orderNo })), () => buildMockIndoorRoute());
+  },
   getReport(query) {
     return withFallback(
       () =>
@@ -122,5 +134,8 @@ export const parkvisionApi = {
         }),
       mockVisionResult,
     );
+  },
+  setEmergency(active) {
+    return request(withQuery("/devices/emergency", { active }), { method: "POST" });
   },
 };

@@ -2,6 +2,7 @@ node_modules/
 dist/
 target/
 logs/
+backend/data/
 .idea/
 .vscode/
 *.log
