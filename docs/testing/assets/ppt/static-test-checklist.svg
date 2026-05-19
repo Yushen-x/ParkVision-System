@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#ffffff" />
+  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">静态测试检查表</text>
+  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 12-13 页：前端结构、后端分层、异常处理与脚本完整性</text>
+  <rect x="110" y="142" width="1380" height="632" fill="none" stroke="#94a3b8" stroke-width="1.4" />
+  
+        <rect x="110" y="142" width="300" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="122" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查项</text>
+      
+
+        <rect x="410" y="142" width="900" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="422" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查内容</text>
+      
+
+        <rect x="1310" y="142" width="180" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="1322" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">结果</text>
+      
+  
+            <rect x="110" y="200" width="300" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="224" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前端路由完整性</text>
+          
+
+            <rect x="410" y="200" width="900" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="224" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖运营首页、AI、调度、孪生、管理台、计费、系统配置、车主端、室内导航</text>
+          
+
+            <rect x="1310" y="200" width="180" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="224" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="282" width="300" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="306" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前端数据来源</text>
+          
+
+            <rect x="410" y="282" width="900" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="306" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">Store 优先调用后端 API，失败时才使用兜底数据</text>
+          
+
+            <rect x="1310" y="282" width="180" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="306" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="364" width="300" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="388" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">组件状态展示</text>
+          
+
+            <rect x="410" y="364" width="900" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="388" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">KPI、表格、事件流、截图页面均为中文展示</text>
+          
+
+            <rect x="1310" y="364" width="180" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="388" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="446" width="300" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="470" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">后端分层结构</text>
+          
+
+            <rect x="410" y="446" width="900" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="470" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">Controller、Service、Repository 分层清晰</text>
+          
+
+            <rect x="1310" y="446" width="180" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="470" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="528" width="300" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="552" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">持久化入口</text>
+          
+
+            <rect x="410" y="528" width="900" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="552" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">H2 文件数据库自动初始化并写入真实演示数据</text>
+          
+
+            <rect x="1310" y="528" width="180" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="552" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="610" width="300" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="634" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">异常处理</text>
+          
+
+            <rect x="410" y="610" width="900" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="634" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单和缺参请求统一返回结构化错误</text>
+          
+
+            <rect x="1310" y="610" width="180" height="82" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="634" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+
+            <rect x="110" y="692" width="300" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="122" y="716" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">自动化脚本</text>
+          
+
+            <rect x="410" y="692" width="900" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="422" y="716" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">截图、数据采集、性能测试、报告渲染脚本可重复运行</text>
+          
+
+            <rect x="1310" y="692" width="180" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1322" y="716" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+          
+</svg>

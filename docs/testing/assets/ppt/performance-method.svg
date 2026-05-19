@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#ffffff" />
+  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">性能测试参数说明</text>
+  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 27 页：线程数、Ramp-Up 时间、循环次数和测试对象</text>
+  <rect x="70" y="142" width="1460" height="538" fill="none" stroke="#94a3b8" stroke-width="1.4" />
+  
+        <rect x="70" y="142" width="260" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="82" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">参数</text>
+      
+
+        <rect x="330" y="142" width="420" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="342" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设置</text>
+      
+
+        <rect x="750" y="142" width="780" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
+        <text x="762" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">说明</text>
+      
+  
+            <rect x="70" y="200" width="260" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="82" y="224" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">线程数</text>
+          
+
+            <rect x="330" y="200" width="420" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="224" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1、5、20、100 级别并发</text>
+          
+
+            <rect x="750" y="200" width="780" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="762" y="224" font-size="22" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">模拟单人演示到多人同时访问的压力</text>
+          
+
+            <rect x="70" y="320" width="260" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="82" y="344" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">Ramp-Up 时间</text>
+          
+
+            <rect x="330" y="320" width="420" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="344" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1 到 10 秒</text>
+          
+
+            <rect x="750" y="320" width="780" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="762" y="344" font-size="22" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">避免瞬时启动造成非业务性抖动</text>
+          
+
+            <rect x="70" y="440" width="260" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="82" y="464" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">循环次数</text>
+          
+
+            <rect x="330" y="440" width="420" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="464" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">每个场景多轮请求</text>
+          
+
+            <rect x="750" y="440" width="780" height="120" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="762" y="464" font-size="22" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">统计平均响应、P95 和成功率</text>
+          
+
+            <rect x="70" y="560" width="260" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="82" y="584" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试对象</text>
+          
+
+            <rect x="330" y="560" width="420" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="584" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">运营汇总、调度队列、设备总览、计费预览、管</text>
+<text x="342" y="614" font-size="22" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">理报表、视觉推理</text>
+          
+
+            <rect x="750" y="560" width="780" height="120" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="762" y="584" font-size="22" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖演示最常访问接口</text>
+          
+</svg>

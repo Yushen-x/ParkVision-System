@@ -2,7 +2,8 @@
   "name": "parkvision-testing-tools",
   "private": true,
   "scripts": {
-    "capture-screenshots": "node ./capture-screenshots.mjs"
+    "capture-screenshots": "node ./capture-screenshots.mjs",
+    "generate-ppt-assets": "node ./generate-ppt-reference-assets.mjs"
   },
   "devDependencies": {
     "marked": "^16.4.1",
