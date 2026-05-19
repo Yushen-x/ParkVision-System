@@ -1,198 +1,200 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">测试用例表（二）：AI 感知与安全联动</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 7-10 页：功能模块、用例编号、前置条件、输入、预期结果、实际结果</text>
-  <rect x="50" y="142" width="1500" height="690" fill="none" stroke="#94a3b8" stroke-width="1.4" />
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">测试用例表（二）：AI 感知与安全联动</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 7-10 页：功能模块、用例编号、前置条件、输入、预期结果、实际结果</text>
+  <rect x="50" y="142" width="1500" height="714" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="50" y="142" width="145" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="62" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">功能模块</text>
+        <text x="62" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">功能模块</text>
       
 
         <rect x="195" y="142" width="135" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="207" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例</text>
+        <text x="207" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例</text>
       
 
         <rect x="330" y="142" width="115" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="342" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例编号</text>
+        <text x="342" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例编号</text>
       
 
         <rect x="445" y="142" width="260" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="457" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例说明</text>
+        <text x="457" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例说明</text>
       
 
         <rect x="705" y="142" width="195" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="717" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前置条件</text>
+        <text x="717" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前置条件</text>
       
 
         <rect x="900" y="142" width="195" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="912" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入/动作</text>
+        <text x="912" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入/动作</text>
       
 
         <rect x="1095" y="142" width="220" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1107" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
+        <text x="1107" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
       
 
         <rect x="1315" y="142" width="130" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1327" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试结果</text>
+        <text x="1327" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试结果</text>
       
 
         <rect x="1445" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1457" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">失败原因</text>
+        <text x="1457" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">失败原因</text>
       
   
-            <rect x="50" y="200" width="145" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 感知</text>
+            <rect x="50" y="200" width="145" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 感知</text>
           
 
-            <rect x="195" y="200" width="135" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">正常识别</text>
+            <rect x="195" y="200" width="135" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">正常识别</text>
           
 
-            <rect x="330" y="200" width="115" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.1</text>
+            <rect x="330" y="200" width="115" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="224" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.1</text>
           
 
-            <rect x="445" y="200" width="260" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">采集画面后返回车牌、</text>
-<text x="457" y="248" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">置信度、摄像头 ID 和动作建议</text>
+            <rect x="445" y="200" width="260" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">采集画面后返回车牌、置信度、摄</text>
+<text x="457" y="246" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">像头 ID 和动作建议</text>
           
 
-            <rect x="705" y="200" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头在线</text>
+            <rect x="705" y="200" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头在线</text>
           
 
-            <rect x="900" y="200" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击采集画面，intru</text>
-<text x="912" y="248" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">sion=false</text>
+            <rect x="900" y="200" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击采集画面，intrus</text>
+<text x="912" y="246" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ion=false</text>
           
 
-            <rect x="1095" y="200" width="220" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 OCR 结果，</text>
-<text x="1107" y="248" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">系统不进入急停</text>
+            <rect x="1095" y="200" width="220" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 OCR 结果，系统不</text>
+<text x="1107" y="246" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">进入急停</text>
           
 
-            <rect x="1315" y="200" width="130" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="200" width="130" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="224" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="200" width="105" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="200" width="105" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="358" width="145" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 感知</text>
+            <rect x="50" y="364" width="145" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 感知</text>
           
 
-            <rect x="195" y="358" width="135" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">入侵急停</text>
+            <rect x="195" y="364" width="135" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">入侵急停</text>
           
 
-            <rect x="330" y="358" width="115" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="382" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.2</text>
+            <rect x="330" y="364" width="115" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="388" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.2</text>
           
 
-            <rect x="445" y="358" width="260" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检测到交接区入侵后触发系统急停</text>
+            <rect x="445" y="364" width="260" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检测到交接区入侵后触发系统急</text>
+<text x="457" y="410" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">停</text>
           
 
-            <rect x="705" y="358" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头在线，闸机在线</text>
+            <rect x="705" y="364" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头在线，闸机在线</text>
           
 
-            <rect x="900" y="358" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击检测入侵，intru</text>
-<text x="912" y="406" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">sion=true</text>
+            <rect x="900" y="364" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击检测入侵，intrus</text>
+<text x="912" y="410" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ion=true</text>
           
 
-            <rect x="1095" y="358" width="220" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头 ROI 风险、</text>
-<text x="1107" y="406" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">闸机急停、节点 warni</text>
-<text x="1107" y="430" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ng、告警新增</text>
+            <rect x="1095" y="364" width="220" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头 ROI 风险、闸机</text>
+<text x="1107" y="410" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停、节点 warning、告</text>
+<text x="1107" y="432" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">警新增</text>
           
 
-            <rect x="1315" y="358" width="130" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="382" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="364" width="130" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="388" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="358" width="105" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="364" width="105" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="516" width="145" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数字孪生</text>
+            <rect x="50" y="528" width="145" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数字孪生</text>
           
 
-            <rect x="195" y="516" width="135" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停展示</text>
+            <rect x="195" y="528" width="135" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停展示</text>
           
 
-            <rect x="330" y="516" width="115" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="540" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.3</text>
+            <rect x="330" y="528" width="115" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="552" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.3</text>
           
 
-            <rect x="445" y="516" width="260" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数字孪生页面展示安全联动后的 A</text>
-<text x="457" y="564" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">GV、车位、闸机状态</text>
+            <rect x="445" y="528" width="260" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数字孪生页面展示安全联动后的</text>
+<text x="457" y="574" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start"> AGV、车位、闸机状态</text>
           
 
-            <rect x="705" y="516" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停已触发</text>
+            <rect x="705" y="528" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停已触发</text>
           
 
-            <rect x="900" y="516" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开数字孪生页面</text>
+            <rect x="900" y="528" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开数字孪生页面</text>
           
 
-            <rect x="1095" y="516" width="220" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停状态与正常孪生页面有明</text>
-<text x="1107" y="564" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">显差异</text>
+            <rect x="1095" y="528" width="220" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停状态与正常孪生页面</text>
+<text x="1107" y="574" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有明显差异</text>
           
 
-            <rect x="1315" y="516" width="130" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="540" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="528" width="130" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="552" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="516" width="105" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="528" width="105" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="674" width="145" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备控制</text>
+            <rect x="50" y="692" width="145" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备控制</text>
           
 
-            <rect x="195" y="674" width="135" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">解除急停</text>
+            <rect x="195" y="692" width="135" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">解除急停</text>
           
 
-            <rect x="330" y="674" width="115" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="698" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.4</text>
+            <rect x="330" y="692" width="115" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="716" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.2.4</text>
           
 
-            <rect x="445" y="674" width="260" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">人工解除急停后设备恢复自动模式</text>
+            <rect x="445" y="692" width="260" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">人工解除急停后设备恢复自动模</text>
+<text x="457" y="738" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">式</text>
           
 
-            <rect x="705" y="674" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">系统处于急停</text>
+            <rect x="705" y="692" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">系统处于急停</text>
           
 
-            <rect x="900" y="674" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">调用 emergency</text>
-<text x="912" y="722" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start"> active=fals</text>
-<text x="912" y="746" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">e</text>
+            <rect x="900" y="692" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">调用 emergency act</text>
+<text x="912" y="738" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ive=false</text>
           
 
-            <rect x="1095" y="674" width="220" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">闸机解除锁定，节点恢复稳定</text>
-<text x="1107" y="722" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">，事件流记录解除动作</text>
+            <rect x="1095" y="692" width="220" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">闸机解除锁定，节点恢复</text>
+<text x="1107" y="738" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">稳定，事件流记录解除动</text>
+<text x="1107" y="760" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">作</text>
           
 
-            <rect x="1315" y="674" width="130" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="698" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="692" width="130" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="716" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="674" width="105" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="692" width="105" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 </svg>

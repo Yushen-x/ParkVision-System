@@ -1,105 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">无效等价类测试套件</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 17 页：异常输入必须返回明确错误</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">无效等价类测试套件</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 17 页：异常输入必须返回明确错误</text>
   <rect x="70" y="142" width="1460" height="648" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="70" y="142" width="440" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="82" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试数据</text>
+        <text x="82" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试数据</text>
       
 
         <rect x="510" y="142" width="390" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="522" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
+        <text x="522" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
       
 
         <rect x="900" y="142" width="460" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="912" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">实际输出</text>
+        <text x="912" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">实际输出</text>
       
 
         <rect x="1360" y="142" width="170" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1372" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖范围</text>
+        <text x="1372" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖范围</text>
       
   
             <rect x="70" y="200" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用取车</text>
+            <text x="82" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用取车</text>
           
 
             <rect x="510" y="200" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
+            <text x="522" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
           
 
             <rect x="900" y="200" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="224" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
+            <text x="912" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
           
 
             <rect x="1360" y="200" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1</text>
+            <text x="1372" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1</text>
           
 
             <rect x="70" y="318" width="440" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用 VIP</text>
+            <text x="82" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用 VIP</text>
           
 
             <rect x="510" y="318" width="390" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
+            <text x="522" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
           
 
             <rect x="900" y="318" width="460" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="342" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
+            <text x="912" y="342" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
           
 
             <rect x="1360" y="318" width="170" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1,2</text>
+            <text x="1372" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1,2</text>
           
 
             <rect x="70" y="436" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用计费预览</text>
+            <text x="82" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用计费预览</text>
           
 
             <rect x="510" y="436" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
+            <text x="522" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
           
 
             <rect x="900" y="436" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="460" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
+            <text x="912" y="460" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
           
 
             <rect x="1360" y="436" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">5</text>
+            <text x="1372" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">5</text>
           
 
             <rect x="70" y="554" width="440" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用室内导航</text>
+            <text x="82" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非法订单号 ORDER-404 调用室内导航</text>
           
 
             <rect x="510" y="554" width="390" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
+            <text x="522" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + ORDER_NOT_FOUND</text>
           
 
             <rect x="900" y="554" width="460" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="578" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
+            <text x="912" y="578" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回结构化错误 ORDER_NOT_FOUND</text>
           
 
             <rect x="1360" y="554" width="170" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">6</text>
+            <text x="1372" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">6</text>
           
 
             <rect x="70" y="672" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停接口缺少 active 参数</text>
+            <text x="82" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停接口缺少 active 参数</text>
           
 
             <rect x="510" y="672" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + VALIDATION_FAIL</text>
-<text x="522" y="723" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ED</text>
+            <text x="522" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">400 + VALIDATION_FAILED</text>
           
 
             <rect x="900" y="672" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="696" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 active parameter is re</text>
-<text x="912" y="723" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">quired</text>
+            <text x="912" y="696" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 active parameter is required</text>
           
 
             <rect x="1360" y="672" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">3,4</text>
+            <text x="1372" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">3,4</text>
           
 </svg>

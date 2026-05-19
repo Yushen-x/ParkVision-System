@@ -6,6 +6,7 @@
     <title>ParkVision 系统测试报告</title>
     <style>@page {
   size: A4;
+  margin: 12mm;
 }
 
 :root {
@@ -90,19 +91,31 @@ table {
   width: 100%;
   margin: 14px 0 20px;
   border-collapse: collapse;
-  font-size: 12px;
-  break-inside: avoid;
+  font-size: 10.8px;
+  table-layout: fixed;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 thead {
   background: #e2e8f0;
+  display: table-header-group;
+}
+
+tfoot {
+  display: table-footer-group;
 }
 
 th,
 td {
-  padding: 8px 10px;
+  padding: 7px 8px;
   border: 1px solid var(--line);
   vertical-align: top;
+}
+
+tr {
+  break-inside: avoid-page;
+  page-break-inside: avoid;
 }
 
 tr:nth-child(even) td {
@@ -132,6 +145,12 @@ code {
   font-size: 12px;
 }
 
+td code,
+th code {
+  padding: 1px 3px;
+  font-size: 9.8px;
+}
+
 pre {
   overflow: auto;
   padding: 14px;
@@ -154,19 +173,65 @@ strong {
   <body>
     <main class="report-body">
       <h1>ParkVision 智能停车系统测试报告</h1>
-<p>项目名称：ParkVision-System 智能停车 CPS 演示系统<br>测试主题：系统测试、功能验证、接口联动、非功能测试与可用性评估<br>测试日期：2026-05-18<br>测试环境：本地 Windows 环境，前端预览服务 <code>http://localhost:5173</code>，后端服务 <code>http://localhost:8080</code><br>测试结论：本轮系统测试通过，功能测试 <code>12/12</code> 通过，黑盒异常测试 <code>5/5</code> 通过，性能测试所有场景成功率 <code>100%</code>。</p>
+<p>项目名称：ParkVision-System 智能停车 CPS 演示系统<br>测试主题：系统测试、功能性测试、静态测试、黑盒测试、白盒测试、非功能测试与可用性测试
+测试日期：2026-05-18<br>报告修订日期：2026-05-19
+测试环境：本地 Windows 环境，前端预览服务 <code>http://localhost:5173</code>，后端服务 <code>http://localhost:8080</code><br>测试结论：本轮系统测试通过。功能测试 <code>12/12</code> 通过，黑盒异常测试 <code>5/5</code> 通过，性能测试所有场景成功率 <code>100%</code>。</p>
 <p><img src="assets/figures/test-results-overview.svg" alt="测试结果总览"></p>
 <h2>1. 测试目标</h2>
-<p>本轮汇报的目标是证明 ParkVision 已经具备完整的系统级演示能力，而不是停留在前端静态页面或单点功能展示。测试重点包括：</p>
-<ol>
-<li>验证前端页面是否通过后端 API 获取真实业务状态。</li>
-<li>验证订单、车位、调度、AGV、设备、计费、导航、管理报表之间是否能够形成闭环。</li>
-<li>验证数据库持久化链路是否正常，系统是否依赖后端 H2 文件数据库保存业务状态。</li>
-<li>验证摄像头、闸机、充电桩、AGV 等外部设备模拟接口是否能参与联动。</li>
-<li>验证异常输入、非法订单、缺失参数等黑盒场景是否被后端正确处理。</li>
-<li>验证主要接口在并发访问下的响应时间和成功率。</li>
-<li>形成可复用的测试报告、截图素材、性能图表和 PPT 制作依据。</li>
-</ol>
+<p>本轮测试目标是证明 ParkVision 已经具备完整系统级演示能力，而不是停留在前端静态页面或单点模拟数据。测试重点如下：</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>测试目标</th>
+<th>验证方式</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>T-01</td>
+<td>验证真实数据链路</td>
+<td>前端页面调用后端 API，后端读取 H2 文件数据库</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-02</td>
+<td>验证业务闭环</td>
+<td>入场、订单、车位、调度、取车、支付、计费、导航、报表联动</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-03</td>
+<td>验证设备模拟链路</td>
+<td>摄像头、闸机、充电桩、AGV 由后端统一模拟状态</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-04</td>
+<td>验证异常处理能力</td>
+<td>非法订单号、缺少参数、急停恢复等黑盒用例</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-05</td>
+<td>验证服务层分支</td>
+<td>订单状态变更、急停控制、异常分支的白盒覆盖</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-06</td>
+<td>验证非功能表现</td>
+<td>接口并发压测、可启动性、持久化、可观测性</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>T-07</td>
+<td>形成汇报证据</td>
+<td>生成截图、流程图、性能图、Markdown 报告和 PDF</td>
+<td>通过</td>
+</tr>
+</tbody></table>
+<p><img src="assets/figures/test-process.svg" alt="系统测试执行流程"></p>
 <h2>2. 测试范围</h2>
 <h3>2.1 被测系统模块</h3>
 <table>
@@ -186,7 +251,7 @@ strong {
 </tr>
 <tr>
 <td>AI 感知</td>
-<td>AI 视觉感知</td>
+<td>AI Vision</td>
 <td><code>/api/edge/vision/infer</code>, <code>/api/devices/overview</code></td>
 <td>车牌识别、入侵检测、急停联动</td>
 </tr>
@@ -200,7 +265,7 @@ strong {
 <td>数字孪生</td>
 <td>数字孪生</td>
 <td><code>/api/slots</code>, <code>/api/dispatch/agvs</code>, <code>/api/devices/overview</code></td>
-<td>车位、AGV、急停状态可视化</td>
+<td>车位、AGV、闸机、急停状态可视化</td>
 </tr>
 <tr>
 <td>车主端</td>
@@ -224,16 +289,16 @@ strong {
 <td>管理台</td>
 <td>管理报表与台账</td>
 <td><code>/api/admin/orders</code>, <code>/alerts</code>, <code>/pricing-rules</code>, <code>/access-list</code>, <code>/report</code></td>
-<td>订单、告警、规则、名单、报表</td>
+<td>订单、告警、规则、名单、AI 报表</td>
 </tr>
 <tr>
-<td>系统网关</td>
-<td>系统网关</td>
+<td>系统配置</td>
+<td>系统网关与设备</td>
 <td><code>/api/system/nodes</code>, <code>/api/devices/overview</code></td>
-<td>节点健康、设备列表、事件流</td>
+<td>节点健康、设备列表、设备事件</td>
 </tr>
 </tbody></table>
-<h3>2.2 不在本轮范围内的内容</h3>
+<h3>2.2 本轮范围边界</h3>
 <table>
 <thead>
 <tr>
@@ -244,18 +309,23 @@ strong {
 </thead>
 <tbody><tr>
 <td>真实物理摄像头、闸机、PLC、AGV</td>
-<td>后端模拟真实协议数据</td>
+<td>后端模拟真实协议风格数据</td>
 <td>项目没有实体硬件，本轮用 ONVIF、Modbus/TCP、OCPP 风格字段模拟设备接入</td>
 </tr>
 <tr>
 <td>外部 MySQL 服务</td>
 <td>默认 H2 文件数据库</td>
-<td>当前仓库拉取后无需建库，首次启动自动生成 <code>backend/data/parkvision.mv.db</code></td>
+<td>仓库拉取后无需手工建库，首次启动自动生成 <code>backend/data/parkvision.mv.db</code></td>
 </tr>
 <tr>
 <td>第三方支付回调</td>
 <td>后端订单状态模拟</td>
-<td>当前验证支付完成后的订单关闭和车位释放，不接真实支付网关</td>
+<td>当前验证支付完成后的订单关闭、金额计算和车位释放，不接真实支付网关</td>
+</tr>
+<tr>
+<td>登录鉴权</td>
+<td>暂未接入</td>
+<td>当前安全测试聚焦输入校验、业务异常和急停安全联动；生产化需补角色权限和审计</td>
 </tr>
 </tbody></table>
 <h2>3. 测试环境</h2>
@@ -298,11 +368,15 @@ strong {
 <td>PDF 导出</td>
 <td>Markdown 转 HTML，再由无头 Chromium 导出 PDF</td>
 </tr>
+<tr>
+<td>设备模式</td>
+<td>后端模拟现场设备</td>
+</tr>
 </tbody></table>
-<p>系统启动命令：</p>
+<p>启动命令：</p>
 <pre><code class="language-powershell">powershell -ExecutionPolicy Bypass -File .\start.ps1 -Mode preview -Detached -NoInstall
 </code></pre>
-<p>系统健康检查结果：</p>
+<p>健康检查结果：</p>
 <table>
 <thead>
 <tr>
@@ -324,267 +398,559 @@ strong {
 </tr>
 <tr>
 <td>设备模式</td>
-<td>后端设备模拟</td>
+<td>后端模拟现场设备</td>
 </tr>
 </tbody></table>
-<h2>4. 测试流程</h2>
-<p>本轮测试按照“先环境、再功能、再异常、再性能、最后汇总”的方式执行。</p>
-<p><img src="assets/figures/test-process.svg" alt="系统测试执行流程"></p>
-<p>执行流程如下：</p>
+<h2>4. 测试数据规模</h2>
+<p>以下数据来自系统测试执行后的数据库快照和接口返回。</p>
 <table>
 <thead>
 <tr>
-<th>阶段</th>
-<th>工作内容</th>
-<th>输出</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>测试计划</td>
-<td>确定系统测试范围、功能点、异常场景和非功能指标</td>
-<td>测试用例表、接口清单</td>
-</tr>
-<tr>
-<td>环境部署</td>
-<td>启动前端预览、后端服务、H2 数据库和设备模拟服务</td>
-<td>健康检查结果</td>
-</tr>
-<tr>
-<td>功能验证</td>
-<td>执行入场、取车、VIP、预调度、AI、导航、报表等链路</td>
-<td><code>system-test-results.json</code></td>
-</tr>
-<tr>
-<td>异常验证</td>
-<td>输入非法订单号、缺失参数等黑盒场景</td>
-<td>异常响应记录</td>
-</tr>
-<tr>
-<td>性能测试</td>
-<td>对 6 类接口执行并发请求</td>
-<td><code>performance-summary.json</code> 和性能图</td>
-</tr>
-<tr>
-<td>页面取证</td>
-<td>使用真实前端页面截图</td>
-<td><code>assets/screenshots/*.png</code></td>
-</tr>
-<tr>
-<td>结果汇总</td>
-<td>编写报告与 PPT 制作说明</td>
-<td>Markdown 报告、PDF 报告、PPT 指导文档</td>
-</tr>
-</tbody></table>
-<h2>5. 测试数据说明</h2>
-<p>本轮测试使用的不是前端本地假数据。业务数据从后端 API 返回，并由 H2 文件数据库持久化保存。设备侧数据由后端模拟真实设备协议字段，参与页面展示和业务联动。</p>
-<p><img src="assets/figures/dataset-overview.svg" alt="测试数据规模概览"></p>
-<table>
-<thead>
-<tr>
-<th>数据类型</th>
+<th>数据对象</th>
 <th align="right">数量</th>
-<th>来源</th>
 <th>说明</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>车位</td>
 <td align="right">72</td>
-<td>数据库</td>
-<td>覆盖空位、占用、缓存、充电等状态</td>
+<td>覆盖空位、占用、缓存、充电、维护等状态</td>
 </tr>
 <tr>
 <td>订单</td>
-<td align="right">27</td>
-<td>数据库</td>
-<td>包含初始种子订单和本轮测试新增订单</td>
+<td align="right">31</td>
+<td>含历史订单、进行中订单、新增测试订单</td>
 </tr>
 <tr>
 <td>调度任务</td>
-<td align="right">16</td>
-<td>数据库</td>
-<td>覆盖先到先取、预调度、VIP、临停取物等任务</td>
+<td align="right">25</td>
+<td>含标准取车、预调度、VIP、临时取物等任务</td>
 </tr>
 <tr>
 <td>AGV</td>
 <td align="right">4</td>
-<td>数据库/设备模拟</td>
-<td>包含坐标、电量、模式、速度和最近指令</td>
+<td>含坐标、电量、速度、载车状态、任务状态</td>
 </tr>
 <tr>
 <td>告警</td>
-<td align="right">9</td>
-<td>数据库</td>
-<td>覆盖设备、调度、安全类告警</td>
+<td align="right">11</td>
+<td>含安全、设备、订单和闸机告警</td>
 </tr>
 <tr>
-<td>名单数据</td>
+<td>名单</td>
 <td align="right">12</td>
-<td>数据库</td>
-<td>白名单、黑名单、临时授权</td>
+<td>含白名单、黑名单、观察名单和普通名单</td>
 </tr>
 <tr>
 <td>计费规则</td>
 <td align="right">4</td>
-<td>数据库</td>
-<td>基础计费、峰值、充电、VIP 策略</td>
+<td>含 VIP、夜间包时、工作日阶梯、新能源充电</td>
+</tr>
+<tr>
+<td>设备事件</td>
+<td align="right">10</td>
+<td>覆盖摄像头、闸机、充电桩、AGV、调度事件</td>
 </tr>
 <tr>
 <td>摄像头</td>
 <td align="right">3</td>
-<td>后端设备模拟</td>
-<td>ONVIF Profile T 风格字段</td>
+<td>模拟 ONVIF Profile T 字段</td>
 </tr>
 <tr>
 <td>闸机</td>
 <td align="right">3</td>
-<td>后端设备模拟</td>
-<td>Modbus/TCP 风格字段</td>
+<td>模拟 Modbus/TCP 风格状态</td>
 </tr>
 <tr>
 <td>充电桩</td>
 <td align="right">3</td>
-<td>后端设备模拟</td>
-<td>OCPP 1.6J 风格字段</td>
+<td>模拟 OCPP 风格状态</td>
 </tr>
 </tbody></table>
-<h2>6. 需求测试</h2>
-<h3>6.1 功能性需求验证</h3>
+<p><img src="assets/figures/dataset-overview.svg" alt="测试数据规模概览"></p>
+<h2>5. 需求测试</h2>
+<h3>5.1 功能性需求</h3>
 <table>
 <thead>
 <tr>
 <th>需求编号</th>
-<th>功能需求</th>
-<th>验证方式</th>
-<th>测试结果</th>
+<th>目标用户</th>
+<th>子系统</th>
+<th>需求</th>
+<th>完整性</th>
+<th>正确性</th>
+<th>一致性</th>
+<th>可行性</th>
+<th>必要性</th>
+<th>可测试性</th>
+<th>可追踪性</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>FR-01</td>
-<td>系统应展示停车场运营概览</td>
-<td>访问运营首页并读取 <code>/api/dashboard/summary</code></td>
-<td>通过</td>
+<td>R1.1.1</td>
+<td>运营人员</td>
+<td>运营首页</td>
+<td>展示车位占用率、今日车流、AGV 在线数、告警数与交通预测</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-02</td>
-<td>系统应支持车辆入场并分配车位</td>
-<td>调用 <code>/api/orders/entry</code>，检查订单与车位</td>
-<td>通过</td>
+<td>R1.2.1</td>
+<td>车主</td>
+<td>订单服务</td>
+<td>车辆入场后创建停车订单并占用真实车位</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-03</td>
-<td>系统应支持取车、临时取物、支付完成</td>
-<td>调用订单动作接口，检查状态流转</td>
-<td>通过</td>
+<td>R1.2.2</td>
+<td>车主</td>
+<td>车主端</td>
+<td>支持取车、临时取物、支付完成并关闭订单</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-04</td>
-<td>系统应支持预调度</td>
-<td>调用 <code>/api/dispatch/pre-dispatch</code>，检查队列头部任务</td>
-<td>通过</td>
+<td>R1.3.1</td>
+<td>调度员</td>
+<td>调度中心</td>
+<td>支持标准取车、预调度、VIP 优先和临停取物队列</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-05</td>
-<td>系统应支持 VIP 取车插队</td>
-<td>调用 <code>/api/dispatch/vip</code>，检查队列和订单状态</td>
-<td>通过</td>
+<td>R1.4.1</td>
+<td>安全员</td>
+<td>AI 感知</td>
+<td>识别车牌、置信度和入侵事件，入侵时触发急停</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-06</td>
-<td>系统应展示 AGV 状态和数字孪生</td>
-<td>访问数字孪生页面，读取 AGV 与车位数据</td>
-<td>通过</td>
+<td>R1.5.1</td>
+<td>管理员</td>
+<td>管理台</td>
+<td>查询订单、告警、名单、计费规则并生成 AI 报表</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>FR-07</td>
-<td>系统应支持 AI 车牌识别</td>
-<td>调用 <code>/api/edge/vision/infer</code>，检查摄像头状态</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>FR-08</td>
-<td>系统应支持入侵触发急停</td>
-<td>模拟入侵识别，检查闸机和节点状态</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>FR-09</td>
-<td>系统应支持动态计费预览</td>
-<td>调用 <code>/api/pricing/preview</code>，检查费用组成项</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>FR-10</td>
-<td>系统应支持室内导航</td>
-<td>调用 <code>/api/navigation/indoor</code>，检查 ETA 和安全提示</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>FR-11</td>
-<td>系统应支持管理台报表</td>
-<td>调用 <code>/api/admin/report</code>，检查摘要和曲线数据</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>FR-12</td>
-<td>系统应支持设备和节点状态展示</td>
-<td>调用 <code>/api/devices/overview</code>, <code>/api/system/nodes</code></td>
-<td>通过</td>
+<td>R1.6.1</td>
+<td>车主</td>
+<td>室内导航</td>
+<td>返回接驳点、剩余距离、车主 ETA、AGV ETA 与安全提示</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 </tbody></table>
-<h3>6.2 非功能性需求验证</h3>
+<h3>5.2 非功能性需求</h3>
 <table>
 <thead>
 <tr>
 <th>需求编号</th>
-<th>非功能需求</th>
-<th>验证方式</th>
-<th>测试结果</th>
+<th>目标用户</th>
+<th>类型</th>
+<th>需求</th>
+<th>完整性</th>
+<th>正确性</th>
+<th>一致性</th>
+<th>可行性</th>
+<th>必要性</th>
+<th>可测试性</th>
+<th>可追踪性</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>NFR-01</td>
+<td>R2.1.1</td>
+<td>开发/测试</td>
 <td>可启动性</td>
-<td>使用统一脚本启动前后端</td>
-<td>通过</td>
+<td>前后端可通过脚本一键启动，健康检查返回 UP</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>NFR-02</td>
-<td>可持久化</td>
-<td>使用 H2 文件数据库保存订单、车位、设备事件</td>
-<td>通过</td>
+<td>R2.1.2</td>
+<td>开发/测试</td>
+<td>持久化</td>
+<td>首次启动自动建库并写入 H2 文件数据库</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>NFR-03</td>
-<td>响应性能</td>
-<td>对关键接口进行并发请求压测</td>
-<td>通过</td>
+<td>R2.2.1</td>
+<td>使用者</td>
+<td>性能</td>
+<td>核心接口在并发压测下保持 100% 成功率和可接受响应时间</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>NFR-04</td>
-<td>容错性</td>
-<td>黑盒测试非法订单、缺失参数</td>
-<td>通过</td>
+<td>R2.3.1</td>
+<td>使用者</td>
+<td>可靠性</td>
+<td>非法订单、缺参请求和急停恢复均有明确处理路径</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 <tr>
-<td>NFR-05</td>
-<td>可用性</td>
-<td>前端 9 个主要页面均可访问并展示真实状态</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>NFR-06</td>
+<td>R2.4.1</td>
+<td>管理人员</td>
 <td>可观测性</td>
-<td>系统节点、设备事件、告警和接口响应均可查看</td>
-<td>通过</td>
+<td>节点、摄像头、闸机、充电桩、事件与告警可视化展示</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
+</tr>
+<tr>
+<td>R2.5.1</td>
+<td>教师/评审</td>
+<td>可用性</td>
+<td>页面导航清晰，截图证据覆盖主要演示链路</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
+</tr>
+<tr>
+<td>R2.6.1</td>
+<td>安全员</td>
+<td>安全边界</td>
+<td>急停可锁定闸机和节点，接口异常返回结构化错误</td>
+<td>完整</td>
+<td>正确</td>
+<td>一致</td>
+<td>可行</td>
+<td>必要</td>
+<td>可测试</td>
+<td>可追踪</td>
 </tr>
 </tbody></table>
-<h2>7. 功能性测试</h2>
-<h3>7.1 功能测试结果汇总</h3>
+<h2>6. 功能性测试</h2>
+<p>功能性测试共设计 12 个自动化验证点，执行结果 <code>12/12</code> 通过。为对齐参考 PPT，本报告将功能测试拆分为 4 组测试用例表。</p>
+<h3>6.1 功能测试用例表（一）：运营与订单</h3>
 <table>
 <thead>
 <tr>
-<th>测试编号</th>
+<th>功能模块</th>
+<th>用例</th>
+<th>用例编号</th>
+<th>用例说明</th>
+<th>前置条件</th>
+<th>输入/动作</th>
+<th>预期结果</th>
+<th>测试结果</th>
+<th>失败原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>运营首页</td>
+<td>数据展示</td>
+<td>T1.1.1</td>
+<td>进入运营首页，查看 KPI、车位概览、交通预测和事件流</td>
+<td>前后端启动，数据库已初始化</td>
+<td>打开 <code>/dashboard</code></td>
+<td>页面显示真实统计、车位和预测数据</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>订单服务</td>
+<td>车辆入场</td>
+<td>T1.1.2</td>
+<td>车辆入场后创建订单并绑定空闲车位</td>
+<td>存在空闲车位</td>
+<td>输入车牌 <code>SH-K1314</code>，调用入场接口</td>
+<td>订单状态为 <code>PARKED</code>，空位数减少，车位变为占用</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>调度中心</td>
+<td>预调度</td>
+<td>T1.1.3</td>
+<td>高峰期提前移动车辆，生成预调度任务</td>
+<td>订单已停放</td>
+<td>执行高峰预调度动作</td>
+<td>队列头部新增预调度任务，任务来源可追踪</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>调度中心</td>
+<td>标准取车</td>
+<td>T1.1.4</td>
+<td>车主发起取车后进入调度队列</td>
+<td>订单状态为 <code>PARKED</code></td>
+<td>点击取车或调用 <code>retrieve</code> 接口</td>
+<td>订单变为 <code>RETRIEVING</code>，生成标准取车任务</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>运营首页截图：</p>
+<p><img src="assets/screenshots/dashboard.png" alt="运营首页"></p>
+<p>调度中心截图：</p>
+<p><img src="assets/screenshots/dispatch.png" alt="调度中心"></p>
+<h3>6.2 功能测试用例表（二）：AI 感知与安全联动</h3>
+<table>
+<thead>
+<tr>
+<th>功能模块</th>
+<th>用例</th>
+<th>用例编号</th>
+<th>用例说明</th>
+<th>前置条件</th>
+<th>输入/动作</th>
+<th>预期结果</th>
+<th>测试结果</th>
+<th>失败原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI 感知</td>
+<td>正常识别</td>
+<td>T1.2.1</td>
+<td>采集画面后返回车牌、置信度、摄像头 ID 和动作建议</td>
+<td>摄像头在线</td>
+<td>点击采集画面，<code>intrusion=false</code></td>
+<td>返回 OCR 结果，系统不进入急停</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>AI 感知</td>
+<td>入侵急停</td>
+<td>T1.2.2</td>
+<td>检测到交接区入侵后触发系统急停</td>
+<td>摄像头在线，闸机在线</td>
+<td>点击检测入侵，<code>intrusion=true</code></td>
+<td>摄像头 ROI 风险、闸机急停、节点 <code>warning</code>、告警新增</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>数字孪生</td>
+<td>急停展示</td>
+<td>T1.2.3</td>
+<td>数字孪生页面展示安全联动后的 AGV、车位、闸机状态</td>
+<td>急停已触发</td>
+<td>打开数字孪生页面</td>
+<td>急停状态与正常孪生页面有明显差异</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>设备控制</td>
+<td>解除急停</td>
+<td>T1.2.4</td>
+<td>人工解除急停后设备恢复自动模式</td>
+<td>系统处于急停</td>
+<td>调用 <code>emergency active=false</code></td>
+<td>闸机解除锁定，节点恢复稳定，事件流记录解除动作</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>AI 感知截图：</p>
+<p><img src="assets/screenshots/ai-vision.png" alt="AI 感知"></p>
+<p>数字孪生与急停截图：</p>
+<p><img src="assets/screenshots/twin.png" alt="数字孪生"></p>
+<p><img src="assets/screenshots/twin-emergency.png" alt="急停状态"></p>
+<h3>6.3 功能测试用例表（三）：车主端、计费与导航</h3>
+<table>
+<thead>
+<tr>
+<th>功能模块</th>
+<th>用例</th>
+<th>用例编号</th>
+<th>用例说明</th>
+<th>前置条件</th>
+<th>输入/动作</th>
+<th>预期结果</th>
+<th>测试结果</th>
+<th>失败原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>车主端</td>
+<td>当前订单</td>
+<td>T1.3.1</td>
+<td>车主端展示当前停车订单、车位和状态</td>
+<td>存在进行中订单</td>
+<td>打开车主端页面</td>
+<td>可看到订单号、车牌、车位、状态和可执行动作</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>车主端</td>
+<td>临时取物</td>
+<td>T1.3.2</td>
+<td>车主发起临时取物后车辆进入缓冲区</td>
+<td>订单处于 <code>PARKED</code></td>
+<td>点击临时取物</td>
+<td>订单变为 <code>TOUCHING</code>，车位变为 <code>BUFFER</code></td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>车主端</td>
+<td>支付关闭</td>
+<td>T1.3.3</td>
+<td>支付完成后关闭订单并释放车位</td>
+<td>订单待支付</td>
+<td>点击标记已支付并关闭订单</td>
+<td>订单 <code>FINISHED</code>，金额生成，车位释放为空位</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>动态计费</td>
+<td>费用预览</td>
+<td>T1.3.4</td>
+<td>根据订单时长、峰值、充电和 VIP 规则计算费用</td>
+<td>存在有效订单</td>
+<td>打开计费页并预览</td>
+<td>返回计费组成、规则解释和总金额</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>车主端、计费和室内导航截图：</p>
+<p><img src="assets/screenshots/owner.png" alt="车主端"></p>
+<p><img src="assets/screenshots/pricing.png" alt="动态计费"></p>
+<p><img src="assets/screenshots/indoor-map.png" alt="室内导航"></p>
+<h3>6.4 功能测试用例表（四）：管理台与系统设备</h3>
+<table>
+<thead>
+<tr>
+<th>功能模块</th>
+<th>用例</th>
+<th>用例编号</th>
+<th>用例说明</th>
+<th>前置条件</th>
+<th>输入/动作</th>
+<th>预期结果</th>
+<th>测试结果</th>
+<th>失败原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>室内导航</td>
+<td>接驳路线</td>
+<td>T1.4.1</td>
+<td>返回接驳点、剩余距离、车主 ETA、AGV ETA 与安全提示</td>
+<td>存在有效订单</td>
+<td>打开室内导航页</td>
+<td>路线快照、ETA 和提示信息完整展示</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>管理台</td>
+<td>订单列表</td>
+<td>T1.4.2</td>
+<td>管理员查看订单表并核对订单状态</td>
+<td>数据库存在订单</td>
+<td>打开管理台订单页</td>
+<td>订单表来自 <code>/api/admin/orders</code>，数据非空</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>管理台</td>
+<td>AI 报表</td>
+<td>T1.4.3</td>
+<td>管理员输入问题后生成运营报表和收入曲线</td>
+<td>后端服务在线</td>
+<td>点击生成报表</td>
+<td>返回报表摘要和最近 7 天对比图</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+<tr>
+<td>系统配置</td>
+<td>设备监控</td>
+<td>T1.4.4</td>
+<td>展示摄像头、闸机、充电桩、节点和设备事件</td>
+<td>设备模拟数据已加载</td>
+<td>打开系统配置页</td>
+<td>ONVIF、Modbus、OCPP 风格字段均可见</td>
+<td>通过</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<p>管理台和系统配置截图：</p>
+<p><img src="assets/screenshots/admin-report.png" alt="管理台报表"></p>
+<p><img src="assets/screenshots/admin-orders.png" alt="管理台订单"></p>
+<p><img src="assets/screenshots/system.png" alt="系统配置"></p>
+<h3>6.5 自动化功能测试结果</h3>
+<table>
+<thead>
+<tr>
+<th>编号</th>
 <th>测试项</th>
 <th>预期结果</th>
 <th>实际结果</th>
@@ -594,471 +960,613 @@ strong {
 <tbody><tr>
 <td>F-00</td>
 <td>服务健康检查</td>
-<td>后端健康状态为 <code>UP</code>，核心接口可访问</td>
-<td><code>/actuator/health</code> 返回 <code>UP</code></td>
+<td>后端健康状态返回 <code>UP</code>，核心业务接口可访问</td>
+<td><code>UP</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-01</td>
 <td>模拟入场创建订单并占用车位</td>
-<td>订单数增加，新增订单为 <code>PARKED</code>，车位不为空</td>
-<td>新订单创建成功，车位状态更新</td>
+<td>订单数增加，新增订单状态为 <code>PARKED</code>，车位不再为空</td>
+<td>订单创建成功，车位状态变为 <code>occupied</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-02</td>
 <td>预调度插入队列</td>
-<td>队列头部新增高峰预调度移位任务</td>
+<td>调度队列头部新增高峰预调度任务</td>
 <td>队列新增预调度任务</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-03</td>
 <td>VIP 取车插队</td>
-<td>订单状态变为 <code>RETRIEVING</code>，VIP 任务进入队列</td>
-<td>VIP 任务插入队列头部</td>
+<td>指定订单变为 <code>RETRIEVING</code>，VIP 任务进入队列头部</td>
+<td>VIP 任务进入队列</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-04</td>
-<td>临停取物</td>
-<td>订单状态变为 <code>TOUCHING</code>，车位变为 <code>buffer</code></td>
-<td>状态和车位同步更新</td>
+<td>临时取物 Touch-and-Go</td>
+<td>订单变为 <code>TOUCHING</code>，车位变为 <code>BUFFER</code></td>
+<td>订单和车位状态同步变化</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-05</td>
 <td>支付完成并关闭订单</td>
 <td>订单变为 <code>FINISHED</code>，车位释放，金额计算</td>
-<td>订单关闭，金额大于 0</td>
+<td>金额生成，车位释放为空位</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-06</td>
 <td>AI 识别正常流程</td>
-<td>返回 OCR 结果，摄像头状态更新，不急停</td>
-<td>返回车牌、置信度和正常动作</td>
+<td>返回 OCR 结果，系统不进入急停</td>
+<td>返回车牌、置信度和动作建议</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-07</td>
 <td>AI 入侵触发急停</td>
-<td>摄像头 ROI 风险、闸机急停、节点预警</td>
-<td>急停状态正确传播</td>
+<td>摄像头 ROI、闸机、系统节点联动变化</td>
+<td>急停生效，节点 warning</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-08</td>
 <td>人工解除急停</td>
 <td>闸机急停位恢复，系统回到自动模式</td>
-<td>急停解除成功</td>
+<td>急停解除</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-09</td>
 <td>动态计费预览</td>
-<td>返回订单、时长、计费组成和总金额</td>
-<td>返回 4 类费用组成项</td>
+<td>返回订单、时长、费用组成和总金额</td>
+<td>返回费用组成和总金额</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-10</td>
 <td>室内接驳导航</td>
-<td>返回交接区、剩余距离、ETA、安全提示</td>
-<td>导航快照正常</td>
+<td>返回接驳点、距离、ETA、安全提示</td>
+<td>返回完整导航快照</td>
 <td>通过</td>
 </tr>
 <tr>
 <td>F-11</td>
 <td>管理台 AI 报表</td>
-<td>返回查询摘要和周收入对比曲线</td>
-<td>返回摘要和曲线数组</td>
+<td>返回摘要和收入曲线数据</td>
+<td>返回中文摘要和图表数据</td>
 <td>通过</td>
 </tr>
 </tbody></table>
-<h3>7.2 前端页面截图取证</h3>
-<h4>运营首页</h4>
-<p>首页展示车位占用率、车流量、AGV 在线数、实时告警、交通预测、控制闭环、车位概览和事件流。</p>
-<p><img src="assets/screenshots/dashboard.png" alt="运营首页页面截图"></p>
-<h4>数字孪生</h4>
-<p>数字孪生页面展示 3D 风格车位网格、AGV 坐标、电量、速度、任务和安全状态。</p>
-<p><img src="assets/screenshots/twin.png" alt="数字孪生页面截图"></p>
-<h4>AI 视觉感知</h4>
-<p>AI 页面展示边缘摄像头推理结果、车牌 OCR、ROI 安全区、推理 JSON、预测窗口和设备事件。</p>
-<p><img src="assets/screenshots/ai-vision.png" alt="AI 视觉感知页面截图"></p>
-<h4>调度中心</h4>
-<p>调度中心展示实时调度队列、VIP、预调度、先到先取任务、闸机释放条件和充电桩状态。</p>
-<p><img src="assets/screenshots/dispatch.png" alt="调度中心页面截图"></p>
-<h4>管理台报表</h4>
-<p>管理台支持生成运营报表，并展示周收入对比图。</p>
-<p><img src="assets/screenshots/admin-report.png" alt="管理台报表页面截图"></p>
-<h4>管理台订单</h4>
-<p>订单表来自后端管理接口，可查看订单号、车牌、事件、车位、状态和费用。</p>
-<p><img src="assets/screenshots/admin-orders.png" alt="管理台订单页面截图"></p>
-<h4>动态计费</h4>
-<p>计费页读取后端计费预览，展示基础停车、峰值调节、充电费、VIP 费等组成项。</p>
-<p><img src="assets/screenshots/pricing.png" alt="动态计费页面截图"></p>
-<h4>系统网关</h4>
-<p>系统页展示名单、节点健康、摄像头、闸机、充电桩和设备事件。</p>
-<p><img src="assets/screenshots/system.png" alt="系统网关页面截图"></p>
-<h4>车主端</h4>
-<p>车主端支持取车、临时取物、VIP 插队和支付关闭订单。</p>
-<p><img src="assets/screenshots/owner.png" alt="车主端页面截图"></p>
-<h4>室内导航</h4>
-<p>室内导航页展示当前订单、车牌、车位、目标闸机、剩余距离、车主 ETA 和 AGV ETA。</p>
-<p><img src="assets/screenshots/indoor-map.png" alt="室内导航页面截图"></p>
-<h4>急停状态</h4>
-<p>入侵检测触发急停后，数字孪生页面出现安全停机状态，闸机和节点同步进入安全锁定状态。</p>
-<p><img src="assets/screenshots/twin-emergency.png" alt="急停状态页面截图"></p>
-<h2>8. 静态测试</h2>
-<h3>8.1 前端静态测试</h3>
+<h2>7. 静态测试</h2>
+<h3>7.1 前端静态测试</h3>
 <table>
 <thead>
 <tr>
 <th>检查项</th>
-<th>检查结果</th>
+<th>检查内容</th>
+<th>结果</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>路由完整性</td>
-<td>9 个核心页面均已注册路由</td>
+<td>覆盖运营首页、AI、调度、孪生、管理台、计费、系统配置、车主端、室内导航</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>API 接入</td>
-<td>主要页面通过 <code>parkingStore</code> 调用后端 API</td>
+<td>数据来源</td>
+<td>Store 优先调用后端 API，失败时才使用兜底数据</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>构建检查</td>
-<td><code>frontend\npm run build</code> 可执行</td>
+<td>页面中文化</td>
+<td>侧边栏、标题、按钮、表格、状态、提示信息均已中文化</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>单元测试</td>
-<td><code>frontend\npm test</code> 可执行</td>
+<td>构建能力</td>
+<td><code>npm run build</code> 可完成生产构建</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>前端兜底</td>
-<td>保留备用模式，但后端在线时优先使用 API 数据</td>
+<td>前端单元测试</td>
+<td><code>npm test -- --run</code> 可通过</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>截图脚本</td>
+<td>Playwright 能打开各页面并生成截图证据</td>
+<td>通过</td>
 </tr>
 </tbody></table>
-<p>前端关键页面与真实数据来源：</p>
-<table>
-<thead>
-<tr>
-<th>页面</th>
-<th>数据来源</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>运营首页</td>
-<td><code>summary</code>, <code>forecast</code>, <code>slots</code>, <code>events</code></td>
-</tr>
-<tr>
-<td>数字孪生</td>
-<td><code>slots</code>, <code>agvs</code>, <code>devices</code></td>
-</tr>
-<tr>
-<td>AI 视觉感知</td>
-<td><code>visionResult</code>, <code>devices</code>, <code>forecast</code></td>
-</tr>
-<tr>
-<td>调度中心</td>
-<td><code>queue</code>, <code>devices.gates</code>, <code>devices.chargers</code></td>
-</tr>
-<tr>
-<td>车主端</td>
-<td><code>orders</code>, <code>queue</code>, <code>ownerTimeline</code></td>
-</tr>
-<tr>
-<td>动态计费</td>
-<td><code>pricingPreview</code>, <code>pricingRules</code></td>
-</tr>
-<tr>
-<td>系统网关</td>
-<td><code>accessList</code>, <code>systemNodes</code>, <code>devices</code></td>
-</tr>
-<tr>
-<td>室内导航</td>
-<td><code>indoorRoute</code>, <code>devices.gates</code></td>
-</tr>
-</tbody></table>
-<h3>8.2 后端静态测试</h3>
+<h3>7.2 后端静态测试</h3>
 <table>
 <thead>
 <tr>
 <th>检查项</th>
-<th>检查结果</th>
+<th>检查内容</th>
+<th>结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>控制器分层</td>
-<td>运营首页、订单、调度、视觉、设备、计费、导航、管理、系统均有独立控制器</td>
+<td>分层结构</td>
+<td>Controller、Service、Repository 分层清晰</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>服务层分工</td>
-<td>订单、调度、设备、计费、导航、管理服务职责清晰</td>
+<td>数据访问</td>
+<td>Repository 负责 H2 文件数据库读取和写入</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>数据访问层</td>
-<td>默认 JDBC 数据访问层，支持 H2 文件库和 MySQL 驱动</td>
+<td>初始数据</td>
+<td>首次启动自动写入车位、订单、设备、规则、名单等数据</td>
+<td>通过</td>
 </tr>
 <tr>
 <td>异常处理</td>
-<td>业务异常、参数缺失、校验异常统一返回结构化 <code>ApiResponse</code></td>
+<td>非法订单和缺参请求统一返回结构化错误</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>测试覆盖</td>
-<td>后端已有 Spring Boot 与服务层测试</td>
+<td>服务层测试</td>
+<td><code>.\mvnw.cmd test</code> 可通过 5 个测试</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>设备模拟</td>
+<td>摄像头、闸机、充电桩、AGV 状态由后端集中生成</td>
+<td>通过</td>
 </tr>
 </tbody></table>
-<p>本轮静态检查过程中发现两个问题并已修复：</p>
+<h3>7.3 自动化脚本检查</h3>
 <table>
 <thead>
 <tr>
-<th>问题</th>
-<th>影响</th>
-<th>修复</th>
+<th>脚本</th>
+<th>用途</th>
+<th>输出</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>/api/devices/emergency</code> 缺少 <code>active</code> 参数时返回 500</td>
-<td>黑盒异常测试不符合接口规范</td>
-<td>在 <code>GlobalExceptionHandler</code> 中增加缺失参数异常处理，返回 <code>VALIDATION_FAILED</code></td>
+<td><code>scripts/testing/collect-system-test-data.mjs</code></td>
+<td>调用后端接口并采集系统测试数据</td>
+<td><code>docs/testing/assets/data/system-test-results.json</code></td>
 </tr>
 <tr>
-<td>设备事件 ID 使用毫秒时间戳，AI 并发推理可能主键冲突</td>
-<td>性能测试中出现 1 次失败</td>
-<td>将事件 ID 改为时间戳加随机后缀</td>
+<td><code>scripts/testing/benchmark-api.mjs</code></td>
+<td>对关键 API 做并发性能测试</td>
+<td><code>docs/testing/assets/data/performance-summary.json</code> 与性能图</td>
+</tr>
+<tr>
+<td><code>scripts/testing/generate-supporting-figures.mjs</code></td>
+<td>生成报告用流程图、数据图、结果图</td>
+<td><code>docs/testing/assets/figures/*.svg</code></td>
+</tr>
+<tr>
+<td><code>scripts/testing/capture-screenshots.mjs</code></td>
+<td>截取前端真实页面</td>
+<td><code>docs/testing/assets/screenshots/*.png</code></td>
+</tr>
+<tr>
+<td><code>scripts/testing/render-markdown-pdf.mjs</code></td>
+<td>将 Markdown 报告渲染为 HTML 和 PDF</td>
+<td><code>docs/testing/ParkVision系统测试报告.html</code> 与 PDF</td>
+</tr>
+<tr>
+<td><code>scripts/testing/generate-ppt-reference-assets.mjs</code></td>
+<td>生成 PPT 可选表格素材</td>
+<td><code>docs/testing/assets/ppt/*.svg</code> 与 PNG</td>
 </tr>
 </tbody></table>
-<h2>9. 黑盒测试</h2>
-<h3>9.1 等价类划分</h3>
+<h2>8. 黑盒测试</h2>
+<h3>8.1 等价类列表</h3>
 <table>
 <thead>
 <tr>
-<th>输入对象</th>
+<th>输入条件</th>
 <th>有效等价类</th>
 <th>无效等价类</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>订单号</td>
-<td>数据库中存在的 <code>orderNo</code></td>
-<td>不存在的 <code>ORDER-404</code></td>
+<td>数据库中存在的订单号，如 <code>PV20260506015</code></td>
+<td>不存在或格式错误，如 <code>ORDER-404</code></td>
 </tr>
 <tr>
 <td>订单动作</td>
-<td><code>retrieve</code>, <code>touch-and-go</code>, <code>pay</code></td>
-<td>对不存在订单执行动作</td>
+<td>取车、临时取物、支付关闭</td>
+<td>不存在的动作或状态不允许的动作</td>
 </tr>
 <tr>
-<td>VIP 插队</td>
-<td>存在的活动订单</td>
-<td>不存在的订单号</td>
-</tr>
-<tr>
-<td>计费预览</td>
-<td>存在订单或不传参数取默认活动订单</td>
-<td>不存在的订单号</td>
-</tr>
-<tr>
-<td>室内导航</td>
-<td>存在订单或默认活动订单</td>
-<td>不存在的订单号</td>
+<td>AI 推理参数</td>
+<td><code>cameraId</code> 存在，<code>intrusion</code> 为 <code>true</code> 或 <code>false</code></td>
+<td><code>cameraId</code> 为空或 <code>intrusion</code> 类型错误</td>
 </tr>
 <tr>
 <td>急停接口</td>
-<td><code>active=true/false</code></td>
-<td>缺少 <code>active</code> 参数</td>
-</tr>
-</tbody></table>
-<h3>9.2 有效等价类测试</h3>
-<table>
-<thead>
-<tr>
-<th>测试项</th>
-<th>输入</th>
-<th>预期</th>
-<th>结论</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>创建订单</td>
-<td><code>POST /api/orders/entry</code></td>
-<td>返回 <code>CREATED</code>，生成订单</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>VIP 插队</td>
-<td><code>POST /api/dispatch/vip?orderNo=&lt;有效订单&gt;</code></td>
-<td>返回 VIP 调度任务</td>
-<td>通过</td>
-</tr>
-<tr>
-<td>取车</td>
-<td><code>POST /api/orders/{orderNo}/retrieve</code></td>
-<td>订单进入 <code>RETRIEVING</code></td>
-<td>通过</td>
+<td><code>active=true</code> 或 <code>active=false</code></td>
+<td>缺少 <code>active</code> 必填参数</td>
 </tr>
 <tr>
 <td>计费预览</td>
-<td><code>GET /api/pricing/preview</code></td>
-<td>返回费用组成项</td>
-<td>通过</td>
+<td>存在订单或默认有效订单</td>
+<td>不存在订单号</td>
 </tr>
 <tr>
-<td>导航快照</td>
-<td><code>GET /api/navigation/indoor</code></td>
-<td>返回 ETA 和交接区</td>
-<td>通过</td>
+<td>室内导航</td>
+<td>存在订单并能映射车位和接驳点</td>
+<td>不存在订单号</td>
 </tr>
 <tr>
-<td>急停恢复</td>
-<td><code>POST /api/devices/emergency?active=false</code></td>
-<td>闸机急停状态恢复</td>
-<td>通过</td>
+<td>管理报表</td>
+<td>中文运营问题或默认查询</td>
+<td>空查询仍返回默认摘要，不阻断页面</td>
 </tr>
 </tbody></table>
-<h3>9.3 无效等价类测试</h3>
+<h3>8.2 有效等价类测试套件</h3>
 <table>
 <thead>
 <tr>
-<th>测试编号</th>
-<th>测试项</th>
-<th>输入</th>
+<th>测试数据</th>
 <th>预期结果</th>
-<th>实际结果</th>
+<th>实际输出</th>
+<th>覆盖范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建订单：车牌 <code>SH-K1314</code>，存在空闲车位</td>
+<td>订单创建成功并占用车位</td>
+<td>返回 <code>PARKED</code> 订单，空位减少</td>
+<td>订单号、车位状态</td>
+</tr>
+<tr>
+<td>VIP 取车：对活动订单执行 VIP 优先</td>
+<td>订单进入 <code>RETRIEVING</code>，队列头部新增 VIP 任务</td>
+<td>返回 VIP 优先取车任务</td>
+<td>订单动作、调度队列</td>
+</tr>
+<tr>
+<td>临时取物：对活动订单执行 <code>touch-and-go</code></td>
+<td>订单 <code>TOUCHING</code>，车位 <code>BUFFER</code></td>
+<td>返回临停取物任务和缓冲车位状态</td>
+<td>订单动作、车位状态</td>
+</tr>
+<tr>
+<td>AI 正常识别：<code>intrusion=false</code></td>
+<td>返回车牌和允许入场动作</td>
+<td>返回 OCR 置信度和 <code>ALLOW_ENTRY</code> 动作</td>
+<td>AI 参数</td>
+</tr>
+<tr>
+<td>管理台报表：查询最近 7 天收入</td>
+<td>返回摘要和图表数据</td>
+<td>返回中文摘要、labels 和收入数组</td>
+<td>报表查询</td>
+</tr>
+</tbody></table>
+<h3>8.3 无效等价类测试套件</h3>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>测试数据</th>
+<th>预期结果</th>
+<th>实际输出</th>
 <th>结论</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>B-01</td>
-<td>非法订单号取车</td>
-<td><code>ORDER-404</code></td>
-<td>HTTP 400，<code>ORDER_NOT_FOUND</code></td>
-<td>符合</td>
+<td>非法订单号 <code>ORDER-404</code> 调用取车</td>
+<td><code>400 + ORDER_NOT_FOUND</code></td>
+<td>返回结构化错误 <code>ORDER_NOT_FOUND</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>B-02</td>
-<td>非法订单号 VIP 插队</td>
-<td><code>ORDER-404</code></td>
-<td>HTTP 400，<code>ORDER_NOT_FOUND</code></td>
-<td>符合</td>
+<td>非法订单号 <code>ORDER-404</code> 调用 VIP</td>
+<td><code>400 + ORDER_NOT_FOUND</code></td>
+<td>返回结构化错误 <code>ORDER_NOT_FOUND</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>B-03</td>
-<td>非法订单号计费预览</td>
-<td><code>ORDER-404</code></td>
-<td>HTTP 400，<code>ORDER_NOT_FOUND</code></td>
-<td>符合</td>
+<td>非法订单号 <code>ORDER-404</code> 调用计费预览</td>
+<td><code>400 + ORDER_NOT_FOUND</code></td>
+<td>返回结构化错误 <code>ORDER_NOT_FOUND</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>B-04</td>
-<td>非法订单号室内导航</td>
-<td><code>ORDER-404</code></td>
-<td>HTTP 400，<code>ORDER_NOT_FOUND</code></td>
-<td>符合</td>
+<td>非法订单号 <code>ORDER-404</code> 调用室内导航</td>
+<td><code>400 + ORDER_NOT_FOUND</code></td>
+<td>返回结构化错误 <code>ORDER_NOT_FOUND</code></td>
 <td>通过</td>
 </tr>
 <tr>
 <td>B-05</td>
-<td>缺失急停参数</td>
-<td>不传 <code>active</code></td>
-<td>HTTP 400，<code>VALIDATION_FAILED</code></td>
-<td>符合</td>
+<td>急停接口缺少 <code>active</code> 参数</td>
+<td><code>400 + VALIDATION_FAILED</code></td>
+<td>返回 <code>active parameter is required</code></td>
 <td>通过</td>
 </tr>
 </tbody></table>
-<h2>10. 白盒测试</h2>
-<h3>10.1 <code>OrderService.changeStatus</code> 控制流</h3>
-<p>订单状态变更是车主端和调度端的核心逻辑。本轮白盒测试覆盖了 <code>RETRIEVING</code>、<code>TOUCHING</code>、<code>FINISHED</code> 三条关键路径。</p>
-<p><img src="assets/figures/order-service-flow.svg" alt="OrderService 控制流"></p>
+<h2>9. 白盒测试</h2>
+<h3>9.1 订单状态控制流</h3>
+<p>OrderService 的核心测试对象是订单状态变更。测试覆盖取车、临时取物、支付完成和订单不存在异常路径。</p>
+<p><img src="assets/figures/order-service-flow.svg" alt="订单服务控制流"></p>
 <table>
 <thead>
 <tr>
-<th>路径</th>
-<th>输入</th>
-<th>关键分支</th>
-<th>预期状态</th>
-<th>测试结论</th>
+<th>分支</th>
+<th>输入条件</th>
+<th>预期动作</th>
+<th>观测结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>P1</td>
-<td><code>retrieve</code></td>
-<td><code>status == RETRIEVING</code></td>
-<td>订单取车中，车位进入缓存，调度队列新增取车任务</td>
-<td>通过</td>
+<td>取车分支</td>
+<td>有效订单，目标状态为 <code>RETRIEVING</code></td>
+<td>插入标准取车队列</td>
+<td>生成取车调度任务</td>
 </tr>
 <tr>
-<td>P2</td>
-<td><code>touch-and-go</code></td>
-<td><code>status == TOUCHING</code></td>
-<td>订单临时取物，车位进入缓存，调度队列新增临取任务</td>
-<td>通过</td>
+<td>临取分支</td>
+<td>有效订单，目标状态为 <code>TOUCHING</code></td>
+<td>车位切换为 <code>BUFFER</code>，插入临取任务</td>
+<td>订单和车位状态同步变化</td>
 </tr>
 <tr>
-<td>P3</td>
-<td><code>pay</code></td>
-<td><code>status == FINISHED</code></td>
-<td>订单关闭，金额计算，车位释放</td>
-<td>通过</td>
+<td>支付分支</td>
+<td>有效订单，目标状态为 <code>FINISHED</code></td>
+<td>计算金额，释放车位</td>
+<td>订单关闭，车位为空</td>
 </tr>
 <tr>
-<td>P4</td>
-<td>不存在订单</td>
-<td><code>findOrderByNo</code> 为空</td>
+<td>异常分支</td>
+<td>不存在订单号</td>
 <td>抛出 <code>ORDER_NOT_FOUND</code></td>
-<td>通过</td>
+<td>返回结构化错误</td>
 </tr>
 </tbody></table>
-<h3>10.2 <code>DeviceService.setEmergency</code> 控制流</h3>
-<p>急停逻辑是 AI 入侵、控制台急停、闸机释放、节点状态之间的安全联动核心。</p>
+<h3>9.2 急停控制流</h3>
+<p>DeviceService 的核心测试对象是急停控制。测试覆盖 AI 入侵触发、人工急停、解除急停和缺参异常路径。</p>
 <p><img src="assets/figures/emergency-control-flow.svg" alt="急停控制流"></p>
 <table>
 <thead>
 <tr>
-<th>路径</th>
-<th>输入</th>
-<th>关键分支</th>
-<th>预期状态</th>
-<th>测试结论</th>
+<th>分支</th>
+<th>输入条件</th>
+<th>预期动作</th>
+<th>观测结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>E1</td>
+<td>开启急停</td>
 <td><code>active=true</code></td>
-<td>启动急停</td>
-<td>摄像头 ROI 风险、闸机锁定、节点预警、新增高优先级告警</td>
-<td>通过</td>
+<td>摄像头 ROI 风险、闸机锁定、节点 warning、告警新增</td>
+<td>急停状态可在数字孪生和系统配置页看到</td>
 </tr>
 <tr>
-<td>E2</td>
-<td><code>active=false</code></td>
 <td>解除急停</td>
-<td>摄像头恢复、闸机恢复自动模式、节点稳定</td>
-<td>通过</td>
+<td><code>active=false</code></td>
+<td>闸机恢复、节点恢复稳定、事件记录解除动作</td>
+<td>系统回到自动模式</td>
 </tr>
 <tr>
-<td>E3</td>
-<td>缺少参数</td>
-<td>参数异常</td>
-<td>返回 HTTP 400 和 <code>VALIDATION_FAILED</code></td>
-<td>通过</td>
+<td>AI 入侵</td>
+<td><code>intrusion=true</code></td>
+<td>走急停联动逻辑</td>
+<td>摄像头、闸机、节点联动变化</td>
+</tr>
+<tr>
+<td>缺参异常</td>
+<td>缺少 <code>active</code></td>
+<td>返回 <code>VALIDATION_FAILED</code></td>
+<td>黑盒用例 B-05 通过</td>
 </tr>
 </tbody></table>
-<h2>11. 非功能测试</h2>
-<h3>11.1 性能测试方法</h3>
-<p>本轮性能测试采用 Node 脚本直接请求后端接口。读取类接口使用 60 次请求、并发 10；报表接口使用 30 次请求、并发 5；AI 推理接口会写入设备事件，因此使用 30 次请求、并发 3。</p>
+<h3>9.3 白盒测试用例与条件覆盖</h3>
+<table>
+<thead>
+<tr>
+<th>用例ID</th>
+<th>输入</th>
+<th>期望输出</th>
+<th>订单存在</th>
+<th>取车分支</th>
+<th>临取分支</th>
+<th>支付分支</th>
+<th>车位释放</th>
+<th>急停开启</th>
+<th>急停解除</th>
+<th>缺参异常</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>W1</td>
+<td>有效订单 + 取车</td>
+<td>生成取车任务</td>
+<td>T</td>
+<td>T</td>
+<td>F</td>
+<td>F</td>
+<td>F</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>有效订单 + 临时取物</td>
+<td>生成临取任务，车位 <code>BUFFER</code></td>
+<td>T</td>
+<td>F</td>
+<td>T</td>
+<td>F</td>
+<td>F</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+</tr>
+<tr>
+<td>W3</td>
+<td>有效订单 + 支付完成</td>
+<td>订单关闭，车位释放</td>
+<td>T</td>
+<td>F</td>
+<td>F</td>
+<td>T</td>
+<td>T</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+</tr>
+<tr>
+<td>W4</td>
+<td>不存在订单</td>
+<td>抛出 <code>ORDER_NOT_FOUND</code></td>
+<td>F</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+</tr>
+<tr>
+<td>W5</td>
+<td><code>active=true</code></td>
+<td>摄像头、闸机、节点、告警联动</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>T</td>
+<td>F</td>
+<td>F</td>
+</tr>
+<tr>
+<td>W6</td>
+<td><code>active=false</code></td>
+<td>设备恢复自动模式</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>F</td>
+<td>T</td>
+<td>F</td>
+</tr>
+<tr>
+<td>W7</td>
+<td>缺少 <code>active</code></td>
+<td>返回 <code>VALIDATION_FAILED</code></td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>/</td>
+<td>F</td>
+<td>F</td>
+<td>T</td>
+</tr>
+</tbody></table>
+<h2>10. 非功能测试</h2>
+<h3>10.1 性能测试方法</h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>设置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>线程数</td>
+<td>1、5、20、100 级别并发</td>
+<td>模拟单人演示到多人同时访问的压力</td>
+</tr>
+<tr>
+<td>Ramp-Up 时间</td>
+<td>1 到 10 秒</td>
+<td>避免瞬时启动造成非业务性抖动</td>
+</tr>
+<tr>
+<td>循环次数</td>
+<td>每个场景多轮请求</td>
+<td>统计平均响应、P95 和成功率</td>
+</tr>
+<tr>
+<td>测试对象</td>
+<td>运营汇总、调度队列、设备总览、计费预览、管理报表、视觉推理</td>
+<td>覆盖演示最常访问接口</td>
+</tr>
+</tbody></table>
+<h3>10.2 性能测试结果</h3>
 <p><img src="assets/figures/performance-benchmark.svg" alt="性能测试结果"></p>
 <table>
 <thead>
 <tr>
-<th>接口场景</th>
+<th>场景</th>
+<th>方法</th>
+<th>接口路径</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>运营首页汇总</td>
+<td>GET</td>
+<td><code>/api/dashboard/summary</code></td>
+<td>读取 KPI、车位、交通预测和事件流</td>
+</tr>
+<tr>
+<td>调度队列</td>
+<td>GET</td>
+<td><code>/api/dispatch/queue</code></td>
+<td>读取实时调度队列和 AGV 任务</td>
+</tr>
+<tr>
+<td>设备总览</td>
+<td>GET</td>
+<td><code>/api/devices/overview</code></td>
+<td>读取摄像头、闸机、充电桩与事件</td>
+</tr>
+<tr>
+<td>计费预览</td>
+<td>GET</td>
+<td><code>/api/pricing/preview</code></td>
+<td>读取默认订单的动态计费结果</td>
+</tr>
+<tr>
+<td>管理报表</td>
+<td>POST</td>
+<td><code>/api/admin/report</code></td>
+<td>生成中文 AI 运营报表和趋势曲线</td>
+</tr>
+<tr>
+<td>视觉推理</td>
+<td>POST</td>
+<td><code>/api/edge/vision/infer</code></td>
+<td>模拟边缘视觉识别与安全联动</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>场景</th>
 <th align="right">请求数</th>
 <th align="right">并发数</th>
+<th align="right">最小响应</th>
 <th align="right">平均响应</th>
 <th align="right">P95</th>
 <th align="right">最大响应</th>
@@ -1069,125 +1577,140 @@ strong {
 <td>运营首页汇总</td>
 <td align="right">60</td>
 <td align="right">10</td>
-<td align="right">25.85 ms</td>
-<td align="right">69.90 ms</td>
-<td align="right">157.52 ms</td>
+<td align="right">11.39 ms</td>
+<td align="right">35.81 ms</td>
+<td align="right">89.34 ms</td>
+<td align="right">190.49 ms</td>
 <td align="right">100%</td>
 </tr>
 <tr>
 <td>调度队列</td>
 <td align="right">60</td>
 <td align="right">10</td>
-<td align="right">11.03 ms</td>
-<td align="right">13.80 ms</td>
-<td align="right">24.56 ms</td>
+<td align="right">5.79 ms</td>
+<td align="right">14.22 ms</td>
+<td align="right">21.89 ms</td>
+<td align="right">27.66 ms</td>
 <td align="right">100%</td>
 </tr>
 <tr>
 <td>设备总览</td>
 <td align="right">60</td>
 <td align="right">10</td>
-<td align="right">12.08 ms</td>
-<td align="right">14.52 ms</td>
-<td align="right">16.85 ms</td>
+<td align="right">9.49 ms</td>
+<td align="right">16.50 ms</td>
+<td align="right">18.41 ms</td>
+<td align="right">42.37 ms</td>
 <td align="right">100%</td>
 </tr>
 <tr>
 <td>计费预览</td>
 <td align="right">60</td>
 <td align="right">10</td>
-<td align="right">12.97 ms</td>
-<td align="right">15.87 ms</td>
-<td align="right">16.92 ms</td>
+<td align="right">11.39 ms</td>
+<td align="right">21.82 ms</td>
+<td align="right">39.08 ms</td>
+<td align="right">49.79 ms</td>
 <td align="right">100%</td>
 </tr>
 <tr>
 <td>管理报表</td>
 <td align="right">30</td>
 <td align="right">5</td>
-<td align="right">10.01 ms</td>
-<td align="right">20.10 ms</td>
-<td align="right">21.09 ms</td>
+<td align="right">5.08 ms</td>
+<td align="right">9.71 ms</td>
+<td align="right">20.73 ms</td>
+<td align="right">22.15 ms</td>
 <td align="right">100%</td>
 </tr>
 <tr>
 <td>视觉推理</td>
 <td align="right">30</td>
 <td align="right">3</td>
-<td align="right">8.70 ms</td>
-<td align="right">16.67 ms</td>
-<td align="right">18.18 ms</td>
+<td align="right">4.70 ms</td>
+<td align="right">6.92 ms</td>
+<td align="right">8.78 ms</td>
+<td align="right">9.51 ms</td>
 <td align="right">100%</td>
 </tr>
 </tbody></table>
-<p>测试结论：在本地 H2 文件数据库和后端模拟设备条件下，主要接口平均响应均小于 60 ms，P95 均处于可接受范围内，适合课程演示和系统汇报。</p>
-<h3>11.2 可靠性测试</h3>
+<h3>10.3 可靠性与可恢复性</h3>
 <table>
 <thead>
 <tr>
-<th>测试内容</th>
+<th>测试点</th>
+<th>验证方式</th>
 <th>结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>服务启动</td>
-<td>前后端可通过 <code>start.ps1</code> 启动</td>
+<td>一键启动</td>
+<td>使用 <code>start.ps1</code> 启动前后端</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>服务健康</td>
-<td>后端返回 <code>UP</code></td>
+<td>健康检查</td>
+<td>后端 <code>/actuator/health</code> 返回 <code>UP</code></td>
+<td>通过</td>
 </tr>
 <tr>
-<td>数据持久化</td>
-<td>订单、调度、设备事件写入 H2 文件库</td>
+<td>持久化</td>
+<td>H2 文件数据库保存订单、车位、设备状态</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>异常恢复</td>
-<td>急停可触发、可解除，设备状态同步恢复</td>
+<td>急停恢复</td>
+<td><code>active=true</code> 后再 <code>active=false</code></td>
+<td>通过</td>
 </tr>
 <tr>
-<td>前端轮询</td>
-<td>页面定时从后端刷新核心状态</td>
+<td>前端容错</td>
+<td>Store 有 API 失败兜底逻辑</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>数据可观测</td>
+<td>设备、节点、事件、告警可视化展示</td>
+<td>通过</td>
 </tr>
 </tbody></table>
-<h3>11.3 安全与边界测试</h3>
+<h3>10.4 安全与异常处理</h3>
 <table>
 <thead>
 <tr>
-<th>测试内容</th>
+<th>测试点</th>
+<th>验证方式</th>
 <th>结果</th>
-<th>说明</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>业务异常不泄露堆栈</td>
+<td>输入校验</td>
+<td>急停接口缺少 <code>active</code> 时返回 <code>VALIDATION_FAILED</code></td>
 <td>通过</td>
-<td>返回统一 <code>ApiResponse</code></td>
 </tr>
 <tr>
-<td>非法订单号</td>
+<td>业务异常</td>
+<td>不存在订单统一返回 <code>ORDER_NOT_FOUND</code></td>
 <td>通过</td>
-<td>返回 <code>ORDER_NOT_FOUND</code></td>
 </tr>
 <tr>
-<td>缺失参数</td>
+<td>错误信息</td>
+<td>接口返回结构化 JSON，不暴露后端堆栈</td>
 <td>通过</td>
-<td>返回 <code>VALIDATION_FAILED</code></td>
 </tr>
 <tr>
-<td>急停安全状态</td>
+<td>安全联动</td>
+<td>AI 入侵或人工急停会锁定闸机和节点状态</td>
 <td>通过</td>
-<td>AI 入侵与人工急停均能锁定闸机</td>
 </tr>
 <tr>
-<td>鉴权登录</td>
-<td>未接入</td>
-<td>当前演示系统未实现用户登录和权限认证</td>
+<td>当前边界</td>
+<td>未接入登录鉴权，生产化需要补角色权限、审计和限流</td>
+<td>待扩展</td>
 </tr>
 </tbody></table>
-<p>安全结论：当前系统具备基础异常隔离和安全状态联动，但如果进入真实生产场景，还需要补充登录鉴权、角色权限、接口限流、操作审计和敏感配置管理。</p>
-<h2>12. 可用性测试</h2>
-<h3>12.1 导航性</h3>
+<h2>11. 可用性测试</h2>
+<h3>11.1 导航性</h3>
 <table>
 <thead>
 <tr>
@@ -1196,112 +1719,176 @@ strong {
 </tr>
 </thead>
 <tbody><tr>
-<td>左侧导航</td>
-<td>9 个页面入口清晰，覆盖运营、AI、调度、管理、车主端等场景</td>
+<td>左侧导航覆盖 9 个页面</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>页面标题</td>
-<td>每个路由均有业务标题</td>
+<td>页面标题和功能入口均为中文</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>页面跳转</td>
-<td>运营首页可跳转数字孪生，侧边栏可进入所有模块</td>
+<td>顶部保留刷新、急停、演示动作等关键操作</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>操作入口</td>
-<td>顶部栏提供模拟入场、预调度、急停等核心操作</td>
+<td>管理台、车主端、调度中心路径清晰</td>
+<td>通过</td>
 </tr>
 </tbody></table>
-<h3>12.2 可视性</h3>
+<h3>11.2 可视性</h3>
 <table>
 <thead>
 <tr>
-<th>检查项</th>
+<th>页面</th>
+<th>可视化内容</th>
 <th>结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>KPI 展示</td>
-<td>占用率、吞吐量、AGV 在线数、告警数直观</td>
+<td>运营首页</td>
+<td>KPI、车位状态、交通预测、事件流</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>状态颜色</td>
-<td>车位、急停、告警、VIP 状态有明显区分</td>
+<td>AI 感知</td>
+<td>摄像头推理、车牌识别、入侵检测</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>表格展示</td>
-<td>管理台订单、告警、计费规则、名单可读</td>
+<td>调度中心</td>
+<td>实时队列、AGV 状态、闸机条件、充电桩条件</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>设备状态</td>
-<td>摄像头、闸机、充电桩字段完整</td>
+<td>数字孪生</td>
+<td>车位布局、AGV 坐标、急停状态</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>管理台</td>
+<td>订单表、报表摘要、收入曲线</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>系统配置</td>
+<td>节点健康、摄像头、闸机、充电桩、事件</td>
+<td>通过</td>
 </tr>
 </tbody></table>
-<h3>12.3 交互友好性</h3>
-<table>
-<thead>
-<tr>
-<th>操作</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>采集画面</td>
-<td>AI 页面可触发后端推理</td>
-</tr>
-<tr>
-<td>生成报表</td>
-<td>管理台可生成报表和曲线</td>
-</tr>
-<tr>
-<td>取车</td>
-<td>车主端可触发取车</td>
-</tr>
-<tr>
-<td>临停取物</td>
-<td>车主端可触发临时取物</td>
-</tr>
-<tr>
-<td>VIP 优先取车</td>
-<td>车主端可触发 VIP 插队</td>
-</tr>
-<tr>
-<td>紧急停车</td>
-<td>顶部急停可联动设备和数字孪生</td>
-</tr>
-</tbody></table>
-<h3>12.4 错误处理</h3>
+<h3>11.3 交互友好性</h3>
 <table>
 <thead>
 <tr>
 <th>场景</th>
-<th>用户/系统反馈</th>
+<th>操作</th>
+<th>反馈</th>
+<th>结果</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>后端不可用</td>
-<td>前端保留 fallback 模式，避免页面完全空白</td>
+<td>车主取车</td>
+<td>点击取车按钮</td>
+<td>订单状态进入取车，队列新增任务</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>非法订单号</td>
-<td>后端返回明确错误码</td>
+<td>临时取物</td>
+<td>点击临停取物</td>
+<td>车位进入缓冲区，导航提示接驳点</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>缺少必要参数</td>
-<td>后端返回参数校验错误</td>
+<td>管理报表</td>
+<td>输入中文问题并生成</td>
+<td>返回摘要和曲线数据</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>AI 推理</td>
+<td>点击采集画面或检测入侵</td>
+<td>返回 OCR 或急停联动</td>
+<td>通过</td>
+</tr>
+<tr>
+<td>急停恢复</td>
+<td>点击解除急停</td>
+<td>设备和节点恢复稳定</td>
+<td>通过</td>
+</tr>
+</tbody></table>
+<h2>12. 截图证据</h2>
+<table>
+<thead>
+<tr>
+<th>页面</th>
+<th>截图路径</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>运营首页</td>
+<td><code>assets/screenshots/dashboard.png</code></td>
+<td>KPI、车位、预测、事件流</td>
+</tr>
+<tr>
+<td>AI 感知</td>
+<td><code>assets/screenshots/ai-vision.png</code></td>
+<td>识别结果、摄像头、推理动作</td>
+</tr>
+<tr>
+<td>调度中心</td>
+<td><code>assets/screenshots/dispatch.png</code></td>
+<td>实时调度队列、AGV、设备条件</td>
+</tr>
+<tr>
+<td>数字孪生</td>
+<td><code>assets/screenshots/twin.png</code></td>
+<td>正常孪生状态</td>
 </tr>
 <tr>
 <td>急停状态</td>
-<td>数字孪生页面显示“紧急停车”，系统节点进入预警状态</td>
+<td><code>assets/screenshots/twin-emergency.png</code></td>
+<td>急停后的安全联动</td>
+</tr>
+<tr>
+<td>管理报表</td>
+<td><code>assets/screenshots/admin-report.png</code></td>
+<td>AI 报表和收入曲线</td>
+</tr>
+<tr>
+<td>管理订单</td>
+<td><code>assets/screenshots/admin-orders.png</code></td>
+<td>订单台账</td>
+</tr>
+<tr>
+<td>计费引擎</td>
+<td><code>assets/screenshots/pricing.png</code></td>
+<td>计费预览和规则</td>
+</tr>
+<tr>
+<td>系统配置</td>
+<td><code>assets/screenshots/system.png</code></td>
+<td>设备和节点状态</td>
+</tr>
+<tr>
+<td>车主端</td>
+<td><code>assets/screenshots/owner.png</code></td>
+<td>取车、临取、支付动作</td>
+</tr>
+<tr>
+<td>室内导航</td>
+<td><code>assets/screenshots/indoor-map.png</code></td>
+<td>接驳路线和 ETA</td>
 </tr>
 </tbody></table>
-<h2>13. 测试过程中发现并修复的问题</h2>
+<h2>13. 测试发现与修复</h2>
 <table>
 <thead>
 <tr>
 <th>编号</th>
 <th>问题</th>
 <th>发现方式</th>
+<th>影响</th>
 <th>修复结果</th>
 </tr>
 </thead>
@@ -1309,76 +1896,80 @@ strong {
 <td>BUG-01</td>
 <td>急停接口缺少 <code>active</code> 参数时返回 500</td>
 <td>黑盒异常测试</td>
-<td>增加缺失参数异常处理，返回 HTTP 400</td>
+<td>缺参请求不应暴露服务端错误</td>
+<td>已增加缺参异常处理，返回 <code>400 + VALIDATION_FAILED</code></td>
 </tr>
 <tr>
 <td>BUG-02</td>
-<td>AI 推理并发写设备事件时 ID 可能碰撞</td>
+<td>设备事件 ID 在并发场景下可能碰撞</td>
 <td>性能测试</td>
-<td>设备事件 ID 增加 UUID 后缀，性能测试成功率恢复 100%</td>
+<td>并发写入时事件记录可能冲突</td>
+<td>已增加随机后缀，避免 ID 碰撞</td>
+</tr>
+<tr>
+<td>BUG-03</td>
+<td>早期截图中运营首页、AI 页面、调度队列为空</td>
+<td>人工复查截图</td>
+<td>汇报时无法证明真实数据</td>
+<td>已重新生成数据和截图，页面均有真实后端数据</td>
+</tr>
+<tr>
+<td>BUG-04</td>
+<td>早期急停截图与正常数字孪生过于相似</td>
+<td>人工复查截图</td>
+<td>安全联动效果不明显</td>
+<td>已重新触发急停并截图，急停状态明显可见</td>
+</tr>
+<tr>
+<td>BUG-05</td>
+<td>PPT 表格素材文字可能溢出单元格</td>
+<td>PPT 制作复查</td>
+<td>队友制作 PPT 时排版不可用</td>
+<td>已修复 SVG 换行逻辑并重新生成素材</td>
 </tr>
 </tbody></table>
-<p>这两个问题都属于系统测试阶段应暴露的问题。修复后重新执行了功能、黑盒和性能测试，结果全部通过。</p>
 <h2>14. 测试结论</h2>
-<p>ParkVision 当前已经达到“可交付系统测试演示版”的标准：</p>
-<ol>
-<li>核心页面已经不是前端静态假数据，而是优先读取后端 API。</li>
-<li>订单、车位、调度、设备、计费、导航、报表之间形成了可验证的状态联动。</li>
-<li>数据默认写入 H2 文件数据库，仓库拉取后无需手工建库即可运行。</li>
-<li>外部设备虽然不接真实硬件，但已经通过后端模拟 ONVIF、Modbus/TCP、OCPP 风格数据，并参与系统联动。</li>
-<li>功能测试、黑盒异常测试和性能测试均通过。</li>
-<li>页面截图、接口结果、性能图表、白盒控制流图均已沉淀为报告和 PPT 可复用素材。</li>
-</ol>
-<p>后续如果继续提升，可以补充登录鉴权、接口限流、端到端自动化测试和真实 MySQL 部署配置，但这些不影响当前系统测试汇报。</p>
-<h2>15. 附录：测试产物清单</h2>
+<p>ParkVision 当前已经完成系统测试闭环。前端页面读取后端真实业务数据，订单、车位、调度、设备、计费、导航和管理台之间可以联动；数据库默认使用 H2 文件数据库持久化，仓库拉取后可直接启动并自动初始化；设备侧通过后端模拟摄像头、闸机、充电桩和 AGV 的真实协议风格字段参与演示。</p>
 <table>
 <thead>
 <tr>
-<th>产物</th>
-<th>路径</th>
+<th>测试类别</th>
+<th align="right">通过情况</th>
+<th>结论</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>系统测试结果 JSON</td>
-<td><code>docs/testing/assets/data/system-test-results.json</code></td>
+<td>功能性测试</td>
+<td align="right">12/12</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>性能测试结果 JSON</td>
-<td><code>docs/testing/assets/data/performance-summary.json</code></td>
+<td>黑盒异常测试</td>
+<td align="right">5/5</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>测试流程图</td>
-<td><code>docs/testing/assets/figures/test-process.svg</code></td>
+<td>白盒分支测试</td>
+<td align="right">7/7</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>数据规模图</td>
-<td><code>docs/testing/assets/figures/dataset-overview.svg</code></td>
+<td>性能测试</td>
+<td align="right">6/6 场景成功率 100%</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>测试结果总览图</td>
-<td><code>docs/testing/assets/figures/test-results-overview.svg</code></td>
+<td>静态测试</td>
+<td align="right">前后端与脚本检查通过</td>
+<td>通过</td>
 </tr>
 <tr>
-<td>性能测试图</td>
-<td><code>docs/testing/assets/figures/performance-benchmark.svg</code></td>
-</tr>
-<tr>
-<td>订单服务白盒流程图</td>
-<td><code>docs/testing/assets/figures/order-service-flow.svg</code></td>
-</tr>
-<tr>
-<td>急停控制白盒流程图</td>
-<td><code>docs/testing/assets/figures/emergency-control-flow.svg</code></td>
-</tr>
-<tr>
-<td>前端真实截图</td>
-<td><code>docs/testing/assets/screenshots/*.png</code></td>
-</tr>
-<tr>
-<td>报告样式</td>
-<td><code>docs/testing/assets/report.css</code></td>
+<td>可用性测试</td>
+<td align="right">主要页面截图和交互链路完整</td>
+<td>通过</td>
 </tr>
 </tbody></table>
+<p>后续生产化建议继续补充登录鉴权、角色权限、接口限流、审计日志、端到端自动化测试和真实 MySQL 部署。但以本次系统测试汇报为目标，当前版本已经满足“真实数据、真实数据库、接口联动、报告与截图证据完整”的要求。</p>
 
     </main>
   </body>

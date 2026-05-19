@@ -7,42 +7,74 @@
     </linearGradient>
   </defs>
   <rect width="1280" height="500" rx="28" fill="url(#bg)" />
-  <text x="40" y="52" font-size="34" font-weight="700" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">OrderService.changeStatus 控制流</text>
-  <text x="40" y="82" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">白盒测试重点覆盖 3 条业务分支：取车、临时取物、支付完成。</text>
+  <text x="40" y="52" font-size="34" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI" font-weight="700">
+      <tspan x="40" dy="0">OrderService.changeStatus 控制流</tspan>
+    </text>
+  <text x="40" y="84" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="40" dy="0">白盒测试重点覆盖 3 条业务分支：取车、临时取物、支付完成。</tspan>
+    </text>
   
         <rect x="80" y="140" width="220" height="92" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="102" y="180" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">接收订单状态变更</text>
-        <text x="102" y="210" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">输入订单号与目标状态</text>
+        <text x="102" y="178" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="102" dy="0">接收订单状态变更</tspan>
+    </text>
+        <text x="102" y="212" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="102" dy="0">输入订单号与目标状态</tspan>
+    </text>
       
 
         <rect x="380" y="140" width="220" height="92" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="402" y="180" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">查找订单</text>
-        <text x="402" y="210" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">未找到则返回订单不存在</text>
+        <text x="402" y="178" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="402" dy="0">查找订单</tspan>
+    </text>
+        <text x="402" y="212" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="402" dy="0">未找到则返回订单不存在</tspan>
+    </text>
       
 
         <rect x="680" y="140" width="220" height="92" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="702" y="180" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">同步车位状态</text>
-        <text x="702" y="210" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">取车/临取时切换为周转区</text>
+        <text x="702" y="178" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="702" dy="0">同步车位状态</tspan>
+    </text>
+        <text x="702" y="212" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="702" dy="0">取车/临取时切换为周转区</tspan>
+    </text>
       
 
         <rect x="980" y="140" width="220" height="92" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="1002" y="180" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">完成订单计算金额</text>
-        <text x="1002" y="210" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">按时长阶梯 + 充电附加费</text>
+        <text x="1002" y="178" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="1002" dy="0">完成订单计算金额</tspan>
+    </text>
+        <text x="1002" y="212" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="1002" dy="0">按时长阶梯 + 充电附加费</tspan>
+    </text>
       
 
         <rect x="220" y="320" width="240" height="96" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="242" y="360" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">取车分支</text>
-        <text x="242" y="390" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">插入标准取车队列</text>
+        <text x="242" y="358" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="242" dy="0">取车分支</tspan>
+    </text>
+        <text x="242" y="392" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="242" dy="0">插入标准取车队列</tspan>
+    </text>
       
 
         <rect x="500" y="320" width="240" height="96" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="522" y="360" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">临时取物分支</text>
-        <text x="522" y="390" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">插入临停取物队列</text>
+        <text x="522" y="358" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="522" dy="0">临时取物分支</tspan>
+    </text>
+        <text x="522" y="392" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="522" dy="0">插入临停取物队列</tspan>
+    </text>
       
 
         <rect x="780" y="320" width="240" height="96" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="802" y="360" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">支付完成分支</text>
-        <text x="802" y="390" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">释放车位并记录出口事件</text>
+        <text x="802" y="358" font-size="21" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="802" dy="0">支付完成分支</tspan>
+    </text>
+        <text x="802" y="392" font-size="15" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="802" dy="0">释放车位并记录出口事件</tspan>
+    </text>
       
     <line x1="300" y1="186" x2="380" y2="186" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" />
     <line x1="600" y1="186" x2="680" y2="186" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" />

@@ -1,106 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">有效等价类测试套件</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 16 页：测试数据、预期结果、实际输出、覆盖范围</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">有效等价类测试套件</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 16 页：测试数据、预期结果、实际输出、覆盖范围</text>
   <rect x="70" y="142" width="1460" height="648" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="70" y="142" width="440" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="82" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试数据</text>
+        <text x="82" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试数据</text>
       
 
         <rect x="510" y="142" width="390" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="522" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
+        <text x="522" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
       
 
         <rect x="900" y="142" width="460" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="912" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">实际输出</text>
+        <text x="912" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">实际输出</text>
       
 
         <rect x="1360" y="142" width="170" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1372" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖范围</text>
+        <text x="1372" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">覆盖范围</text>
       
   
             <rect x="70" y="200" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">创建订单：车牌 SH-K1314，存在空闲车位</text>
+            <text x="82" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">创建订单：车牌 SH-K1314，存在空闲车位</text>
           
 
             <rect x="510" y="200" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单创建成功并占用车位</text>
+            <text x="522" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单创建成功并占用车位</text>
           
 
             <rect x="900" y="200" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="224" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 PARKED 订单，空位减少</text>
+            <text x="912" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 PARKED 订单，空位减少</text>
           
 
             <rect x="1360" y="200" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="224" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1,2</text>
+            <text x="1372" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">1,2</text>
           
 
             <rect x="70" y="318" width="440" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">VIP 取车：对活动订单执行 VIP 优先</text>
+            <text x="82" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">VIP 取车：对活动订单执行 VIP 优先</text>
           
 
             <rect x="510" y="318" width="390" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单进入 RETRIEVING，</text>
-<text x="522" y="369" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">队列头部新增 VIP 任务</text>
+            <text x="522" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单进入 RETRIEVING，队列头部新增 V</text>
+<text x="522" y="366" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">IP 任务</text>
           
 
             <rect x="900" y="318" width="460" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="342" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 VIP 优先取车任务</text>
+            <text x="912" y="342" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 VIP 优先取车任务</text>
           
 
             <rect x="1360" y="318" width="170" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="342" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">3</text>
+            <text x="1372" y="342" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">3</text>
           
 
             <rect x="70" y="436" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">临时取物：对活动订单执行 touch-and-g</text>
-<text x="82" y="487" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">o</text>
+            <text x="82" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">临时取物：对活动订单执行 touch-and-go</text>
           
 
             <rect x="510" y="436" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单 TOUCHING，车位 BUFFER</text>
+            <text x="522" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单 TOUCHING，车位 BUFFER</text>
           
 
             <rect x="900" y="436" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="460" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回临停取物任务和缓冲车位状态</text>
+            <text x="912" y="460" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回临停取物任务和缓冲车位状态</text>
           
 
             <rect x="1360" y="436" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="460" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">4</text>
+            <text x="1372" y="460" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">4</text>
           
 
             <rect x="70" y="554" width="440" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 正常识别：intrusion=false</text>
+            <text x="82" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 正常识别：intrusion=false</text>
           
 
             <rect x="510" y="554" width="390" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回车牌和允许入场动作</text>
+            <text x="522" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回车牌和允许入场动作</text>
           
 
             <rect x="900" y="554" width="460" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="578" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 OCR 置信度和 ALLOW_ENTRY 动</text>
-<text x="912" y="605" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">作</text>
+            <text x="912" y="578" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 OCR 置信度和 ALLOW_ENTRY 动作</text>
           
 
             <rect x="1360" y="554" width="170" height="118" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="578" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">5</text>
+            <text x="1372" y="578" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">5</text>
           
 
             <rect x="70" y="672" width="440" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台报表：查询最近 7 天收入</text>
+            <text x="82" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台报表：查询最近 7 天收入</text>
           
 
             <rect x="510" y="672" width="390" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="522" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回摘要和图表数据</text>
+            <text x="522" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回摘要和图表数据</text>
           
 
             <rect x="900" y="672" width="460" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="696" font-size="20" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回中文摘要、labels 和收入数组</text>
+            <text x="912" y="696" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回中文摘要、labels 和收入数组</text>
           
 
             <rect x="1360" y="672" width="170" height="118" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1372" y="696" font-size="20" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">6,7</text>
+            <text x="1372" y="696" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">6,7</text>
           
 </svg>

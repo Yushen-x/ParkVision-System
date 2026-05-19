@@ -7,27 +7,43 @@
     </linearGradient>
   </defs>
   <rect width="1280" height="420" rx="28" fill="url(#bg)" />
-  <text x="40" y="52" font-size="34" font-weight="700" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">测试结果总览</text>
-  <text x="40" y="82" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">功能、黑盒异常、设备联动与数据持久化均以真实接口结果为依据。</text>
+  <text x="40" y="52" font-size="34" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI" font-weight="700">
+      <tspan x="40" dy="0">测试结果总览</tspan>
+    </text>
+  <text x="40" y="84" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="40" dy="0">功能、黑盒异常、设备联动与数据持久化均以真实接口结果为依据。</tspan>
+    </text>
   
     <rect x="40" y="140" width="360" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="58" y="160" width="8" height="120" rx="4" fill="#38bdf8" />
-    <text x="82" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">功能测试通过</text>
+    <text x="82" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="82" dy="0">功能测试通过</tspan>
+    </text>
     <text x="82" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">12/12</text>
-    <text x="82" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">覆盖入场、预调度、VIP、计费、导航、报表</text>
+    <text x="82" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="82" dy="0">覆盖入场、预调度、VIP、计费、导航、报表</tspan>
+    </text>
   
 
     <rect x="440" y="140" width="360" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="458" y="160" width="8" height="120" rx="4" fill="#f59e0b" />
-    <text x="482" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">黑盒异常通过</text>
+    <text x="482" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="482" dy="0">黑盒异常通过</tspan>
+    </text>
     <text x="482" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">5/5</text>
-    <text x="482" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">覆盖非法订单号、缺参请求与错误路径</text>
+    <text x="482" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="482" dy="0">覆盖非法订单号、缺参请求与错误路径</tspan>
+    </text>
   
 
     <rect x="840" y="140" width="360" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="858" y="160" width="8" height="120" rx="4" fill="#10b981" />
-    <text x="882" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">综合通过率</text>
+    <text x="882" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="882" dy="0">综合通过率</tspan>
+    </text>
     <text x="882" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">17/17</text>
-    <text x="882" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">本轮测试全部通过</text>
+    <text x="882" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="882" dy="0">本轮测试全部通过</tspan>
+    </text>
   
 </svg>

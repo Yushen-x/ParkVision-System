@@ -1,5 +1,6 @@
 @page {
   size: A4;
+  margin: 12mm;
 }
 
 :root {
@@ -84,19 +85,31 @@ table {
   width: 100%;
   margin: 14px 0 20px;
   border-collapse: collapse;
-  font-size: 12px;
-  break-inside: avoid;
+  font-size: 10.8px;
+  table-layout: fixed;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 thead {
   background: #e2e8f0;
+  display: table-header-group;
+}
+
+tfoot {
+  display: table-footer-group;
 }
 
 th,
 td {
-  padding: 8px 10px;
+  padding: 7px 8px;
   border: 1px solid var(--line);
   vertical-align: top;
+}
+
+tr {
+  break-inside: avoid-page;
+  page-break-inside: avoid;
 }
 
 tr:nth-child(even) td {
@@ -124,6 +137,12 @@ code {
   border-radius: 4px;
   font-family: "Cascadia Code", "Consolas", monospace;
   font-size: 12px;
+}
+
+td code,
+th code {
+  padding: 1px 3px;
+  font-size: 9.8px;
 }
 
 pre {

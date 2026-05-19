@@ -1,364 +1,365 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">白盒测试用例与条件覆盖</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 25 页：按分支条件标记 True/False 覆盖情况</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">白盒测试用例与条件覆盖</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 25 页：按分支条件标记 True/False 覆盖情况</text>
   <rect x="138" y="142" width="1325" height="660" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="138" y="142" width="95" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="150" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例ID</text>
+        <text x="150" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例ID</text>
       
 
         <rect x="233" y="142" width="180" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="245" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入</text>
+        <text x="245" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入</text>
       
 
         <rect x="413" y="142" width="210" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="425" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">期望输出</text>
+        <text x="425" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">期望输出</text>
       
 
         <rect x="623" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="635" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单存在</text>
+        <text x="635" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单存在</text>
       
 
         <rect x="728" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="740" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">取车分支</text>
+        <text x="740" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">取车分支</text>
       
 
         <rect x="833" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="845" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">临取分支</text>
+        <text x="845" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">临取分支</text>
       
 
         <rect x="938" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="950" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">支付分支</text>
+        <text x="950" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">支付分支</text>
       
 
         <rect x="1043" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1055" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">车位释放</text>
+        <text x="1055" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">车位释放</text>
       
 
         <rect x="1148" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1160" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停开启</text>
+        <text x="1160" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停开启</text>
       
 
         <rect x="1253" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1265" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停解除</text>
+        <text x="1265" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停解除</text>
       
 
         <rect x="1358" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1370" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺参异常</text>
+        <text x="1370" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺参异常</text>
       
   
             <rect x="138" y="200" width="95" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W1</text>
+            <text x="150" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W1</text>
           
 
             <rect x="233" y="200" width="180" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 取车</text>
+            <text x="245" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 取车</text>
           
 
             <rect x="413" y="200" width="210" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">生成取车任务</text>
+            <text x="425" y="224" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">生成取车任务</text>
           
 
             <rect x="623" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="635" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="728" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="740" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="833" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="845" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="938" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="950" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1043" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1055" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1148" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1160" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1253" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1265" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1358" y="200" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1370" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="138" y="286" width="95" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W2</text>
+            <text x="150" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W2</text>
           
 
             <rect x="233" y="286" width="180" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 临时取物</text>
+            <text x="245" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 临时取</text>
+<text x="245" y="332" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">物</text>
           
 
             <rect x="413" y="286" width="210" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="310" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">生成临取任务，车位 BU</text>
-<text x="425" y="334" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">FFER</text>
+            <text x="425" y="310" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">生成临取任务，车位 BUF</text>
+<text x="425" y="332" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">FER</text>
           
 
             <rect x="623" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="635" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="728" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="740" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="833" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="845" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="938" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="950" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1043" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1055" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1148" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1160" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1253" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1265" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1358" y="286" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="310" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1370" y="310" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="138" y="372" width="95" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W3</text>
+            <text x="150" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W3</text>
           
 
             <rect x="233" y="372" width="180" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 支付完成</text>
+            <text x="245" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效订单 + 支付完</text>
+<text x="245" y="418" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">成</text>
           
 
             <rect x="413" y="372" width="210" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="396" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单关闭，车位释放</text>
+            <text x="425" y="396" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单关闭，车位释放</text>
           
 
             <rect x="623" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="635" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="728" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="740" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="833" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="845" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="938" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="950" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="1043" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="1055" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="1148" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1160" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1253" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1265" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1358" y="372" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="396" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1370" y="396" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="138" y="458" width="95" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W4</text>
+            <text x="150" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W4</text>
           
 
             <rect x="233" y="458" width="180" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单</text>
+            <text x="245" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单</text>
           
 
             <rect x="413" y="458" width="210" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="482" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">抛出 ORDER_NOT</text>
-<text x="425" y="506" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">_FOUND</text>
+            <text x="425" y="482" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">抛出 ORDER_NOT_FOU</text>
+<text x="425" y="504" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ND</text>
           
 
             <rect x="623" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="635" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="728" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="740" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="833" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="845" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="938" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="950" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1043" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1055" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1148" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1160" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1253" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1265" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1358" y="458" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="482" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1370" y="482" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="138" y="544" width="95" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W5</text>
+            <text x="150" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W5</text>
           
 
             <rect x="233" y="544" width="180" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=true</text>
+            <text x="245" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=true</text>
           
 
             <rect x="413" y="544" width="210" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="568" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头、闸机、节点、告警</text>
-<text x="425" y="592" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">联动</text>
+            <text x="425" y="568" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">摄像头、闸机、节点、告警</text>
+<text x="425" y="590" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">联动</text>
           
 
             <rect x="623" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="635" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="728" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="740" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="833" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="845" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="938" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="950" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1043" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1055" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1148" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="1160" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="1253" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1265" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1358" y="544" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="568" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1370" y="568" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="138" y="630" width="95" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W6</text>
+            <text x="150" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W6</text>
           
 
             <rect x="233" y="630" width="180" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=fals</text>
-<text x="245" y="678" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">e</text>
+            <text x="245" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=false</text>
           
 
             <rect x="413" y="630" width="210" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="654" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备恢复自动模式</text>
+            <text x="425" y="654" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备恢复自动模式</text>
           
 
             <rect x="623" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="635" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="728" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="740" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="833" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="845" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="938" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="950" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1043" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1055" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1148" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1160" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1253" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="1265" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 
             <rect x="1358" y="630" width="105" height="86" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="654" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1370" y="654" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="138" y="716" width="95" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="150" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W7</text>
+            <text x="150" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">W7</text>
           
 
             <rect x="233" y="716" width="180" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="245" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺少 active</text>
+            <text x="245" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺少 active</text>
           
 
             <rect x="413" y="716" width="210" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="425" y="740" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 VALIDATIO</text>
-<text x="425" y="764" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">N_FAILED</text>
+            <text x="425" y="740" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回 VALIDATION_F</text>
+<text x="425" y="762" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AILED</text>
           
 
             <rect x="623" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="635" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="635" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="728" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="740" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="740" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="833" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="845" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="845" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="938" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="950" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="950" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1043" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1055" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
+            <text x="1055" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">/</text>
           
 
             <rect x="1148" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1160" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1160" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1253" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1265" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
+            <text x="1265" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">F</text>
           
 
             <rect x="1358" y="716" width="105" height="86" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1370" y="740" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
+            <text x="1370" y="740" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T</text>
           
 </svg>

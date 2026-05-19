@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-18T10:42:56.697Z",
-  "finishedAt": "2026-05-18T10:42:57.639Z",
+  "generatedAt": "2026-05-19T14:47:25.250Z",
+  "finishedAt": "2026-05-19T14:47:26.032Z",
   "environment": {
     "baseUrl": "http://localhost:8080",
     "frontendUrl": "http://localhost:5173",
@@ -9,10 +9,10 @@
   },
   "dataset": {
     "slotCount": 72,
-    "orderCount": 27,
-    "queueCount": 16,
+    "orderCount": 31,
+    "queueCount": 25,
     "agvCount": 4,
-    "alertCount": 9,
+    "alertCount": 11,
     "accessListCount": 12,
     "pricingRuleCount": 4,
     "deviceEventCount": 10,
@@ -25,12 +25,12 @@
       "status": "UP"
     },
     "summary": {
-      "occupancyRate": 67,
-      "trafficTotal": 434,
+      "occupancyRate": 71,
+      "trafficTotal": 438,
       "agvOnline": "4/4",
-      "alertCount": 8,
-      "revenue": 646,
-      "avgWait": "03:06",
+      "alertCount": 10,
+      "revenue": 652,
+      "avgWait": "00:30",
       "chargingTurnover": "7.4 / day"
     },
     "forecast": {
@@ -61,9 +61,9 @@
       {
         "id": "A01",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "A02",
@@ -110,9 +110,9 @@
       {
         "id": "A08",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "A09",
@@ -138,9 +138,9 @@
       {
         "id": "A12",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "B01",
@@ -411,9 +411,9 @@
       {
         "id": "E03",
         "layer": "Deep",
-        "status": "occupied",
+        "status": "buffer",
         "available": false,
-        "renderColor": "blue"
+        "renderColor": "amber"
       },
       {
         "id": "E04",
@@ -432,9 +432,9 @@
       {
         "id": "E06",
         "layer": "Deep",
-        "status": "occupied",
+        "status": "buffer",
         "available": false,
-        "renderColor": "blue"
+        "renderColor": "amber"
       },
       {
         "id": "E07",
@@ -564,6 +564,38 @@
       }
     ],
     "orders": [
+      {
+        "orderNo": "PV101087414",
+        "plateNo": "SU-M9021",
+        "slotId": "A12",
+        "entryTime": "2026-05-18T18:44:47.414865",
+        "status": "RETRIEVING",
+        "amount": 0
+      },
+      {
+        "orderNo": "PV100977191",
+        "plateNo": "SH-V7780",
+        "slotId": "A12",
+        "entryTime": "2026-05-18T18:42:57.191801",
+        "status": "FINISHED",
+        "amount": 6
+      },
+      {
+        "orderNo": "PV100977138",
+        "plateNo": "SU-M9021",
+        "slotId": "A08",
+        "entryTime": "2026-05-18T18:42:57.138762",
+        "status": "TOUCHING",
+        "amount": 0
+      },
+      {
+        "orderNo": "PV100977008",
+        "plateNo": "SH-K1314",
+        "slotId": "A01",
+        "entryTime": "2026-05-18T18:42:57.008919",
+        "status": "RETRIEVING",
+        "amount": 0
+      },
       {
         "orderNo": "PV20260506004",
         "plateNo": "SH-K1314",
@@ -759,6 +791,69 @@
     ],
     "queue": [
       {
+        "plateNo": "SU-M9021",
+        "type": "VIP 优先取车",
+        "tag": "VIP",
+        "wait": "00:30",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-A7686",
+        "type": "高峰预调度移位",
+        "tag": "预调度",
+        "wait": "00:48",
+        "vip": true
+      },
+      {
+        "plateNo": "SU-M9021",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SH-V7780",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SU-M9021",
+        "type": "临停取物",
+        "tag": "临取",
+        "wait": "02:10",
+        "vip": false
+      },
+      {
+        "plateNo": "SU-M9021",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "VIP 优先取车",
+        "tag": "VIP",
+        "wait": "00:30",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "高峰预调度移位",
+        "tag": "预调度",
+        "wait": "00:48",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
         "plateNo": "SH-H3819",
         "type": "夜间套餐出场",
         "tag": "夜间",
@@ -832,41 +927,41 @@
     "agvs": [
       {
         "id": "AGV-01",
-        "x": 40,
-        "y": 68,
-        "loaded": false,
-        "task": "A 区巡检",
-        "batteryPct": 81,
-        "mode": "TRANSIT",
-        "velocityMps": 0.58,
-        "lastCommand": "navigate"
-      },
-      {
-        "id": "AGV-02",
-        "x": 25,
-        "y": 62,
+        "x": 20,
+        "y": 12,
         "loaded": true,
-        "task": "搬运车辆 SH-A7686",
-        "batteryPct": 64,
+        "task": "电池恢复充电",
+        "batteryPct": 21,
         "mode": "CARRYING",
         "velocityMps": 0.86,
         "lastCommand": "deliver"
       },
       {
+        "id": "AGV-02",
+        "x": 74,
+        "y": 73,
+        "loaded": true,
+        "task": "电池恢复充电",
+        "batteryPct": 20,
+        "mode": "CHARGING",
+        "velocityMps": 0.86,
+        "lastCommand": "dock"
+      },
+      {
         "id": "AGV-03",
-        "x": 20,
-        "y": 38,
+        "x": 83,
+        "y": 58,
         "loaded": false,
-        "task": "前往浅层缓冲区",
-        "batteryPct": 58,
-        "mode": "TRANSIT",
+        "task": "电池恢复充电",
+        "batteryPct": 20,
+        "mode": "CHARGING",
         "velocityMps": 0.58,
-        "lastCommand": "navigate"
+        "lastCommand": "dock"
       },
       {
         "id": "AGV-04",
-        "x": 8,
-        "y": 31,
+        "x": 58,
+        "y": 43,
         "loaded": false,
         "task": "电池恢复充电",
         "batteryPct": 21,
@@ -886,10 +981,10 @@
           "bitrateKbps": 3072,
           "status": "ONLINE",
           "lastPlate": "SU-M9021",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "tamperAlarm": false,
           "intrusionState": false,
-          "detail": "交接区安全摄像头，支持人员入侵告警"
+          "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
         },
         {
           "cameraId": "CAM-NORTH-03",
@@ -900,10 +995,10 @@
           "bitrateKbps": 3584,
           "status": "ONLINE",
           "lastPlate": "SH-P3308",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "tamperAlarm": false,
           "intrusionState": false,
-          "detail": "北侧坡道摄像头，用于出场队列观察和二次车牌识别"
+          "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
         },
         {
           "cameraId": "CAM-SOUTH-01",
@@ -913,11 +1008,11 @@
           "fps": 25,
           "bitrateKbps": 4096,
           "status": "ONLINE",
-          "lastPlate": "SH-A7686",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastPlate": "SU-M9021",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "tamperAlarm": false,
           "intrusionState": false,
-          "detail": "南门边缘摄像头，支持车牌 OCR 和交接区入侵检测"
+          "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
         }
       ],
       "gates": [
@@ -930,9 +1025,9 @@
           "gateState": "OPEN",
           "loopOccupied": true,
           "estopArmed": false,
-          "lastDecision": "ACCESS_GRANTED",
-          "lastSeen": "2026-05-18T18:42:56.375117",
-          "detail": "入场道闸，带地感线圈和 PLC 继电器控制"
+          "lastDecision": "QUEUE_BUILDUP",
+          "lastSeen": "2026-05-19T22:47:24.371824",
+          "detail": "检测到排队积压，PLC 可请求预调度放行窗口。"
         },
         {
           "gateId": "GATE-OUT-01",
@@ -941,24 +1036,24 @@
           "coilAddress": "00021",
           "queueDepth": 0,
           "gateState": "CLOSED",
-          "loopOccupied": true,
+          "loopOccupied": false,
           "estopArmed": false,
-          "lastDecision": "READY",
-          "lastSeen": "2026-05-18T18:42:56.375117",
-          "detail": "出场交接闸机，与 AGV 放行窗口同步"
+          "lastDecision": "QUEUE_BUILDUP",
+          "lastSeen": "2026-05-19T22:47:24.371824",
+          "detail": "检测到排队积压，PLC 可请求预调度放行窗口。"
         },
         {
           "gateId": "GATE-SERVICE-01",
           "protocol": "Modbus/TCP",
           "endpoint": "10.10.20.19:502",
           "coilAddress": "00025",
-          "queueDepth": 1,
-          "gateState": "READY",
+          "queueDepth": 5,
+          "gateState": "OPEN",
           "loopOccupied": true,
           "estopArmed": false,
-          "lastDecision": "MAINTENANCE_READY",
-          "lastSeen": "2026-05-18T18:42:56.375117",
-          "detail": "服务通道闸机，用于人工复核和维护绕行"
+          "lastDecision": "QUEUE_BUILDUP",
+          "lastSeen": "2026-05-19T22:47:24.371824",
+          "detail": "检测到排队积压，PLC 可请求预调度放行窗口。"
         }
       ],
       "chargers": [
@@ -971,7 +1066,7 @@
           "sessionKwh": 22,
           "vehiclePlate": "SH-D5218",
           "authStatus": "Accepted",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "已从活跃充电枪接收 OCPP 遥测心跳"
         },
         {
@@ -983,7 +1078,7 @@
           "sessionKwh": 0,
           "vehiclePlate": null,
           "authStatus": "Idle",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "交接区附近交流充电桩，适合短停补能"
         },
         {
@@ -995,110 +1090,110 @@
           "sessionKwh": 0.6,
           "vehiclePlate": "SH-D3015",
           "authStatus": "Authorizing",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "快周转充电桩，等待连接器锁止确认"
         }
       ],
       "events": [
         {
-          "eventId": "DV20260518024",
-          "deviceType": "dispatch",
-          "deviceId": "RISK-QUEUE",
-          "eventCode": "HOLD_ACTIVE",
-          "severity": "high",
-          "message": "人工复核转运在工作人员确认前保持拦截",
-          "eventTime": "2026-05-18T18:40:40.078753",
-          "acknowledged": false
-        },
-        {
-          "eventId": "DV20260518023",
-          "deviceType": "charger",
-          "deviceId": "EVSE-03",
-          "eventCode": "LOCK_RETRY",
-          "severity": "medium",
-          "message": "EVSE-03 连接器锁止重试一次后成功",
-          "eventTime": "2026-05-18T18:39:40.078753",
-          "acknowledged": false
-        },
-        {
-          "eventId": "DV20260518022",
-          "deviceType": "gate",
-          "deviceId": "GATE-OUT-01",
-          "eventCode": "EXIT_CONFIRMED",
+          "eventId": "EST1779101116787-597d3e97",
+          "deviceType": "safety",
+          "deviceId": "HandoffZone",
+          "eventCode": "ESTOP_RELEASED",
           "severity": "info",
-          "message": "出场闸机已确认交接放行完成",
-          "eventTime": "2026-05-18T18:38:40.078753",
+          "message": "急停已解除，现场设备恢复自动服务",
+          "eventTime": "2026-05-18T18:45:16.784714",
           "acknowledged": false
         },
         {
-          "eventId": "DV20260518021",
-          "deviceType": "agv",
-          "deviceId": "AGV-01",
-          "eventCode": "PATROL_TICK",
-          "severity": "info",
-          "message": "AGV-01 已完成 A 区周界巡检",
-          "eventTime": "2026-05-18T18:37:40.078753",
+          "eventId": "EST1779101113706-de040af9",
+          "deviceType": "safety",
+          "deviceId": "HandoffZone",
+          "eventCode": "ESTOP_ACTIVE",
+          "severity": "critical",
+          "message": "操作台触发的急停已锁存，并下发到 PLC 层",
+          "eventTime": "2026-05-18T18:45:13.703875",
           "acknowledged": false
         },
         {
-          "eventId": "DV20260518020",
-          "deviceType": "camera",
-          "deviceId": "CAM-SOUTH-01",
-          "eventCode": "BITRATE_DIP",
-          "severity": "low",
-          "message": "码率短暂低于首选边缘配置，随后恢复",
-          "eventTime": "2026-05-18T18:36:40.078753",
-          "acknowledged": false
-        },
-        {
-          "eventId": "DV20260518019",
-          "deviceType": "charger",
-          "deviceId": "EVSE-02",
-          "eventCode": "HEARTBEAT",
-          "severity": "info",
-          "message": "空闲充电桩 EVSE-02 已发送正常心跳帧",
-          "eventTime": "2026-05-18T18:35:40.078753",
-          "acknowledged": false
-        },
-        {
-          "eventId": "DV20260518018",
-          "deviceType": "billing",
-          "deviceId": "INVOICE-SVC",
-          "eventCode": "SETTLEMENT_PENDING",
-          "severity": "medium",
-          "message": "一笔已完成订单等待结算回调确认",
-          "eventTime": "2026-05-18T18:34:40.078753",
-          "acknowledged": true
-        },
-        {
-          "eventId": "DV20260518017",
-          "deviceType": "dispatch",
-          "deviceId": "PRE-DISPATCH",
-          "eventCode": "TASK_QUEUED",
-          "severity": "info",
-          "message": "预测驱动的移位任务已为 SH-P3308 入队",
-          "eventTime": "2026-05-18T18:33:40.078753",
-          "acknowledged": true
-        },
-        {
-          "eventId": "DV20260518016",
-          "deviceType": "gate",
-          "deviceId": "GATE-SERVICE-01",
-          "eventCode": "SERVICE_READY",
-          "severity": "info",
-          "message": "服务通道闸机空闲，可用于异常路线",
-          "eventTime": "2026-05-18T18:32:40.078753",
-          "acknowledged": true
-        },
-        {
-          "eventId": "DV20260518015",
+          "eventId": "VIS1779101113703-e460f19e",
           "deviceType": "camera",
           "deviceId": "CAM-HANDOFF-02",
-          "eventCode": "PERSON_DETECTED",
-          "severity": "low",
-          "message": "受保护 ROI 外记录到一次短时行人识别",
-          "eventTime": "2026-05-18T18:31:40.078753",
-          "acknowledged": true
+          "eventCode": "INTRUSION_DETECTED",
+          "severity": "high",
+          "message": "摄像头 CAM-HANDOFF-02 检测到安全入侵并请求急停",
+          "eventTime": "2026-05-18T18:45:13.702864",
+          "acknowledged": false
+        },
+        {
+          "eventId": "VIS1779101097811-ae8b86d6",
+          "deviceType": "camera",
+          "deviceId": "CAM-SOUTH-01",
+          "eventCode": "PLATE_READ",
+          "severity": "info",
+          "message": "摄像头 CAM-SOUTH-01 识别车牌 SU-M9021，置信度 0.975",
+          "eventTime": "2026-05-18T18:44:57.810228",
+          "acknowledged": false
+        },
+        {
+          "eventId": "VIS1779101087457-37b16160",
+          "deviceType": "camera",
+          "deviceId": "CAM-SOUTH-01",
+          "eventCode": "PLATE_READ",
+          "severity": "info",
+          "message": "摄像头 CAM-SOUTH-01 识别车牌 SU-M9021，置信度 0.943",
+          "eventTime": "2026-05-18T18:44:47.457137",
+          "acknowledged": false
+        },
+        {
+          "eventId": "DSP1779101087444-d73f8968",
+          "deviceType": "dispatch",
+          "deviceId": "VIP-QUEUE",
+          "eventCode": "VIP_INSERT",
+          "severity": "medium",
+          "message": "VIP 优先取车 已为车牌 SU-M9021 入队",
+          "eventTime": "2026-05-18T18:44:47.442932",
+          "acknowledged": false
+        },
+        {
+          "eventId": "DSP1779101087432-e7996f64",
+          "deviceType": "dispatch",
+          "deviceId": "VIP-QUEUE",
+          "eventCode": "VIP_INSERT",
+          "severity": "medium",
+          "message": "高峰预调度移位 已为车牌 SH-A7686 入队",
+          "eventTime": "2026-05-18T18:44:47.432386",
+          "acknowledged": false
+        },
+        {
+          "eventId": "DSP1779101087418-efeda873",
+          "deviceType": "dispatch",
+          "deviceId": "STANDARD-QUEUE",
+          "eventCode": "TASK_QUEUED",
+          "severity": "info",
+          "message": "入场存车 已为车牌 SU-M9021 入队",
+          "eventTime": "2026-05-18T18:44:47.418862",
+          "acknowledged": false
+        },
+        {
+          "eventId": "ENT1779101087416-774bc28a",
+          "deviceType": "gate",
+          "deviceId": "GATE-IN-01",
+          "eventCode": "ORDER_CREATED",
+          "severity": "info",
+          "message": "入场流程已为车牌 SU-M9021 创建订单 PV101087414",
+          "eventTime": "2026-05-18T18:44:47.416861",
+          "acknowledged": false
+        },
+        {
+          "eventId": "EST1779101087392-6bb9e5ad",
+          "deviceType": "safety",
+          "deviceId": "HandoffZone",
+          "eventCode": "ESTOP_RELEASED",
+          "severity": "info",
+          "message": "急停已解除，现场设备恢复自动服务",
+          "eventTime": "2026-05-18T18:44:47.389508",
+          "acknowledged": false
         }
       ]
     },
@@ -1117,41 +1212,41 @@
       },
       {
         "name": "Edge-Cam-01",
-        "latency": "104ms",
+        "latency": "97ms",
         "detail": "南门视觉预处理节点运行正常，正在转发 OCR 元数据",
         "level": "stable"
       },
       {
         "name": "PLC-Master-Controller",
-        "latency": "14ms",
+        "latency": "12ms",
         "detail": "道闸控制器与 AGV 网关心跳稳定",
         "level": "stable"
       },
       {
         "name": "Redis-Sync-Cluster",
-        "latency": "25ms",
+        "latency": "30ms",
         "detail": "运营缓存与报表分发数据已同步",
         "level": "stable"
       }
     ],
     "pricingPreview": {
-      "orderNo": "PV20260506015",
-      "plateNo": "SH-V7780",
-      "pricingWindow": "工作日高峰时段",
-      "durationMinutes": 89,
-      "baseAmount": 10,
-      "peakMultiplier": 1.5,
+      "orderNo": "PV101087414",
+      "plateNo": "SU-M9021",
+      "pricingWindow": "标准计时时段",
+      "durationMinutes": 1682,
+      "baseAmount": 118,
+      "peakMultiplier": 1,
       "components": [
         {
           "label": "基础停车费",
-          "formula": "2 小时阶梯计费",
-          "amount": 10,
+          "formula": "29 小时阶梯计费",
+          "amount": 118,
           "accent": "base"
         },
         {
           "label": "高峰调节费",
-          "formula": "1.50 倍拥堵调节",
-          "amount": 5,
+          "formula": "1 倍拥堵调节",
+          "amount": 0,
           "accent": "peak"
         },
         {
@@ -1163,29 +1258,61 @@
         {
           "label": "VIP 优先取车",
           "formula": "固定调度优先费",
-          "amount": 0,
+          "amount": 5,
           "accent": "vip"
         }
       ],
-      "totalAmount": 15,
+      "totalAmount": 123,
       "explanation": "费用预览来自持久化订单、当前调度优先级和实时充电桩遥测。"
     },
     "indoorRoute": {
-      "orderNo": "PV20260506015",
-      "plateNo": "SH-V7780",
-      "slotId": "E11",
+      "orderNo": "PV101087414",
+      "plateNo": "SU-M9021",
+      "slotId": "A12",
       "handoffZone": "A 区交接点",
       "targetGate": "GATE-OUT-01",
-      "remainingMeters": 114,
-      "etaSeconds": 342,
-      "agvEtaSeconds": 118,
+      "remainingMeters": 86,
+      "etaSeconds": 258,
+      "agvEtaSeconds": 60,
       "walkingSpeedKph": 6,
-      "completedSegments": 1,
+      "completedSegments": 2,
       "nextInstruction": "沿主通道前进，并跟随地面指引灯前往 A 区",
-      "status": "车辆仍在库内，室内路线处于待命状态",
+      "status": "AGV-01 正在接近放行走廊",
       "safetyMessage": "室内路线安全，已与实时 AGV 和闸机遥测同步。"
     },
     "adminOrders": [
+      {
+        "orderNo": "PV101087414",
+        "plateNo": "SU-M9021",
+        "event": "取车请求",
+        "slotId": "A12",
+        "status": "调度中",
+        "amount": "￥0.00"
+      },
+      {
+        "orderNo": "PV100977191",
+        "plateNo": "SH-V7780",
+        "event": "完成离场",
+        "slotId": "A12",
+        "status": "已关闭",
+        "amount": "￥6.00"
+      },
+      {
+        "orderNo": "PV100977138",
+        "plateNo": "SU-M9021",
+        "event": "临停取物",
+        "slotId": "A08",
+        "status": "交接区等待",
+        "amount": "￥0.00"
+      },
+      {
+        "orderNo": "PV100977008",
+        "plateNo": "SH-K1314",
+        "event": "取车请求",
+        "slotId": "A01",
+        "status": "调度中",
+        "amount": "￥0.00"
+      },
       {
         "orderNo": "PV20260506004",
         "plateNo": "SH-K1314",
@@ -1381,6 +1508,20 @@
     ],
     "alerts": [
       {
+        "alertNo": "AL20260518184513",
+        "type": "安全",
+        "content": "操作员触发的急停已在交接走廊生效",
+        "status": "急停中",
+        "level": "高"
+      },
+      {
+        "alertNo": "AL20260518184257",
+        "type": "安全",
+        "content": "操作员触发的急停已在交接走廊生效",
+        "status": "急停中",
+        "level": "高"
+      },
+      {
         "alertNo": "AL20260518008",
         "type": "调度",
         "content": "A04 异常车位释放需要人工复核",
@@ -1559,11 +1700,11 @@
       "status": "UP"
     },
     "summary": {
-      "occupancyRate": 69,
-      "trafficTotal": 437,
+      "occupancyRate": 74,
+      "trafficTotal": 441,
       "agvOnline": "4/4",
-      "alertCount": 9,
-      "revenue": 652,
+      "alertCount": 11,
+      "revenue": 658,
       "avgWait": "00:36",
       "chargingTurnover": "7.4 / day"
     },
@@ -1672,16 +1813,16 @@
       {
         "id": "A12",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "B01",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "B02",
@@ -1693,9 +1834,9 @@
       {
         "id": "B03",
         "layer": "Shallow",
-        "status": "empty",
-        "available": true,
-        "renderColor": "cyan"
+        "status": "buffer",
+        "available": false,
+        "renderColor": "amber"
       },
       {
         "id": "B04",
@@ -1966,16 +2107,16 @@
       {
         "id": "E06",
         "layer": "Deep",
-        "status": "occupied",
+        "status": "buffer",
         "available": false,
-        "renderColor": "blue"
+        "renderColor": "amber"
       },
       {
         "id": "E07",
         "layer": "Deep",
-        "status": "occupied",
+        "status": "buffer",
         "available": false,
-        "renderColor": "blue"
+        "renderColor": "amber"
       },
       {
         "id": "E08",
@@ -2098,6 +2239,38 @@
       }
     ],
     "orders": [
+      {
+        "orderNo": "PV202045694",
+        "plateNo": "SH-V7780",
+        "slotId": "B04",
+        "entryTime": "2026-05-19T22:47:25.694613",
+        "status": "FINISHED",
+        "amount": 6
+      },
+      {
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "slotId": "B03",
+        "entryTime": "2026-05-19T22:47:25.650286",
+        "status": "TOUCHING",
+        "amount": 0
+      },
+      {
+        "orderNo": "PV202045527",
+        "plateNo": "SH-K1314",
+        "slotId": "B01",
+        "entryTime": "2026-05-19T22:47:25.527872",
+        "status": "RETRIEVING",
+        "amount": 0
+      },
+      {
+        "orderNo": "PV101087414",
+        "plateNo": "SU-M9021",
+        "slotId": "A12",
+        "entryTime": "2026-05-18T18:44:47.414865",
+        "status": "RETRIEVING",
+        "amount": 0
+      },
       {
         "orderNo": "PV100977191",
         "plateNo": "SH-V7780",
@@ -2324,6 +2497,69 @@
         "vip": false
       },
       {
+        "plateNo": "SH-K1314",
+        "type": "临停取物",
+        "tag": "临取",
+        "wait": "02:10",
+        "vip": false
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "VIP 优先取车",
+        "tag": "VIP",
+        "wait": "00:30",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "高峰预调度移位",
+        "tag": "预调度",
+        "wait": "00:48",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-K1314",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SU-M9021",
+        "type": "VIP 优先取车",
+        "tag": "VIP",
+        "wait": "00:30",
+        "vip": true
+      },
+      {
+        "plateNo": "SH-A7686",
+        "type": "高峰预调度移位",
+        "tag": "预调度",
+        "wait": "00:48",
+        "vip": true
+      },
+      {
+        "plateNo": "SU-M9021",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
+        "plateNo": "SH-V7780",
+        "type": "入场存车",
+        "tag": "入场",
+        "wait": "00:36",
+        "vip": false
+      },
+      {
         "plateNo": "SU-M9021",
         "type": "临停取物",
         "tag": "临取",
@@ -2432,41 +2668,41 @@
     "agvs": [
       {
         "id": "AGV-01",
-        "x": 40,
-        "y": 68,
+        "x": 20,
+        "y": 12,
         "loaded": false,
         "task": "放行走廊已清空",
-        "batteryPct": 81,
+        "batteryPct": 21,
         "mode": "IDLE",
         "velocityMps": 0,
         "lastCommand": "hold"
       },
       {
         "id": "AGV-02",
-        "x": 25,
-        "y": 62,
+        "x": 74,
+        "y": 73,
         "loaded": true,
-        "task": "搬运车辆 SH-A7686",
-        "batteryPct": 64,
-        "mode": "CARRYING",
+        "task": "电池恢复充电",
+        "batteryPct": 20,
+        "mode": "CHARGING",
         "velocityMps": 0.86,
-        "lastCommand": "deliver"
+        "lastCommand": "dock"
       },
       {
         "id": "AGV-03",
-        "x": 20,
-        "y": 38,
+        "x": 83,
+        "y": 58,
         "loaded": false,
-        "task": "前往浅层缓冲区",
-        "batteryPct": 58,
-        "mode": "TRANSIT",
+        "task": "电池恢复充电",
+        "batteryPct": 20,
+        "mode": "CHARGING",
         "velocityMps": 0.58,
-        "lastCommand": "navigate"
+        "lastCommand": "dock"
       },
       {
         "id": "AGV-04",
-        "x": 8,
-        "y": 31,
+        "x": 58,
+        "y": 43,
         "loaded": false,
         "task": "电池恢复充电",
         "batteryPct": 21,
@@ -2486,7 +2722,7 @@
           "bitrateKbps": 3072,
           "status": "ONLINE",
           "lastPlate": "SH-V7780",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "tamperAlarm": false,
           "intrusionState": false,
           "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
@@ -2500,7 +2736,7 @@
           "bitrateKbps": 3584,
           "status": "ONLINE",
           "lastPlate": "SH-P3308",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "tamperAlarm": false,
           "intrusionState": false,
           "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
@@ -2514,7 +2750,7 @@
           "bitrateKbps": 4096,
           "status": "ONLINE",
           "lastPlate": "SH-V7780",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "tamperAlarm": false,
           "intrusionState": false,
           "detail": "安全 ROI 已清空，边缘摄像头恢复正常运行"
@@ -2531,7 +2767,7 @@
           "loopOccupied": true,
           "estopArmed": false,
           "lastDecision": "RECOVERY_READY",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "detail": "安全复核结束后，道闸控制器已恢复自动模式。"
         },
         {
@@ -2544,7 +2780,7 @@
           "loopOccupied": false,
           "estopArmed": false,
           "lastDecision": "RECOVERY_READY",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "detail": "安全复核结束后，道闸控制器已恢复自动模式。"
         },
         {
@@ -2552,12 +2788,12 @@
           "protocol": "Modbus/TCP",
           "endpoint": "10.10.20.19:502",
           "coilAddress": "00025",
-          "queueDepth": 1,
-          "gateState": "READY",
+          "queueDepth": 5,
+          "gateState": "OPEN",
           "loopOccupied": true,
           "estopArmed": false,
           "lastDecision": "RECOVERY_READY",
-          "lastSeen": "2026-05-18T18:42:57.401748",
+          "lastSeen": "2026-05-19T22:47:25.875265",
           "detail": "安全复核结束后，道闸控制器已恢复自动模式。"
         }
       ],
@@ -2571,7 +2807,7 @@
           "sessionKwh": 22,
           "vehiclePlate": "SH-D5218",
           "authStatus": "Accepted",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "已从活跃充电枪接收 OCPP 遥测心跳"
         },
         {
@@ -2583,7 +2819,7 @@
           "sessionKwh": 0,
           "vehiclePlate": null,
           "authStatus": "Idle",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "交接区附近交流充电桩，适合短停补能"
         },
         {
@@ -2595,109 +2831,109 @@
           "sessionKwh": 0.6,
           "vehiclePlate": "SH-D3015",
           "authStatus": "Authorizing",
-          "lastSeen": "2026-05-18T18:42:56.375117",
+          "lastSeen": "2026-05-19T22:47:24.371824",
           "detail": "快周转充电桩，等待连接器锁止确认"
         }
       ],
       "events": [
         {
-          "eventId": "EST1779100977410-923d2c34",
+          "eventId": "EST1779202045880-afce1811",
           "deviceType": "safety",
           "deviceId": "HandoffZone",
           "eventCode": "ESTOP_RELEASED",
           "severity": "info",
           "message": "急停已解除，现场设备恢复自动服务",
-          "eventTime": "2026-05-18T18:42:57.401748",
+          "eventTime": "2026-05-19T22:47:25.875265",
           "acknowledged": false
         },
         {
-          "eventId": "EST1779100977382-b2159f33",
+          "eventId": "EST1779202045851-383635a2",
           "deviceType": "safety",
           "deviceId": "HandoffZone",
           "eventCode": "ESTOP_ACTIVE",
           "severity": "critical",
           "message": "操作台触发的急停已锁存，并下发到 PLC 层",
-          "eventTime": "2026-05-18T18:42:57.373473",
+          "eventTime": "2026-05-19T22:47:25.844265",
           "acknowledged": false
         },
         {
-          "eventId": "VIS1779100977372-22cbad8f",
+          "eventId": "VIS1779202045844-8be03903",
           "deviceType": "camera",
           "deviceId": "CAM-HANDOFF-02",
           "eventCode": "INTRUSION_DETECTED",
           "severity": "high",
           "message": "摄像头 CAM-HANDOFF-02 检测到安全入侵并请求急停",
-          "eventTime": "2026-05-18T18:42:57.370058",
+          "eventTime": "2026-05-19T22:47:25.843264",
           "acknowledged": false
         },
         {
-          "eventId": "VIS1779100977346-5dbcf8a6",
+          "eventId": "VIS1779202045811-942702a8",
           "deviceType": "camera",
           "deviceId": "CAM-SOUTH-01",
           "eventCode": "PLATE_READ",
           "severity": "info",
-          "message": "摄像头 CAM-SOUTH-01 识别车牌 SH-V7780，置信度 0.989",
-          "eventTime": "2026-05-18T18:42:57.34486",
+          "message": "摄像头 CAM-SOUTH-01 识别车牌 SH-V7780，置信度 0.967",
+          "eventTime": "2026-05-19T22:47:25.809247",
           "acknowledged": false
         },
         {
-          "eventId": "PAY1779100977224-e3af37c9",
+          "eventId": "PAY1779202045718-95e0c1c7",
           "deviceType": "order",
-          "deviceId": "PV100977191",
+          "deviceId": "PV202045694",
           "eventCode": "EXIT_CONFIRMED",
           "severity": "info",
-          "message": "订单 PV100977191 已关闭，放行闸机已确认",
-          "eventTime": "2026-05-18T18:42:57.217605",
+          "message": "订单 PV202045694 已关闭，放行闸机已确认",
+          "eventTime": "2026-05-19T22:47:25.713607",
           "acknowledged": false
         },
         {
-          "eventId": "DSP1779100977203-bea14e9e",
+          "eventId": "DSP1779202045700-421d881e",
           "deviceType": "dispatch",
           "deviceId": "STANDARD-QUEUE",
           "eventCode": "TASK_QUEUED",
           "severity": "info",
           "message": "入场存车 已为车牌 SH-V7780 入队",
-          "eventTime": "2026-05-18T18:42:57.200806",
+          "eventTime": "2026-05-19T22:47:25.699609",
           "acknowledged": false
         },
         {
-          "eventId": "ENT1779100977196-d72fe246",
+          "eventId": "ENT1779202045698-a86339e3",
           "deviceType": "gate",
           "deviceId": "GATE-IN-01",
           "eventCode": "ORDER_CREATED",
           "severity": "info",
-          "message": "入场流程已为车牌 SH-V7780 创建订单 PV100977191",
-          "eventTime": "2026-05-18T18:42:57.194801",
+          "message": "入场流程已为车牌 SH-V7780 创建订单 PV202045694",
+          "eventTime": "2026-05-19T22:47:25.697608",
           "acknowledged": false
         },
         {
-          "eventId": "DSP1779100977171-af7dfaa4",
+          "eventId": "DSP1779202045671-028ed50b",
           "deviceType": "dispatch",
           "deviceId": "STANDARD-QUEUE",
           "eventCode": "TASK_QUEUED",
           "severity": "info",
-          "message": "临停取物 已为车牌 SU-M9021 入队",
-          "eventTime": "2026-05-18T18:42:57.1691",
+          "message": "临停取物 已为车牌 SH-K1314 入队",
+          "eventTime": "2026-05-19T22:47:25.66961",
           "acknowledged": false
         },
         {
-          "eventId": "DSP1779100977150-b64fe937",
+          "eventId": "DSP1779202045655-ac4fbab2",
           "deviceType": "dispatch",
           "deviceId": "STANDARD-QUEUE",
           "eventCode": "TASK_QUEUED",
           "severity": "info",
-          "message": "入场存车 已为车牌 SU-M9021 入队",
-          "eventTime": "2026-05-18T18:42:57.145183",
+          "message": "入场存车 已为车牌 SH-K1314 入队",
+          "eventTime": "2026-05-19T22:47:25.655606",
           "acknowledged": false
         },
         {
-          "eventId": "ENT1779100977141-2b60a5a7",
+          "eventId": "ENT1779202045653-2c4b46c2",
           "deviceType": "gate",
           "deviceId": "GATE-IN-01",
           "eventCode": "ORDER_CREATED",
           "severity": "info",
-          "message": "入场流程已为车牌 SU-M9021 创建订单 PV100977138",
-          "eventTime": "2026-05-18T18:42:57.14076",
+          "message": "入场流程已为车牌 SH-K1314 创建订单 PV202045650",
+          "eventTime": "2026-05-19T22:47:25.652605",
           "acknowledged": false
         }
       ]
@@ -2717,30 +2953,30 @@
       },
       {
         "name": "Edge-Cam-01",
-        "latency": "107ms",
+        "latency": "90ms",
         "detail": "南门视觉预处理节点运行正常，正在转发 OCR 元数据",
         "level": "stable"
       },
       {
         "name": "PLC-Master-Controller",
-        "latency": "17ms",
+        "latency": "13ms",
         "detail": "道闸控制器与 AGV 网关心跳稳定",
         "level": "stable"
       },
       {
         "name": "Redis-Sync-Cluster",
-        "latency": "31ms",
+        "latency": "24ms",
         "detail": "运营缓存与报表分发数据已同步",
         "level": "stable"
       }
     ],
     "pricingPreview": {
-      "orderNo": "PV100977138",
-      "plateNo": "SU-M9021",
-      "pricingWindow": "工作日高峰时段",
+      "orderNo": "PV202045650",
+      "plateNo": "SH-K1314",
+      "pricingWindow": "标准计时时段",
       "durationMinutes": 30,
       "baseAmount": 6,
-      "peakMultiplier": 1.5,
+      "peakMultiplier": 1,
       "components": [
         {
           "label": "基础停车费",
@@ -2750,8 +2986,8 @@
         },
         {
           "label": "高峰调节费",
-          "formula": "1.50 倍拥堵调节",
-          "amount": 3,
+          "formula": "1 倍拥堵调节",
+          "amount": 0,
           "accent": "peak"
         },
         {
@@ -2763,22 +2999,22 @@
         {
           "label": "VIP 优先取车",
           "formula": "固定调度优先费",
-          "amount": 0,
+          "amount": 5,
           "accent": "vip"
         }
       ],
-      "totalAmount": 9,
+      "totalAmount": 11,
       "explanation": "费用预览来自持久化订单、当前调度优先级和实时充电桩遥测。"
     },
     "indoorRoute": {
-      "orderNo": "PV100977138",
-      "plateNo": "SU-M9021",
-      "slotId": "A08",
+      "orderNo": "PV202045650",
+      "plateNo": "SH-K1314",
+      "slotId": "B03",
       "handoffZone": "A 区交接点",
       "targetGate": "GATE-OUT-01",
-      "remainingMeters": 62,
-      "etaSeconds": 186,
-      "agvEtaSeconds": 68,
+      "remainingMeters": 86,
+      "etaSeconds": 258,
+      "agvEtaSeconds": 94,
       "walkingSpeedKph": 6,
       "completedSegments": 3,
       "nextInstruction": "前往交接区，并在倒计时结束前完成物品拿取",
@@ -2786,6 +3022,38 @@
       "safetyMessage": "室内路线安全，已与实时 AGV 和闸机遥测同步。"
     },
     "adminOrders": [
+      {
+        "orderNo": "PV202045694",
+        "plateNo": "SH-V7780",
+        "event": "完成离场",
+        "slotId": "B04",
+        "status": "已关闭",
+        "amount": "￥6.00"
+      },
+      {
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "event": "临停取物",
+        "slotId": "B03",
+        "status": "交接区等待",
+        "amount": "￥0.00"
+      },
+      {
+        "orderNo": "PV202045527",
+        "plateNo": "SH-K1314",
+        "event": "取车请求",
+        "slotId": "B01",
+        "status": "调度中",
+        "amount": "￥0.00"
+      },
+      {
+        "orderNo": "PV101087414",
+        "plateNo": "SU-M9021",
+        "event": "取车请求",
+        "slotId": "A12",
+        "status": "调度中",
+        "amount": "￥0.00"
+      },
       {
         "orderNo": "PV100977191",
         "plateNo": "SH-V7780",
@@ -3005,6 +3273,20 @@
     ],
     "alerts": [
       {
+        "alertNo": "AL20260519224725",
+        "type": "安全",
+        "content": "操作员触发的急停已在交接走廊生效",
+        "status": "急停中",
+        "level": "高"
+      },
+      {
+        "alertNo": "AL20260518184513",
+        "type": "安全",
+        "content": "操作员触发的急停已在交接走廊生效",
+        "status": "急停中",
+        "level": "高"
+      },
+      {
         "alertNo": "AL20260518184257",
         "type": "安全",
         "content": "操作员触发的急停已在交接走廊生效",
@@ -3187,10 +3469,10 @@
   },
   "evidence": {
     "createdEntry": {
-      "orderNo": "PV100977008",
+      "orderNo": "PV202045527",
       "plateNo": "SH-K1314",
-      "slotId": "A01",
-      "entryTime": "2026-05-18T18:42:57.0089185",
+      "slotId": "B01",
+      "entryTime": "2026-05-19T22:47:25.5278723",
       "status": "PARKED",
       "amount": 0
     },
@@ -3221,7 +3503,7 @@
         "health": {
           "status": "UP"
         },
-        "orderCount": 24
+        "orderCount": 28
       }
     },
     {
@@ -3230,20 +3512,20 @@
       "category": "functional",
       "expected": "订单数 +1，新增订单状态为 PARKED，对应车位不再为空",
       "actual": {
-        "orderCountBefore": 24,
-        "orderCountAfter": 25,
-        "createdOrder": "PV100977008",
+        "orderCountBefore": 28,
+        "orderCountAfter": 29,
+        "createdOrder": "PV202045527",
         "createdStatus": "PARKED",
         "slotStatus": "occupied",
-        "emptySlotsBefore": 24,
-        "emptySlotsAfter": 23
+        "emptySlotsBefore": 21,
+        "emptySlotsAfter": 20
       },
       "pass": true,
       "evidence": {
-        "orderNo": "PV100977008",
+        "orderNo": "PV202045527",
         "plateNo": "SH-K1314",
-        "slotId": "A01",
-        "entryTime": "2026-05-18T18:42:57.0089185",
+        "slotId": "B01",
+        "entryTime": "2026-05-19T22:47:25.5278723",
         "status": "PARKED",
         "amount": 0
       }
@@ -3254,8 +3536,8 @@
       "category": "functional",
       "expected": "调度队列头部新增高峰预调度移位任务",
       "actual": {
-        "queueBefore": 11,
-        "queueAfter": 12,
+        "queueBefore": 20,
+        "queueAfter": 21,
         "headTask": {
           "plateNo": "SH-K1314",
           "type": "高峰预调度移位",
@@ -3308,10 +3590,10 @@
       },
       "pass": true,
       "evidence": {
-        "orderNo": "PV100977138",
-        "plateNo": "SU-M9021",
-        "slotId": "A08",
-        "entryTime": "2026-05-18T18:42:57.138762",
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "slotId": "B03",
+        "entryTime": "2026-05-19T22:47:25.650286",
         "status": "TOUCHING",
         "amount": 0
       }
@@ -3328,10 +3610,10 @@
       },
       "pass": true,
       "evidence": {
-        "orderNo": "PV100977191",
+        "orderNo": "PV202045694",
         "plateNo": "SH-V7780",
-        "slotId": "A12",
-        "entryTime": "2026-05-18T18:42:57.191801",
+        "slotId": "B04",
+        "entryTime": "2026-05-19T22:47:25.694613",
         "status": "FINISHED",
         "amount": 6
       }
@@ -3343,10 +3625,10 @@
       "expected": "返回 OCR 结果，摄像头状态更新，系统不进入急停",
       "actual": {
         "inference": {
-          "requestId": "edge-977344",
+          "requestId": "edge-45809",
           "cameraId": "CAM-SOUTH-01",
           "plate": "SH-V7780",
-          "confidence": 0.989,
+          "confidence": 0.967,
           "intrusion": false,
           "action": "ALLOW_ENTRY_AND_CREATE_ORDER"
         },
@@ -3354,10 +3636,10 @@
       },
       "pass": true,
       "evidence": {
-        "requestId": "edge-977344",
+        "requestId": "edge-45809",
         "cameraId": "CAM-SOUTH-01",
         "plate": "SH-V7780",
-        "confidence": 0.989,
+        "confidence": 0.967,
         "intrusion": false,
         "action": "ALLOW_ENTRY_AND_CREATE_ORDER"
       }
@@ -3369,10 +3651,10 @@
       "expected": "入侵识别后，摄像头 ROI 置为风险态，闸机急停位拉起，系统节点进入 warning",
       "actual": {
         "inference": {
-          "requestId": "edge-977370",
+          "requestId": "edge-45843",
           "cameraId": "CAM-HANDOFF-02",
           "plate": "SH-V7780",
-          "confidence": 0.953,
+          "confidence": 0.973,
           "intrusion": true,
           "action": "ESTOP_AND_REVIEW"
         },
@@ -3385,10 +3667,10 @@
       },
       "pass": true,
       "evidence": {
-        "requestId": "edge-977370",
+        "requestId": "edge-45843",
         "cameraId": "CAM-HANDOFF-02",
         "plate": "SH-V7780",
-        "confidence": 0.953,
+        "confidence": 0.973,
         "intrusion": true,
         "action": "ESTOP_AND_REVIEW"
       }
@@ -3411,12 +3693,12 @@
       "category": "functional",
       "expected": "返回当前订单、时长、组成项和总金额",
       "actual": {
-        "orderNo": "PV100977138",
-        "plateNo": "SU-M9021",
-        "pricingWindow": "工作日高峰时段",
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "pricingWindow": "标准计时时段",
         "durationMinutes": 30,
         "baseAmount": 6,
-        "peakMultiplier": 1.5,
+        "peakMultiplier": 1,
         "components": [
           {
             "label": "基础停车费",
@@ -3426,8 +3708,8 @@
           },
           {
             "label": "高峰调节费",
-            "formula": "1.50 倍拥堵调节",
-            "amount": 3,
+            "formula": "1 倍拥堵调节",
+            "amount": 0,
             "accent": "peak"
           },
           {
@@ -3439,21 +3721,21 @@
           {
             "label": "VIP 优先取车",
             "formula": "固定调度优先费",
-            "amount": 0,
+            "amount": 5,
             "accent": "vip"
           }
         ],
-        "totalAmount": 9,
+        "totalAmount": 11,
         "explanation": "费用预览来自持久化订单、当前调度优先级和实时充电桩遥测。"
       },
       "pass": true,
       "evidence": {
-        "orderNo": "PV100977138",
-        "plateNo": "SU-M9021",
-        "pricingWindow": "工作日高峰时段",
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "pricingWindow": "标准计时时段",
         "durationMinutes": 30,
         "baseAmount": 6,
-        "peakMultiplier": 1.5,
+        "peakMultiplier": 1,
         "components": [
           {
             "label": "基础停车费",
@@ -3463,8 +3745,8 @@
           },
           {
             "label": "高峰调节费",
-            "formula": "1.50 倍拥堵调节",
-            "amount": 3,
+            "formula": "1 倍拥堵调节",
+            "amount": 0,
             "accent": "peak"
           },
           {
@@ -3476,11 +3758,11 @@
           {
             "label": "VIP 优先取车",
             "formula": "固定调度优先费",
-            "amount": 0,
+            "amount": 5,
             "accent": "vip"
           }
         ],
-        "totalAmount": 9,
+        "totalAmount": 11,
         "explanation": "费用预览来自持久化订单、当前调度优先级和实时充电桩遥测。"
       }
     },
@@ -3490,14 +3772,14 @@
       "category": "functional",
       "expected": "返回目标交接区、剩余距离、车主 ETA、AGV ETA 与安全提示",
       "actual": {
-        "orderNo": "PV100977138",
-        "plateNo": "SU-M9021",
-        "slotId": "A08",
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "slotId": "B03",
         "handoffZone": "A 区交接点",
         "targetGate": "GATE-OUT-01",
-        "remainingMeters": 62,
-        "etaSeconds": 186,
-        "agvEtaSeconds": 68,
+        "remainingMeters": 86,
+        "etaSeconds": 258,
+        "agvEtaSeconds": 94,
         "walkingSpeedKph": 6,
         "completedSegments": 3,
         "nextInstruction": "前往交接区，并在倒计时结束前完成物品拿取",
@@ -3506,14 +3788,14 @@
       },
       "pass": true,
       "evidence": {
-        "orderNo": "PV100977138",
-        "plateNo": "SU-M9021",
-        "slotId": "A08",
+        "orderNo": "PV202045650",
+        "plateNo": "SH-K1314",
+        "slotId": "B03",
         "handoffZone": "A 区交接点",
         "targetGate": "GATE-OUT-01",
-        "remainingMeters": 62,
-        "etaSeconds": 186,
-        "agvEtaSeconds": 68,
+        "remainingMeters": 86,
+        "etaSeconds": 258,
+        "agvEtaSeconds": 94,
         "walkingSpeedKph": 6,
         "completedSegments": 3,
         "nextInstruction": "前往交接区，并在倒计时结束前完成物品拿取",
@@ -3529,12 +3811,12 @@
       "actual": {
         "query": "对比最近 7 天 VIP 取车与标准取车收入。",
         "labelCount": 7,
-        "summary": "当前 9 条实时告警、16 个调度排队任务、50 个占用车位、已确认收入 652 元。VIP 与预调度动作当前贡献 4 个优先任务。"
+        "summary": "当前 11 条实时告警、25 个调度排队任务、53 个占用车位、已确认收入 658 元。VIP 与预调度动作当前贡献 8 个优先任务。"
       },
       "pass": true,
       "evidence": {
         "query": "对比最近 7 天 VIP 取车与标准取车收入。",
-        "summary": "当前 9 条实时告警、16 个调度排队任务、50 个占用车位、已确认收入 652 元。VIP 与预调度动作当前贡献 4 个优先任务。",
+        "summary": "当前 11 条实时告警、25 个调度排队任务、53 个占用车位、已确认收入 658 元。VIP 与预调度动作当前贡献 8 个优先任务。",
         "labels": [
           "周一",
           "周二",
@@ -3578,7 +3860,7 @@
           "code": "ORDER_NOT_FOUND",
           "message": "Order not found: ORDER-404",
           "data": null,
-          "timestamp": "2026-05-18T10:42:57.492842Z"
+          "timestamp": "2026-05-19T14:47:25.939090300Z"
         }
       },
       "pass": true,
@@ -3587,7 +3869,7 @@
         "code": "ORDER_NOT_FOUND",
         "message": "Order not found: ORDER-404",
         "data": null,
-        "timestamp": "2026-05-18T10:42:57.492842Z"
+        "timestamp": "2026-05-19T14:47:25.939090300Z"
       }
     },
     {
@@ -3602,7 +3884,7 @@
           "code": "ORDER_NOT_FOUND",
           "message": "Order not found: ORDER-404",
           "data": null,
-          "timestamp": "2026-05-18T10:42:57.520215700Z"
+          "timestamp": "2026-05-19T14:47:25.951095800Z"
         }
       },
       "pass": true,
@@ -3611,7 +3893,7 @@
         "code": "ORDER_NOT_FOUND",
         "message": "Order not found: ORDER-404",
         "data": null,
-        "timestamp": "2026-05-18T10:42:57.520215700Z"
+        "timestamp": "2026-05-19T14:47:25.951095800Z"
       }
     },
     {
@@ -3626,7 +3908,7 @@
           "code": "ORDER_NOT_FOUND",
           "message": "Order not found: ORDER-404",
           "data": null,
-          "timestamp": "2026-05-18T10:42:57.537743Z"
+          "timestamp": "2026-05-19T14:47:25.962462800Z"
         }
       },
       "pass": true,
@@ -3635,7 +3917,7 @@
         "code": "ORDER_NOT_FOUND",
         "message": "Order not found: ORDER-404",
         "data": null,
-        "timestamp": "2026-05-18T10:42:57.537743Z"
+        "timestamp": "2026-05-19T14:47:25.962462800Z"
       }
     },
     {
@@ -3650,7 +3932,7 @@
           "code": "ORDER_NOT_FOUND",
           "message": "Order not found: ORDER-404",
           "data": null,
-          "timestamp": "2026-05-18T10:42:57.560020200Z"
+          "timestamp": "2026-05-19T14:47:25.973453400Z"
         }
       },
       "pass": true,
@@ -3659,7 +3941,7 @@
         "code": "ORDER_NOT_FOUND",
         "message": "Order not found: ORDER-404",
         "data": null,
-        "timestamp": "2026-05-18T10:42:57.560020200Z"
+        "timestamp": "2026-05-19T14:47:25.973453400Z"
       }
     },
     {
@@ -3674,7 +3956,7 @@
           "code": "VALIDATION_FAILED",
           "message": "active parameter is required",
           "data": null,
-          "timestamp": "2026-05-18T10:42:57.574547600Z"
+          "timestamp": "2026-05-19T14:47:25.984459Z"
         }
       },
       "pass": true,
@@ -3683,7 +3965,7 @@
         "code": "VALIDATION_FAILED",
         "message": "active parameter is required",
         "data": null,
-        "timestamp": "2026-05-18T10:42:57.574547600Z"
+        "timestamp": "2026-05-19T14:47:25.984459Z"
       }
     }
   ],

@@ -7,34 +7,58 @@
     </linearGradient>
   </defs>
   <rect width="1280" height="420" rx="28" fill="url(#bg)" />
-  <text x="40" y="52" font-size="34" font-weight="700" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">测试数据规模概览</text>
-  <text x="40" y="82" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">以下统计均来自本轮真实运行后的数据库快照。</text>
+  <text x="40" y="52" font-size="34" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI" font-weight="700">
+      <tspan x="40" dy="0">测试数据规模概览</tspan>
+    </text>
+  <text x="40" y="84" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="40" dy="0">以下统计均来自本轮真实运行后的数据库快照。</tspan>
+    </text>
   
     <rect x="40" y="140" width="260" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="58" y="160" width="8" height="120" rx="4" fill="#38bdf8" />
-    <text x="82" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">车位总数</text>
+    <text x="82" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="82" dy="0">车位总数</tspan>
+    </text>
     <text x="82" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">72</text>
-    <text x="82" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">覆盖空位、占用、缓存、充电等状态</text>
+    <text x="82" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="82" dy="0">覆盖空位、占用、缓存、充电等</tspan>
+      <tspan x="82" dy="22">状态</tspan>
+    </text>
   
 
     <rect x="340" y="140" width="260" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="358" y="160" width="8" height="120" rx="4" fill="#10b981" />
-    <text x="382" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">订单总数</text>
-    <text x="382" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">27</text>
-    <text x="382" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">含历史单、进行中订单与新增测试单</text>
+    <text x="382" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="382" dy="0">订单总数</tspan>
+    </text>
+    <text x="382" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">31</text>
+    <text x="382" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="382" dy="0">含历史单、进行中订单与新增</tspan>
+      <tspan x="382" dy="22">测试单</tspan>
+    </text>
   
 
     <rect x="640" y="140" width="260" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="658" y="160" width="8" height="120" rx="4" fill="#f59e0b" />
-    <text x="682" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">调度任务</text>
-    <text x="682" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">16</text>
-    <text x="682" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">包含先到先取、预调度、VIP、临取等类型</text>
+    <text x="682" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="682" dy="0">调度任务</tspan>
+    </text>
+    <text x="682" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">25</text>
+    <text x="682" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="682" dy="0">包含先到先取、预调度、VIP、</tspan>
+      <tspan x="682" dy="22">临取等类型</tspan>
+    </text>
   
 
     <rect x="940" y="140" width="260" height="160" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="958" y="160" width="8" height="120" rx="4" fill="#ef4444" />
-    <text x="982" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">设备事件</text>
+    <text x="982" y="182" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="982" dy="0">设备事件</tspan>
+    </text>
     <text x="982" y="226" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">10</text>
-    <text x="982" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">摄像头、闸机、充电桩与调度事件</text>
+    <text x="982" y="260" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">
+      <tspan x="982" dy="0">摄像头、闸机、充电桩与调度</tspan>
+      <tspan x="982" dy="22">事件</tspan>
+    </text>
   
 </svg>

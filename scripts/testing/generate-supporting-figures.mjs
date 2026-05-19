@@ -15,6 +15,57 @@ function escapeXml(value) {
     .replaceAll("\"", "&quot;");
 }
 
+function charUnits(char) {
+  if (/[\u4e00-\u9fff]/.test(char)) {
+    return 1;
+  }
+  if (/[A-Z0-9]/.test(char)) {
+    return 0.64;
+  }
+  if (/[a-z]/.test(char)) {
+    return 0.55;
+  }
+  return 0.48;
+}
+
+function wrapText(value, maxUnits) {
+  const lines = [];
+  for (const rawPart of String(value ?? "").split("\n")) {
+    let current = "";
+    let units = 0;
+    for (const char of rawPart.trim()) {
+      const nextUnits = charUnits(char);
+      if (current && units + nextUnits > maxUnits) {
+        lines.push(current);
+        current = char;
+        units = nextUnits;
+      } else {
+        current += char;
+        units += nextUnits;
+      }
+    }
+    if (current) {
+      lines.push(current);
+    }
+  }
+  return lines.length ? lines : [""];
+}
+
+function textBlock(x, y, width, text, options = {}) {
+  const fontSize = options.fontSize ?? 16;
+  const lineHeight = options.lineHeight ?? Math.round(fontSize * 1.35);
+  const fill = options.fill ?? "#cbd5e1";
+  const weight = options.weight ? ` font-weight="${options.weight}"` : "";
+  const family = options.family ?? "Microsoft YaHei, Segoe UI";
+  const maxLines = options.maxLines ?? 3;
+  const maxUnits = Math.max(4, (width - 12) / (fontSize * 0.92));
+  const wrapped = wrapText(text, maxUnits);
+  const lines = wrapped.length > maxLines ? [...wrapped.slice(0, maxLines - 1), `${wrapped[maxLines - 1]}...`] : wrapped;
+  return `<text x="${x}" y="${y}" font-size="${fontSize}" fill="${fill}" font-family="${family}"${weight}>
+${lines.map((line, index) => `      <tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`).join("\n")}
+    </text>`;
+}
+
 function backgroundSvg(width, height, title, subtitle, body) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
@@ -25,8 +76,8 @@ function backgroundSvg(width, height, title, subtitle, body) {
     </linearGradient>
   </defs>
   <rect width="${width}" height="${height}" rx="28" fill="url(#bg)" />
-  <text x="40" y="52" font-size="34" font-weight="700" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">${escapeXml(title)}</text>
-  <text x="40" y="82" font-size="18" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">${escapeXml(subtitle)}</text>
+  ${textBlock(40, 52, width - 80, title, { fontSize: 34, fill: "#ffffff", weight: 700, maxLines: 1 })}
+  ${textBlock(40, 84, width - 80, subtitle, { fontSize: 18, fill: "#94a3b8", maxLines: 2 })}
   ${body}
 </svg>
 `;
@@ -36,9 +87,9 @@ function card(x, y, width, height, title, value, detail, accent = "#38bdf8") {
   return `
     <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
     <rect x="${x + 18}" y="${y + 20}" width="8" height="${height - 40}" rx="4" fill="${accent}" />
-    <text x="${x + 42}" y="${y + 42}" font-size="22" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">${escapeXml(title)}</text>
+    ${textBlock(x + 42, y + 42, width - 58, title, { fontSize: 22, fill: "#cbd5e1", maxLines: 1 })}
     <text x="${x + 42}" y="${y + 86}" font-size="42" font-weight="700" fill="#ffffff" font-family="Segoe UI">${escapeXml(value)}</text>
-    <text x="${x + 42}" y="${y + 120}" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">${escapeXml(detail)}</text>
+    ${textBlock(x + 42, y + 120, width - 58, detail, { fontSize: 16, fill: "#94a3b8", maxLines: 2 })}
   `;
 }
 
@@ -60,8 +111,8 @@ function processFigure() {
         <rect x="${x}" y="150" width="${stepWidth}" height="170" rx="22" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
         <circle cx="${x + 38}" cy="188" r="22" fill="#38bdf8" />
         <text x="${x + 31}" y="196" font-size="22" font-weight="700" fill="#0f172a" font-family="Segoe UI">${index + 1}</text>
-        <text x="${x + 72}" y="190" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">${escapeXml(step[0])}</text>
-        <text x="${x + 24}" y="240" font-size="18" fill="#cbd5e1" font-family="Microsoft YaHei, Segoe UI">${escapeXml(step[1])}</text>
+        ${textBlock(x + 72, 190, stepWidth - 88, step[0], { fontSize: 23, fill: "#ffffff", maxLines: 1 })}
+        ${textBlock(x + 24, 238, stepWidth - 48, step[1], { fontSize: 16, fill: "#cbd5e1", maxLines: 4 })}
         ${index < steps.length - 1 ? `<line x1="${x + stepWidth}" y1="235" x2="${x + stepWidth + gap}" y2="235" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" />` : ""}
       `;
     })
@@ -85,8 +136,8 @@ function orderFlowFigure() {
     .map(
       (box) => `
         <rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-        <text x="${box.x + 22}" y="${box.y + 40}" font-size="22" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">${escapeXml(box.title)}</text>
-        <text x="${box.x + 22}" y="${box.y + 70}" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">${escapeXml(box.detail)}</text>
+        ${textBlock(box.x + 22, box.y + 38, box.w - 44, box.title, { fontSize: 21, fill: "#ffffff", maxLines: 2 })}
+        ${textBlock(box.x + 22, box.y + 72, box.w - 44, box.detail, { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
       `,
     )
     .join("\n");
@@ -110,28 +161,28 @@ function orderFlowFigure() {
 function emergencyFlowFigure() {
   const body = `
     <rect x="70" y="140" width="250" height="100" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="92" y="182" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">接收急停指令</text>
-    <text x="92" y="214" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">控制台或 AI 入侵事件触发</text>
+    ${textBlock(92, 180, 206, "接收急停指令", { fontSize: 23, fill: "#ffffff", maxLines: 1 })}
+    ${textBlock(92, 214, 206, "控制台或 AI 入侵事件触发", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <rect x="390" y="140" width="250" height="100" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="412" y="182" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">更新摄像头 ROI 状态</text>
-    <text x="412" y="214" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">入侵状态随急停同步</text>
+    ${textBlock(412, 178, 206, "更新摄像头 ROI 状态", { fontSize: 21, fill: "#ffffff", maxLines: 2 })}
+    ${textBlock(412, 214, 206, "入侵状态随急停同步", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <rect x="710" y="140" width="250" height="100" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="732" y="182" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">更新闸机锁定状态</text>
-    <text x="732" y="214" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">急停后闸机锁定</text>
+    ${textBlock(732, 178, 206, "更新闸机锁定状态", { fontSize: 21, fill: "#ffffff", maxLines: 2 })}
+    ${textBlock(732, 214, 206, "急停后闸机锁定", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <rect x="1030" y="140" width="180" height="100" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="1050" y="182" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">写入安全事件</text>
-    <text x="1050" y="214" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">急停生效 / 解除</text>
+    ${textBlock(1050, 178, 140, "写入安全事件", { fontSize: 21, fill: "#ffffff", maxLines: 2 })}
+    ${textBlock(1050, 214, 140, "急停生效 / 解除", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <rect x="280" y="330" width="280" height="104" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="304" y="372" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">更新系统节点健康等级</text>
-    <text x="304" y="404" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">预警 / 稳定</text>
+    ${textBlock(304, 368, 232, "更新系统节点健康等级", { fontSize: 21, fill: "#ffffff", maxLines: 2 })}
+    ${textBlock(304, 406, 232, "预警 / 稳定", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <rect x="700" y="330" width="320" height="104" rx="20" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.08)" />
-    <text x="724" y="372" font-size="24" fill="#ffffff" font-family="Microsoft YaHei, Segoe UI">若 active=true，则新增高优先级告警</text>
-    <text x="724" y="404" font-size="16" fill="#94a3b8" font-family="Microsoft YaHei, Segoe UI">记录操作台触发的急停告警</text>
+    ${textBlock(724, 366, 272, "若 active=true，则新增高优先级告警", { fontSize: 19, fill: "#ffffff", maxLines: 2 })}
+    ${textBlock(724, 406, 272, "记录操作台触发的急停告警", { fontSize: 15, fill: "#94a3b8", maxLines: 2 })}
 
     <line x1="320" y1="190" x2="390" y2="190" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" />
     <line x1="640" y1="190" x2="710" y2="190" stroke="#38bdf8" stroke-width="6" stroke-linecap="round" />

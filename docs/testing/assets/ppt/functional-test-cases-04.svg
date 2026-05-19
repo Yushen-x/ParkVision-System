@@ -1,195 +1,195 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">测试用例表（四）：管理台与系统设备</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 7-10 页：功能模块、用例编号、前置条件、输入、预期结果、实际结果</text>
-  <rect x="50" y="142" width="1500" height="690" fill="none" stroke="#94a3b8" stroke-width="1.4" />
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">测试用例表（四）：管理台与系统设备</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 7-10 页：功能模块、用例编号、前置条件、输入、预期结果、实际结果</text>
+  <rect x="50" y="142" width="1500" height="714" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="50" y="142" width="145" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="62" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">功能模块</text>
+        <text x="62" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">功能模块</text>
       
 
         <rect x="195" y="142" width="135" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="207" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例</text>
+        <text x="207" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例</text>
       
 
         <rect x="330" y="142" width="115" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="342" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例编号</text>
+        <text x="342" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例编号</text>
       
 
         <rect x="445" y="142" width="260" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="457" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例说明</text>
+        <text x="457" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">用例说明</text>
       
 
         <rect x="705" y="142" width="195" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="717" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前置条件</text>
+        <text x="717" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">前置条件</text>
       
 
         <rect x="900" y="142" width="195" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="912" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入/动作</text>
+        <text x="912" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入/动作</text>
       
 
         <rect x="1095" y="142" width="220" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1107" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
+        <text x="1107" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">预期结果</text>
       
 
         <rect x="1315" y="142" width="130" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1327" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试结果</text>
+        <text x="1327" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">测试结果</text>
       
 
         <rect x="1445" y="142" width="105" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1457" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">失败原因</text>
+        <text x="1457" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">失败原因</text>
       
   
-            <rect x="50" y="200" width="145" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">室内导航</text>
+            <rect x="50" y="200" width="145" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">室内导航</text>
           
 
-            <rect x="195" y="200" width="135" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">接驳路线</text>
+            <rect x="195" y="200" width="135" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">接驳路线</text>
           
 
-            <rect x="330" y="200" width="115" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.1</text>
+            <rect x="330" y="200" width="115" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="224" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.1</text>
           
 
-            <rect x="445" y="200" width="260" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回接驳点、剩余距离、车主 ET</text>
-<text x="457" y="248" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">A、AGV ETA 与安全提示</text>
+            <rect x="445" y="200" width="260" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回接驳点、剩余距离、车主 ET</text>
+<text x="457" y="246" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">A、AGV ETA 与安全提示</text>
           
 
-            <rect x="705" y="200" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在有效订单</text>
+            <rect x="705" y="200" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在有效订单</text>
           
 
-            <rect x="900" y="200" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开室内导航页</text>
+            <rect x="900" y="200" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开室内导航页</text>
           
 
-            <rect x="1095" y="200" width="220" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">路线快照、ETA 和提示信</text>
-<text x="1107" y="248" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">息完整展示</text>
+            <rect x="1095" y="200" width="220" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">路线快照、ETA 和提示信</text>
+<text x="1107" y="246" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">息完整展示</text>
           
 
-            <rect x="1315" y="200" width="130" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="224" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="200" width="130" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="224" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="200" width="105" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="224" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="200" width="105" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="224" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="358" width="145" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台</text>
+            <rect x="50" y="364" width="145" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台</text>
           
 
-            <rect x="195" y="358" width="135" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单列表</text>
+            <rect x="195" y="364" width="135" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单列表</text>
           
 
-            <rect x="330" y="358" width="115" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="382" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.2</text>
+            <rect x="330" y="364" width="115" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="388" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.2</text>
           
 
-            <rect x="445" y="358" width="260" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理员查看订单表并核对订单状态</text>
+            <rect x="445" y="364" width="260" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理员查看订单表并核对订单状</text>
+<text x="457" y="410" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">态</text>
           
 
-            <rect x="705" y="358" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数据库存在订单</text>
+            <rect x="705" y="364" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数据库存在订单</text>
           
 
-            <rect x="900" y="358" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开管理台订单页</text>
+            <rect x="900" y="364" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开管理台订单页</text>
           
 
-            <rect x="1095" y="358" width="220" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单表来自 /api/ad</text>
-<text x="1107" y="406" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">min/orders，数据</text>
-<text x="1107" y="430" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">非空</text>
+            <rect x="1095" y="364" width="220" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单表来自 /api/admi</text>
+<text x="1107" y="410" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">n/orders，数据非空</text>
           
 
-            <rect x="1315" y="358" width="130" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="382" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="364" width="130" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="388" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="358" width="105" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="382" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="364" width="105" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="388" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="516" width="145" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台</text>
+            <rect x="50" y="528" width="145" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理台</text>
           
 
-            <rect x="195" y="516" width="135" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 报表</text>
+            <rect x="195" y="528" width="135" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 报表</text>
           
 
-            <rect x="330" y="516" width="115" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="540" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.3</text>
+            <rect x="330" y="528" width="115" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="552" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.3</text>
           
 
-            <rect x="445" y="516" width="260" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理员输入问题后生成运营报表和收</text>
-<text x="457" y="564" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">入曲线</text>
+            <rect x="445" y="528" width="260" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理员输入问题后生成运营报表</text>
+<text x="457" y="574" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">和收入曲线</text>
           
 
-            <rect x="705" y="516" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">后端服务在线</text>
+            <rect x="705" y="528" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">后端服务在线</text>
           
 
-            <rect x="900" y="516" width="195" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击生成报表</text>
+            <rect x="900" y="528" width="195" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">点击生成报表</text>
           
 
-            <rect x="1095" y="516" width="220" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回报表摘要和最近 7 天</text>
-<text x="1107" y="564" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">对比图</text>
+            <rect x="1095" y="528" width="220" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">返回报表摘要和最近 7 </text>
+<text x="1107" y="574" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">天对比图</text>
           
 
-            <rect x="1315" y="516" width="130" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="540" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="528" width="130" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="552" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="516" width="105" height="158" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="540" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="528" width="105" height="164" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="552" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 
-            <rect x="50" y="674" width="145" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="62" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">系统配置</text>
+            <rect x="50" y="692" width="145" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="62" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">系统配置</text>
           
 
-            <rect x="195" y="674" width="135" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="207" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备监控</text>
+            <rect x="195" y="692" width="135" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="207" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备监控</text>
           
 
-            <rect x="330" y="674" width="115" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="698" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.4</text>
+            <rect x="330" y="692" width="115" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="342" y="716" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">T1.4.4</text>
           
 
-            <rect x="445" y="674" width="260" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="457" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">展示摄像头、闸机、充电桩、节点和</text>
-<text x="457" y="722" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备事件</text>
+            <rect x="445" y="692" width="260" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="457" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">展示摄像头、闸机、充电桩、节点</text>
+<text x="457" y="738" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">和设备事件</text>
           
 
-            <rect x="705" y="674" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="717" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备模拟数据已加载</text>
+            <rect x="705" y="692" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="717" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">设备模拟数据已加载</text>
           
 
-            <rect x="900" y="674" width="195" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="912" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开系统配置页</text>
+            <rect x="900" y="692" width="195" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="912" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">打开系统配置页</text>
           
 
-            <rect x="1095" y="674" width="220" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1107" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ONVIF/Modbus/</text>
-<text x="1107" y="722" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">OCPP 风格字段均可见</text>
+            <rect x="1095" y="692" width="220" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1107" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">ONVIF/Modbus/OCPP</text>
+<text x="1107" y="738" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start"> 风格字段均可见</text>
           
 
-            <rect x="1315" y="674" width="130" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1327" y="698" font-size="18" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
+            <rect x="1315" y="692" width="130" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1327" y="716" font-size="16" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">通过</text>
           
 
-            <rect x="1445" y="674" width="105" height="158" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="1457" y="698" font-size="18" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
+            <rect x="1445" y="692" width="105" height="164" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+            <text x="1457" y="716" font-size="16" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无</text>
           
 </svg>

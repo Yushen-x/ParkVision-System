@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">静态测试检查表</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 12-13 页：前端结构、后端分层、异常处理与脚本完整性</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">静态测试检查表</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 12-13 页：前端结构、后端分层、异常处理与脚本完整性</text>
   <rect x="110" y="142" width="1380" height="632" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="110" y="142" width="300" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="122" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查项</text>
+        <text x="122" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查项</text>
       
 
         <rect x="410" y="142" width="900" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="422" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查内容</text>
+        <text x="422" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">检查内容</text>
       
 
         <rect x="1310" y="142" width="180" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="1322" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">结果</text>
+        <text x="1322" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">结果</text>
       
   
             <rect x="110" y="200" width="300" height="82" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />

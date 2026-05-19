@@ -1,104 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
   <rect width="1600" height="900" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">等价类列表</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 15 页：按输入条件划分有效等价类和无效等价类</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">等价类列表</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">参考 PPT 第 15 页：按输入条件划分有效等价类和无效等价类</text>
   <rect x="70" y="142" width="1460" height="646" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   
         <rect x="70" y="142" width="260" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="82" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入条件</text>
+        <text x="82" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">输入条件</text>
       
 
         <rect x="330" y="142" width="600" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="342" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效等价类</text>
+        <text x="342" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">有效等价类</text>
       
 
         <rect x="930" y="142" width="600" height="58" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        <text x="942" y="166" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无效等价类</text>
+        <text x="942" y="166" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">无效等价类</text>
       
   
             <rect x="70" y="200" width="260" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="224" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单号</text>
+            <text x="82" y="224" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单号</text>
           
 
             <rect x="330" y="200" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="224" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数据库中存在的订单号，如 PV20260506015</text>
+            <text x="342" y="224" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">数据库中存在的订单号，如 PV20260506015</text>
           
 
             <rect x="930" y="200" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="224" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在或格式错误，如 ORDER-404</text>
+            <text x="942" y="224" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在或格式错误，如 ORDER-404</text>
           
 
             <rect x="70" y="284" width="260" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="308" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单动作</text>
+            <text x="82" y="308" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">订单动作</text>
           
 
             <rect x="330" y="284" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="308" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">取车、临时取物、支付关闭</text>
+            <text x="342" y="308" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">取车、临时取物、支付关闭</text>
           
 
             <rect x="930" y="284" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="308" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在的动作或状态不允许的动作</text>
+            <text x="942" y="308" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在的动作或状态不允许的动作</text>
           
 
             <rect x="70" y="368" width="260" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="392" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 推理参数</text>
+            <text x="82" y="392" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">AI 推理参数</text>
           
 
             <rect x="330" y="368" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="392" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">cameraId 存在，intrusion 为 true/fa</text>
-<text x="342" y="420" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">lse</text>
+            <text x="342" y="392" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">cameraId 存在，intrusion 为 true/false</text>
           
 
             <rect x="930" y="368" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="392" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">cameraId 为空或 intrusion 类型错误</text>
+            <text x="942" y="392" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">cameraId 为空或 intrusion 类型错误</text>
           
 
             <rect x="70" y="452" width="260" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="476" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停接口</text>
+            <text x="82" y="476" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">急停接口</text>
           
 
             <rect x="330" y="452" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="476" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=true 或 active=false</text>
+            <text x="342" y="476" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">active=true 或 active=false</text>
           
 
             <rect x="930" y="452" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="476" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺少 active 必填参数</text>
+            <text x="942" y="476" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">缺少 active 必填参数</text>
           
 
             <rect x="70" y="536" width="260" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="560" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">计费预览</text>
+            <text x="82" y="560" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">计费预览</text>
           
 
             <rect x="330" y="536" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="560" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在订单或默认有效订单</text>
+            <text x="342" y="560" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在订单或默认有效订单</text>
           
 
             <rect x="930" y="536" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="560" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单号</text>
+            <text x="942" y="560" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单号</text>
           
 
             <rect x="70" y="620" width="260" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="644" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">室内导航</text>
+            <text x="82" y="644" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">室内导航</text>
           
 
             <rect x="330" y="620" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="644" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在订单并能映射车位/接驳点</text>
+            <text x="342" y="644" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">存在订单并能映射车位/接驳点</text>
           
 
             <rect x="930" y="620" width="600" height="84" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="644" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单号</text>
+            <text x="942" y="644" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">不存在订单号</text>
           
 
             <rect x="70" y="704" width="260" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="82" y="728" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理报表</text>
+            <text x="82" y="728" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">管理报表</text>
           
 
             <rect x="330" y="704" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="342" y="728" font-size="21" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">中文运营问题或默认查询</text>
+            <text x="342" y="728" font-size="19" font-weight="400" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">中文运营问题或默认查询</text>
           
 
             <rect x="930" y="704" width="600" height="84" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
-            <text x="942" y="728" font-size="21" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">空查询仍返回默认摘要，不阻断页面</text>
+            <text x="942" y="728" font-size="19" font-weight="700" fill="#111827" font-family="Microsoft YaHei, SimSun, Arial" text-anchor="start">空查询仍返回默认摘要，不阻断页面</text>
           
 </svg>

@@ -19,21 +19,21 @@ function wrapText(value, maxChars) {
   const text = String(value ?? "");
   const lines = [];
   for (const rawPart of text.split("\n")) {
-    let part = rawPart.trim();
-    if (!part) {
-      lines.push("");
-      continue;
-    }
-    while (part.length > maxChars) {
-      let cut = maxChars;
-      const punctuation = part.slice(0, maxChars + 1).search(/[，。；、：/]/);
-      if (punctuation > Math.floor(maxChars * 0.55)) {
-        cut = punctuation + 1;
+    const part = rawPart.trim();
+    let current = "";
+    let units = 0;
+    for (const char of part) {
+      const nextUnits = /[\u4e00-\u9fff]/.test(char) ? 1 : /[A-Z0-9]/.test(char) ? 0.68 : /[a-z]/.test(char) ? 0.58 : 0.48;
+      if (current && units + nextUnits > maxChars) {
+        lines.push(current);
+        current = char;
+        units = nextUnits;
+      } else {
+        current += char;
+        units += nextUnits;
       }
-      lines.push(part.slice(0, cut));
-      part = part.slice(cut);
     }
-    lines.push(part);
+    lines.push(current);
   }
   return lines;
 }
@@ -41,7 +41,7 @@ function wrapText(value, maxChars) {
 function textLines(text, x, y, width, rowHeight, options = {}) {
   const fontSize = options.fontSize ?? 20;
   const lineHeight = options.lineHeight ?? Math.round(fontSize * 1.35);
-  const maxChars = options.maxChars ?? Math.max(4, Math.floor(width / (fontSize * 0.92)));
+  const maxChars = options.maxChars ?? Math.max(4, Math.floor((width - 22) / (fontSize * 1.02)));
   const maxLines = Math.max(1, Math.floor((rowHeight - 18) / lineHeight));
   const lines = wrapText(text, maxChars);
   const clipped = lines.length > maxLines ? [...lines.slice(0, maxLines - 1), `${lines[maxLines - 1]}...`] : lines;
@@ -71,7 +71,7 @@ function tableSvg({ title, subtitle, columns, rows, widths, rowHeight = 130, fon
       const w = widths[index];
       const svg = `
         <rect x="${currentX}" y="${y0}" width="${w}" height="${headerHeight}" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1" />
-        ${textLines(column, currentX, y0, w, headerHeight, { fontSize: 21, bold: true, maxChars: Math.floor(w / 17) })}
+        ${textLines(column, currentX, y0, w, headerHeight, { fontSize: 19, bold: true, maxChars: Math.floor((w - 22) / 18) })}
       `;
       currentX += w;
       return svg;
@@ -88,7 +88,7 @@ function tableSvg({ title, subtitle, columns, rows, widths, rowHeight = 130, fon
           const fill = rowIndex % 2 === 0 ? "#ffffff" : "#f8fafc";
           const cellSvg = `
             <rect x="${x}" y="${y}" width="${w}" height="${rowHeight}" fill="${fill}" stroke="#cbd5e1" stroke-width="1" />
-            ${textLines(cell, x, y, w, rowHeight, { fontSize, bold: colIndex === 2 || String(cell).startsWith("通过"), maxChars: Math.floor(w / (fontSize * 0.9)) })}
+            ${textLines(cell, x, y, w, rowHeight, { fontSize, bold: colIndex === 2 || String(cell).startsWith("通过"), maxChars: Math.floor((w - 22) / (fontSize * 1.06)) })}
           `;
           x += w;
           return cellSvg;
@@ -100,8 +100,8 @@ function tableSvg({ title, subtitle, columns, rows, widths, rowHeight = 130, fon
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   <rect width="${width}" height="${height}" fill="#ffffff" />
-  <text x="64" y="66" font-size="38" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">${escapeXml(title)}</text>
-  <text x="64" y="104" font-size="21" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">${escapeXml(subtitle)}</text>
+  <text x="64" y="66" font-size="36" font-weight="700" fill="#0f172a" font-family="Microsoft YaHei, SimHei, Arial">${escapeXml(title)}</text>
+  <text x="64" y="104" font-size="20" fill="#64748b" font-family="Microsoft YaHei, SimHei, Arial">${escapeXml(subtitle)}</text>
   <rect x="${x0}" y="${y0}" width="${tableWidth}" height="${totalHeight}" fill="none" stroke="#94a3b8" stroke-width="1.4" />
   ${header}
   ${body}
@@ -253,8 +253,8 @@ async function main() {
         columns: requirementColumns,
         rows: functionalRequirements,
         widths: requirementWidths,
-        rowHeight: 92,
-        fontSize: 17,
+        rowHeight: 96,
+        fontSize: 15,
       }),
     ],
     [
@@ -265,8 +265,8 @@ async function main() {
         columns: requirementColumns,
         rows: nonFunctionalRequirements,
         widths: requirementWidths,
-        rowHeight: 92,
-        fontSize: 17,
+        rowHeight: 96,
+        fontSize: 15,
       }),
     ],
     ...functionalCaseTables.map((item) => [
@@ -277,8 +277,8 @@ async function main() {
         columns: functionColumns,
         rows: item.rows,
         widths: functionWidths,
-        rowHeight: 158,
-        fontSize: 18,
+        rowHeight: 164,
+        fontSize: 16,
       }),
     ]),
     [
@@ -290,7 +290,7 @@ async function main() {
         rows: blackboxEquivalence,
         widths: [260, 600, 600],
         rowHeight: 84,
-        fontSize: 21,
+        fontSize: 19,
       }),
     ],
     [
@@ -302,7 +302,7 @@ async function main() {
         rows: blackboxValid,
         widths: [440, 390, 460, 170],
         rowHeight: 118,
-        fontSize: 20,
+        fontSize: 18,
       }),
     ],
     [
@@ -314,7 +314,7 @@ async function main() {
         rows: blackboxInvalid,
         widths: [440, 390, 460, 170],
         rowHeight: 118,
-        fontSize: 20,
+        fontSize: 18,
       }),
     ],
     [
@@ -326,7 +326,7 @@ async function main() {
         rows: whiteboxCoverage,
         widths: whiteboxCoverageWidths,
         rowHeight: 86,
-        fontSize: 18,
+        fontSize: 16,
       }),
     ],
     [

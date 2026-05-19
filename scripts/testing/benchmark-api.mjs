@@ -108,6 +108,8 @@ function buildSvg(results) {
       const y = 90 + index * rowHeight;
       const avgWidth = (result.avgMs / maxMetric) * chartWidth;
       const p95Width = (result.p95Ms / maxMetric) * chartWidth;
+      const avgLabelX = Math.min(chartLeft + avgWidth + 12, chartLeft + chartWidth - 82);
+      const p95LabelX = Math.min(chartLeft + p95Width + 12, chartLeft + chartWidth - 82);
 
       return `
         <text x="40" y="${y + 18}" font-size="24" fill="#e2e8f0" font-family="Microsoft YaHei, Segoe UI">${escapeXml(result.name)}</text>
@@ -116,8 +118,8 @@ function buildSvg(results) {
         <rect x="${chartLeft}" y="${y}" width="${avgWidth}" height="20" rx="10" fill="#38bdf8" />
         <rect x="${chartLeft}" y="${y + 30}" width="${chartWidth}" height="12" rx="6" fill="rgba(255,255,255,0.06)" />
         <rect x="${chartLeft}" y="${y + 30}" width="${p95Width}" height="12" rx="6" fill="#f59e0b" />
-        <text x="${chartLeft + avgWidth + 12}" y="${y + 16}" font-size="14" fill="#bae6fd" font-family="Segoe UI">${result.avgMs} ms</text>
-        <text x="${chartLeft + p95Width + 12}" y="${y + 41}" font-size="14" fill="#fde68a" font-family="Segoe UI">${result.p95Ms} ms</text>
+        <text x="${avgLabelX}" y="${y + 16}" font-size="14" fill="#bae6fd" font-family="Segoe UI">${result.avgMs} ms</text>
+        <text x="${p95LabelX}" y="${y + 41}" font-size="14" fill="#fde68a" font-family="Segoe UI">${result.p95Ms} ms</text>
       `;
     })
     .join("\n");
