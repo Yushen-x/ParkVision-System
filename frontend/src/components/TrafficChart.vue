@@ -27,12 +27,12 @@ function draw() {
   const step = chartWidth / Math.max(all.length - 1, 1);
 
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "#f8fbfc";
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = "#d8e1e7";
+  ctx.strokeStyle = "#f1f5f9";
   ctx.lineWidth = 1;
-  ctx.font = "12px Microsoft YaHei";
-  ctx.fillStyle = "#667782";
+  ctx.font = "12px Inter, sans-serif";
+  ctx.fillStyle = "#64748b";
 
   for (let i = 0; i <= 4; i += 1) {
     const y = padding + (chartHeight / 4) * i;
@@ -50,14 +50,14 @@ function draw() {
     if (index === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
-  ctx.strokeStyle = "#0e5f8d";
+  ctx.strokeStyle = "#4f46e5";
   ctx.lineWidth = 3;
   ctx.stroke();
 
   all.forEach((value, index) => {
     const x = padding + step * index;
     const y = padding + chartHeight - (value / max) * chartHeight;
-    ctx.fillStyle = index < props.history.length ? "#117c73" : "#c4652d";
+    ctx.fillStyle = index < props.history.length ? "#3b82f6" : "#f59e0b";
     ctx.beginPath();
     ctx.arc(x, y, 4.8, 0, Math.PI * 2);
     ctx.fill();

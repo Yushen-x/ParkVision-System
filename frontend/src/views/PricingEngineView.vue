@@ -6,14 +6,14 @@ import { zhMoney, zhText } from "../utils/localize";
 const currentOrder = getters.currentOrder;
 const preview = computed(() => state.pricingPreview);
 const formulaChips = computed(() => [
-  { label: "基础费", accent: "rgba(255,255,255,0.1)", color: "#fff" },
+  { label: "基础费", accent: "rgba(0,0,0,0.05)", color: "var(--text-main)" },
   {
     label: `高峰 (${Number(preview.value.peakMultiplier || 1).toFixed(2)}x)`,
-    accent: "rgba(239,68,68,0.2)",
+    accent: "rgba(239,68,68,0.1)",
     color: "var(--danger-red)",
   },
-  { label: "新能源", accent: "rgba(16,185,129,0.2)", color: "var(--safety-green)" },
-  { label: "VIP", accent: "rgba(245,158,11,0.2)", color: "var(--warning-yellow)" },
+  { label: "新能源", accent: "rgba(16,185,129,0.1)", color: "var(--safety-green)" },
+  { label: "VIP", accent: "rgba(245,158,11,0.1)", color: "var(--warning-yellow)" },
 ]);
 
 const durationLabel = computed(() => {
@@ -28,7 +28,7 @@ const durationLabel = computed(() => {
 
 <template>
   <section class="admin-grid">
-    <article class="surface wide" style="background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9)); border-color:var(--brand);">
+    <article class="surface wide" style="background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(248,250,252,0.8)); border-color:var(--brand);">
       <div class="section-head compact">
         <div>
           <h2>动态计费引擎</h2>
@@ -36,9 +36,9 @@ const durationLabel = computed(() => {
         </div>
         <span class="status-pill stable">{{ zhText(preview.pricingWindow) }}</span>
       </div>
-      <div style="padding: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin-top: 16px; border: 1px solid rgba(255,255,255,0.05);">
+      <div style="padding: 20px; background: rgba(0,0,0,0.015); border-radius: 12px; margin-top: 16px; border: 1px solid var(--border-color);">
         <p style="color:var(--text-muted); font-size:13px; margin-bottom:10px; text-transform:uppercase;">后端计算的费用预览</p>
-        <div style="font-size: 28px; font-family:'Orbitron', sans-serif; color: #fff; display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+        <div style="font-size: 28px; font-family:'Outfit', sans-serif; color: var(--text-main); display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
           <span style="color:var(--brand);">合计</span>
           <span>=</span>
           <span
@@ -94,7 +94,7 @@ const durationLabel = computed(() => {
               </b>
               <span>{{ zhText(component.formula) }}</span>
             </div>
-            <strong style="color:#fff;">{{ zhMoney(component.amount) }}</strong>
+            <strong style="color:var(--text-main);">{{ zhMoney(component.amount) }}</strong>
           </div>
         </div>
       </article>

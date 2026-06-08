@@ -4,6 +4,10 @@ import com.parkvision.cps.domain.admin.AccessListItem;
 import com.parkvision.cps.domain.admin.AlertEvent;
 import com.parkvision.cps.domain.admin.PricingRule;
 import com.parkvision.cps.domain.admin.SystemNodeStatus;
+import com.parkvision.cps.domain.billing.OrderBillingComponent;
+import com.parkvision.cps.domain.billing.PaymentTransaction;
+import com.parkvision.cps.domain.customer.CustomerAccount;
+import com.parkvision.cps.domain.customer.VehicleProfile;
 import com.parkvision.cps.domain.device.CameraDevice;
 import com.parkvision.cps.domain.device.ChargingStation;
 import com.parkvision.cps.domain.device.DeviceEvent;
@@ -90,7 +94,7 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     @Override
     public List<ParkingOrder> findOrders() {
         return jdbcTemplate.query(
-                "select order_no, plate_no, slot_id, entry_time, status, amount from parking_order order by entry_time desc, order_no desc",
+                "select order_no, plate_no, slot_id, entry_time, exit_time, status, amount, payment_status, payment_method, paid_at, duration_minutes, discount_amount from parking_order order by entry_time desc, order_no desc",
                 this::mapOrder
         );
     }
@@ -98,7 +102,7 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     @Override
     public Optional<ParkingOrder> findOrderByNo(String orderNo) {
         return queryOne(
-                "select order_no, plate_no, slot_id, entry_time, status, amount from parking_order where order_no = ?",
+                "select order_no, plate_no, slot_id, entry_time, exit_time, status, amount, payment_status, payment_method, paid_at, duration_minutes, discount_amount from parking_order where order_no = ?",
                 this::mapOrder,
                 orderNo
         );
@@ -107,14 +111,20 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     @Override
     public ParkingOrder saveOrder(ParkingOrder order) {
         upsert(
-                "update parking_order set plate_no = ?, slot_id = ?, entry_time = ?, status = ?, amount = ? where order_no = ?",
-                "insert into parking_order (order_no, plate_no, slot_id, entry_time, status, amount) values (?, ?, ?, ?, ?, ?)",
+                "update parking_order set plate_no = ?, slot_id = ?, entry_time = ?, exit_time = ?, status = ?, amount = ?, payment_status = ?, payment_method = ?, paid_at = ?, duration_minutes = ?, discount_amount = ? where order_no = ?",
+                "insert into parking_order (order_no, plate_no, slot_id, entry_time, exit_time, status, amount, payment_status, payment_method, paid_at, duration_minutes, discount_amount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 new Object[]{
                         order.getPlateNo(),
                         order.getSlotId(),
                         Timestamp.valueOf(order.getEntryTime()),
+                        timestampOrNull(order.getExitTime()),
                         order.getStatus().name(),
                         order.getAmount(),
+                        order.getPaymentStatus(),
+                        order.getPaymentMethod(),
+                        timestampOrNull(order.getPaidAt()),
+                        order.getDurationMinutes(),
+                        order.getDiscountAmount(),
                         order.getOrderNo()
                 },
                 new Object[]{
@@ -122,11 +132,165 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
                         order.getPlateNo(),
                         order.getSlotId(),
                         Timestamp.valueOf(order.getEntryTime()),
+                        timestampOrNull(order.getExitTime()),
                         order.getStatus().name(),
-                        order.getAmount()
+                        order.getAmount(),
+                        order.getPaymentStatus(),
+                        order.getPaymentMethod(),
+                        timestampOrNull(order.getPaidAt()),
+                        order.getDurationMinutes(),
+                        order.getDiscountAmount()
                 }
         );
         return order;
+    }
+
+    @Override
+    public List<CustomerAccount> findCustomerAccounts() {
+        return jdbcTemplate.query(
+                "select owner_id, owner_name, phone_masked, member_level, account_status, balance, created_at from customer_account order by owner_id",
+                this::mapCustomerAccount
+        );
+    }
+
+    @Override
+    public CustomerAccount saveCustomerAccount(CustomerAccount account) {
+        upsert(
+                "update customer_account set owner_name = ?, phone_masked = ?, member_level = ?, account_status = ?, balance = ?, created_at = ? where owner_id = ?",
+                "insert into customer_account (owner_id, owner_name, phone_masked, member_level, account_status, balance, created_at) values (?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        account.ownerName(),
+                        account.phoneMasked(),
+                        account.memberLevel(),
+                        account.accountStatus(),
+                        account.balance(),
+                        Timestamp.valueOf(account.createdAt()),
+                        account.ownerId()
+                },
+                new Object[]{
+                        account.ownerId(),
+                        account.ownerName(),
+                        account.phoneMasked(),
+                        account.memberLevel(),
+                        account.accountStatus(),
+                        account.balance(),
+                        Timestamp.valueOf(account.createdAt())
+                }
+        );
+        return account;
+    }
+
+    @Override
+    public List<VehicleProfile> findVehicleProfiles() {
+        return jdbcTemplate.query(
+                "select plate_no, owner_id, vehicle_type, energy_type, membership_type, default_auth_status, created_at from vehicle_profile order by plate_no",
+                this::mapVehicleProfile
+        );
+    }
+
+    @Override
+    public VehicleProfile saveVehicleProfile(VehicleProfile vehicle) {
+        upsert(
+                "update vehicle_profile set owner_id = ?, vehicle_type = ?, energy_type = ?, membership_type = ?, default_auth_status = ?, created_at = ? where plate_no = ?",
+                "insert into vehicle_profile (plate_no, owner_id, vehicle_type, energy_type, membership_type, default_auth_status, created_at) values (?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        vehicle.ownerId(),
+                        vehicle.vehicleType(),
+                        vehicle.energyType(),
+                        vehicle.membershipType(),
+                        vehicle.defaultAuthStatus(),
+                        Timestamp.valueOf(vehicle.createdAt()),
+                        vehicle.plateNo()
+                },
+                new Object[]{
+                        vehicle.plateNo(),
+                        vehicle.ownerId(),
+                        vehicle.vehicleType(),
+                        vehicle.energyType(),
+                        vehicle.membershipType(),
+                        vehicle.defaultAuthStatus(),
+                        Timestamp.valueOf(vehicle.createdAt())
+                }
+        );
+        return vehicle;
+    }
+
+    @Override
+    public List<PaymentTransaction> findPaymentTransactions() {
+        return jdbcTemplate.query(
+                "select payment_no, order_no, plate_no, amount, method, status, paid_at from payment_transaction order by paid_at desc, payment_no desc",
+                this::mapPaymentTransaction
+        );
+    }
+
+    @Override
+    public Optional<PaymentTransaction> findPaymentByOrderNo(String orderNo) {
+        return queryOne(
+                "select payment_no, order_no, plate_no, amount, method, status, paid_at from payment_transaction where order_no = ? order by paid_at desc limit 1",
+                this::mapPaymentTransaction,
+                orderNo
+        );
+    }
+
+    @Override
+    public PaymentTransaction savePaymentTransaction(PaymentTransaction payment) {
+        upsert(
+                "update payment_transaction set order_no = ?, plate_no = ?, amount = ?, method = ?, status = ?, paid_at = ? where payment_no = ?",
+                "insert into payment_transaction (payment_no, order_no, plate_no, amount, method, status, paid_at) values (?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        payment.orderNo(),
+                        payment.plateNo(),
+                        payment.amount(),
+                        payment.method(),
+                        payment.status(),
+                        Timestamp.valueOf(payment.paidAt()),
+                        payment.paymentNo()
+                },
+                new Object[]{
+                        payment.paymentNo(),
+                        payment.orderNo(),
+                        payment.plateNo(),
+                        payment.amount(),
+                        payment.method(),
+                        payment.status(),
+                        Timestamp.valueOf(payment.paidAt())
+                }
+        );
+        return payment;
+    }
+
+    @Override
+    public List<OrderBillingComponent> findBillingComponentsByOrderNo(String orderNo) {
+        return jdbcTemplate.query(
+                "select component_no, order_no, component_type, description, amount, created_at from order_billing_component where order_no = ? order by component_no",
+                this::mapBillingComponent,
+                orderNo
+        );
+    }
+
+    @Override
+    public OrderBillingComponent saveBillingComponent(OrderBillingComponent component) {
+        upsert(
+                "update order_billing_component set order_no = ?, component_type = ?, description = ?, amount = ?, created_at = ? where component_no = ?",
+                "insert into order_billing_component (component_no, order_no, component_type, description, amount, created_at) values (?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        component.orderNo(),
+                        component.componentType(),
+                        component.description(),
+                        component.amount(),
+                        Timestamp.valueOf(component.createdAt()),
+                        component.componentNo()
+                },
+                new Object[]{
+                        component.componentNo(),
+                        component.orderNo(),
+                        component.componentType(),
+                        component.description(),
+                        component.amount(),
+                        Timestamp.valueOf(component.createdAt())
+                }
+        );
+        return component;
     }
 
     @Override
@@ -565,13 +729,70 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     }
 
     private ParkingOrder mapOrder(ResultSet rs, int rowNum) throws SQLException {
+        Timestamp exitTime = rs.getTimestamp("exit_time");
+        Timestamp paidAt = rs.getTimestamp("paid_at");
+        int durationMinutes = rs.getInt("duration_minutes");
+        boolean durationWasNull = rs.wasNull();
         return new ParkingOrder(
                 rs.getString("order_no"),
                 rs.getString("plate_no"),
                 rs.getString("slot_id"),
                 rs.getTimestamp("entry_time").toLocalDateTime(),
+                exitTime == null ? null : exitTime.toLocalDateTime(),
                 OrderStatus.valueOf(rs.getString("status")),
-                rs.getBigDecimal("amount")
+                rs.getBigDecimal("amount"),
+                rs.getString("payment_status"),
+                rs.getString("payment_method"),
+                paidAt == null ? null : paidAt.toLocalDateTime(),
+                durationWasNull ? null : durationMinutes,
+                rs.getBigDecimal("discount_amount")
+        );
+    }
+
+    private CustomerAccount mapCustomerAccount(ResultSet rs, int rowNum) throws SQLException {
+        return new CustomerAccount(
+                rs.getString("owner_id"),
+                rs.getString("owner_name"),
+                rs.getString("phone_masked"),
+                rs.getString("member_level"),
+                rs.getString("account_status"),
+                rs.getBigDecimal("balance"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        );
+    }
+
+    private VehicleProfile mapVehicleProfile(ResultSet rs, int rowNum) throws SQLException {
+        return new VehicleProfile(
+                rs.getString("plate_no"),
+                rs.getString("owner_id"),
+                rs.getString("vehicle_type"),
+                rs.getString("energy_type"),
+                rs.getString("membership_type"),
+                rs.getString("default_auth_status"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        );
+    }
+
+    private PaymentTransaction mapPaymentTransaction(ResultSet rs, int rowNum) throws SQLException {
+        return new PaymentTransaction(
+                rs.getString("payment_no"),
+                rs.getString("order_no"),
+                rs.getString("plate_no"),
+                rs.getBigDecimal("amount"),
+                rs.getString("method"),
+                rs.getString("status"),
+                rs.getTimestamp("paid_at").toLocalDateTime()
+        );
+    }
+
+    private OrderBillingComponent mapBillingComponent(ResultSet rs, int rowNum) throws SQLException {
+        return new OrderBillingComponent(
+                rs.getString("component_no"),
+                rs.getString("order_no"),
+                rs.getString("component_type"),
+                rs.getString("description"),
+                rs.getBigDecimal("amount"),
+                rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
 
@@ -599,6 +820,10 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
         if (updated == 0) {
             jdbcTemplate.update(insertSql, insertArgs);
         }
+    }
+
+    private Timestamp timestampOrNull(LocalDateTime dateTime) {
+        return dateTime == null ? null : Timestamp.valueOf(dateTime);
     }
 
 }

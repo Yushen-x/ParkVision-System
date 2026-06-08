@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import AppSidebar from "./components/AppSidebar.vue";
+import RouteSkeleton from "./components/RouteSkeleton.vue";
 import TopBar from "./components/TopBar.vue";
 import { hydrate, pollRealtime, simulateEntry, state, toggleEmergency, triggerPreDispatch } from "./stores/parkingStore";
 
@@ -34,7 +35,14 @@ onUnmounted(() => {
         @pre-dispatch="triggerPreDispatch"
         @emergency="toggleEmergency"
       />
-      <RouterView />
+      <RouterView v-slot="{ Component }">
+        <Suspense timeout="0">
+          <component :is="Component" />
+          <template #fallback>
+            <RouteSkeleton :title="title" />
+          </template>
+        </Suspense>
+      </RouterView>
     </main>
   </div>
 </template>

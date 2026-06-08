@@ -36,6 +36,26 @@ public class DatabaseSeeder implements ApplicationRunner {
                 () -> repository.saveOrder(order),
                 order.getOrderNo()
         ));
+        seed.findCustomerAccounts().forEach(account -> insertIfMissing(
+                "select count(*) from customer_account where owner_id = ?",
+                () -> repository.saveCustomerAccount(account),
+                account.ownerId()
+        ));
+        seed.findVehicleProfiles().forEach(vehicle -> insertIfMissing(
+                "select count(*) from vehicle_profile where plate_no = ?",
+                () -> repository.saveVehicleProfile(vehicle),
+                vehicle.plateNo()
+        ));
+        seed.findPaymentTransactions().forEach(payment -> insertIfMissing(
+                "select count(*) from payment_transaction where payment_no = ?",
+                () -> repository.savePaymentTransaction(payment),
+                payment.paymentNo()
+        ));
+        seed.findOrders().forEach(order -> seed.findBillingComponentsByOrderNo(order.getOrderNo()).forEach(component -> insertIfMissing(
+                "select count(*) from order_billing_component where component_no = ?",
+                () -> repository.saveBillingComponent(component),
+                component.componentNo()
+        )));
         seed.findAlerts().forEach(alert -> insertIfMissing(
                 "select count(*) from alert_event where alert_no = ?",
                 () -> repository.saveAlert(alert),

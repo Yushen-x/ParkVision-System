@@ -8,6 +8,8 @@ controller -> service -> repository
 
 The default runtime path is now a JDBC repository backed by a persistent H2 file database. A fallback repository implementation is still available so the demo can run without external infrastructure, and the datasource can later be pointed at MySQL by overriding environment variables.
 
+The database schema includes operational parking data plus customer accounts, vehicle profiles, settlement fields on orders, payment transactions, billing components, dispatch data, device telemetry, and event history. The startup schema can add the newer settlement columns and tables to an existing local H2 file.
+
 ## Tech stack
 
 - Java 17 target

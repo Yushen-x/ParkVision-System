@@ -6,6 +6,8 @@ import {
   toggleEmergency,
 } from "./parkingStore";
 import {
+  buildMockBillingComponents,
+  mockAdminOverview,
   buildMockIndoorRoute as createIndoorRoute,
   buildMockPricingPreview as createPricingPreview,
   buildMockReport,
@@ -15,8 +17,10 @@ import {
   mockAccessList,
   mockAgvs,
   mockAlerts,
+  mockCustomerVehicles,
   mockDeviceOverview,
   mockForecast,
+  mockPayments,
   mockPricingRules,
   mockQueue,
   mockSummary,
@@ -40,9 +44,37 @@ function resetState() {
   state.agvs = structuredClone(mockAgvs);
   state.orders = createMockOrders();
   state.adminOrders = createMockAdminOrders();
+  state.adminOverview = { ...mockAdminOverview };
+  Object.assign(state.adminFilters, {
+    orderStatus: "",
+    orderKeyword: "",
+    orderDateFrom: "",
+    orderDateTo: "",
+    alertLevel: "",
+    alertStatus: "",
+    alertKeyword: "",
+    profileEnergyType: "",
+    profileMemberLevel: "",
+    profileKeyword: "",
+    paymentStatus: "",
+    paymentMethod: "",
+    paymentKeyword: "",
+    paymentDateFrom: "",
+    paymentDateTo: "",
+  });
   state.alerts = structuredClone(mockAlerts);
+  state.selectedAlertNo = "AL2026050601";
+  state.adminAlertDetail = null;
   state.pricingRules = structuredClone(mockPricingRules);
   state.accessList = structuredClone(mockAccessList);
+  state.customerVehicles = structuredClone(mockCustomerVehicles);
+  state.selectedCustomerOwnerId = "CUS0001";
+  state.adminCustomerDetail = null;
+  state.payments = structuredClone(mockPayments);
+  state.billingComponents = buildMockBillingComponents();
+  state.selectedBillingOrderNo = "PV20260506004";
+  state.selectedAdminOrderNo = "PV20260506004";
+  state.adminOrderDetail = null;
   state.systemNodes = structuredClone(mockSystemNodes);
   state.queue = structuredClone(mockQueue);
   state.devices = structuredClone(mockDeviceOverview);
@@ -55,6 +87,15 @@ function resetState() {
   ];
   state.visionResult = { ...mockVisionResult };
   state.adminReport = buildMockReport();
+  state.busy.entry = false;
+  state.busy.preDispatch = false;
+  state.busy.vision = false;
+  state.busy.ownerAction = false;
+  state.busy.report = false;
+  state.busy.billing = false;
+  state.busy.detail = false;
+  state.busy.customerDetail = false;
+  state.busy.alertDetail = false;
 }
 
 describe("parkingStore", () => {

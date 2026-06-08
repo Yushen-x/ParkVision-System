@@ -9,8 +9,60 @@ CREATE TABLE IF NOT EXISTS parking_order (
     plate_no VARCHAR(16) NOT NULL,
     slot_id VARCHAR(16) NOT NULL,
     entry_time TIMESTAMP NOT NULL,
+    exit_time TIMESTAMP,
     status VARCHAR(32) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_status VARCHAR(32) NOT NULL DEFAULT 'UNPAID',
+    payment_method VARCHAR(32),
+    paid_at TIMESTAMP,
+    duration_minutes INT,
+    discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+);
+
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS exit_time TIMESTAMP;
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS payment_status VARCHAR(32) NOT NULL DEFAULT 'UNPAID';
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS payment_method VARCHAR(32);
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS paid_at TIMESTAMP;
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS duration_minutes INT;
+ALTER TABLE parking_order ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00;
+
+CREATE TABLE IF NOT EXISTS customer_account (
+    owner_id VARCHAR(32) PRIMARY KEY,
+    owner_name VARCHAR(64) NOT NULL,
+    phone_masked VARCHAR(32) NOT NULL,
+    member_level VARCHAR(32) NOT NULL,
+    account_status VARCHAR(32) NOT NULL,
+    balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS vehicle_profile (
+    plate_no VARCHAR(16) PRIMARY KEY,
+    owner_id VARCHAR(32) NOT NULL,
+    vehicle_type VARCHAR(32) NOT NULL,
+    energy_type VARCHAR(32) NOT NULL,
+    membership_type VARCHAR(32) NOT NULL,
+    default_auth_status VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS payment_transaction (
+    payment_no VARCHAR(40) PRIMARY KEY,
+    order_no VARCHAR(32) NOT NULL,
+    plate_no VARCHAR(16) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    method VARCHAR(32) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    paid_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS order_billing_component (
+    component_no VARCHAR(48) PRIMARY KEY,
+    order_no VARCHAR(32) NOT NULL,
+    component_type VARCHAR(32) NOT NULL,
+    description VARCHAR(128) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS alert_event (
@@ -118,3 +170,10 @@ CREATE TABLE IF NOT EXISTS device_event (
     event_time TIMESTAMP NOT NULL,
     acknowledged BOOLEAN NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_parking_order_plate_status ON parking_order (plate_no, status);
+CREATE INDEX IF NOT EXISTS idx_parking_order_entry_time ON parking_order (entry_time);
+CREATE INDEX IF NOT EXISTS idx_vehicle_profile_owner ON vehicle_profile (owner_id);
+CREATE INDEX IF NOT EXISTS idx_payment_order ON payment_transaction (order_no);
+CREATE INDEX IF NOT EXISTS idx_billing_component_order ON order_billing_component (order_no);
+CREATE INDEX IF NOT EXISTS idx_device_event_device_time ON device_event (device_type, device_id, event_time);

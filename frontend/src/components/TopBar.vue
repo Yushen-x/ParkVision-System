@@ -32,9 +32,9 @@ onUnmounted(() => window.clearInterval(timer));
       <h1>{{ title }}</h1>
     </div>
     <div class="topbar-actions">
-      <div class="time-chip" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px;">
-        <span style="color:var(--text-muted); font-size:11px;">本地时间</span>
-        <strong style="color:#fff; font-family:'Orbitron', sans-serif;">{{ clock }}</strong>
+      <div class="time-chip" style="background: rgba(79, 70, 229, 0.06); border: 1px solid rgba(79, 70, 229, 0.15); padding: 8px 16px; border-radius: 8px;">
+        <span style="color:var(--text-muted); font-size:11px; margin-right: 6px;">本地时间</span>
+        <strong style="color:var(--brand); font-family:'Outfit', sans-serif; font-variant-numeric: tabular-nums;">{{ clock }}</strong>
       </div>
       <button class="ghost-button" :disabled="entryBusy" @click="$emit('entry')">
         <i class="fa-solid fa-car"></i>

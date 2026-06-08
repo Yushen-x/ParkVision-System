@@ -77,7 +77,7 @@ function formatTime(seconds) {
 </script>
 
 <template>
-  <section class="mobile-workbench">
+  <section>
     <div class="phone-frame">
       <div class="phone-status">
         <span>ParkVision</span>
@@ -131,12 +131,12 @@ function formatTime(seconds) {
 
         <div
           v-if="showOverlay"
-          style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.85); backdrop-filter:blur(5px); z-index:50; display:flex; flex-direction:column; justify-content:center; align-items:center;"
+          style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); backdrop-filter:blur(5px); z-index:50; display:flex; flex-direction:column; justify-content:center; align-items:center;"
         >
-          <div style="background: rgba(30, 41, 59, 0.95); width: 85%; border-radius: 20px; padding: 2.5rem 1.5rem; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="background: #ffffff; width: 85%; border-radius: 20px; padding: 2.5rem 1.5rem; text-align: center; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.08);">
             <h3 style="margin:0 0 10px; font-size:18px;">临停取物已开启</h3>
-            <p style="color:#94a3b8; font-size:13px; margin:0;">请在倒计时结束前完成物品拿取。</p>
-            <div style="font-size: 48px; font-weight:700; font-family:'Orbitron', sans-serif; color: #10b981; margin: 30px 0;">
+            <p style="color:var(--text-muted); font-size:13px; margin:0;">请在倒计时结束前完成物品拿取。</p>
+            <div style="font-size: 48px; font-weight:700; font-family:'Outfit', sans-serif; color: #10b981; margin: 30px 0; font-variant-numeric: tabular-nums;">
               {{ formatTime(timer) }}
             </div>
             <button class="primary-button full" @click="finishTouch">关闭</button>

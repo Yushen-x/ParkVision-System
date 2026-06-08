@@ -20,21 +20,21 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
         <span>ParkVision</span>
         <span><i class="fa-solid fa-wifi"></i> 5G <i class="fa-solid fa-battery-full"></i></span>
       </div>
-      <div class="phone-screen" style="background: #0f172a;">
-        <div style="padding: 2rem 1.5rem 1rem; color: #fff;">
+      <div class="phone-screen" style="background: #f8fafc;">
+        <div style="padding: 2rem 1.5rem 1rem; color: var(--text-main);">
           <h2 style="font-size:22px; font-weight:700;"><i class="fa-solid fa-location-arrow" style="color:var(--brand); margin-right:8px;"></i>室内交接导航</h2>
-          <p style="color:#94a3b8; font-size:13px; margin-top:5px;">距离 {{ zhText(route.handoffZone) }} 还剩 {{ route.remainingMeters }} 米。</p>
+          <p style="color:var(--text-muted); font-size:13px; margin-top:5px;">距离 {{ zhText(route.handoffZone) }} 还剩 {{ route.remainingMeters }} 米。</p>
         </div>
 
-        <div style="flex:1; position:relative; margin: 0 1rem 1rem; border-radius: 20px; background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1); overflow:hidden;">
-          <div style="position:absolute; width:200%; height:200%; background:conic-gradient(from 0deg, transparent 70%, rgba(56,189,248,0.3) 100%); top:-50%; left:-50%; animation: spin 4s linear infinite; pointer-events:none;"></div>
+        <div style="flex:1; position:relative; margin: 0 1rem 1rem; border-radius: 20px; background: #ffffff; border: 1px solid var(--border-color); overflow:hidden;">
+          <div style="position:absolute; width:200%; height:200%; background:conic-gradient(from 0deg, transparent 70%, rgba(79,70,229,0.15) 100%); top:-50%; left:-50%; animation: spin 4s linear infinite; pointer-events:none;"></div>
 
           <svg width="100%" height="100%" style="position:absolute; top:0; left:0;">
-            <path d="M 50 350 Q 50 200 150 200 T 250 50" fill="transparent" stroke="rgba(56,189,248,0.2)" stroke-width="12" stroke-linecap="round"/>
+            <path d="M 50 350 Q 50 200 150 200 T 250 50" fill="transparent" stroke="rgba(79,70,229,0.08)" stroke-width="12" stroke-linecap="round"/>
             <path d="M 50 350 Q 50 200 150 200 T 250 50" fill="transparent" stroke="var(--brand)" stroke-width="4" stroke-dasharray="10, 10" class="dash-path"/>
           </svg>
 
-          <div style="position:absolute; bottom:40px; left:35px; width:30px; height:30px; background:#fff; border-radius:50%; display:grid; place-items:center; color:#0f172a; box-shadow:0 0 15px #fff;"><i class="fa-solid fa-car"></i></div>
+          <div style="position:absolute; bottom:40px; left:35px; width:30px; height:30px; background:var(--brand); border-radius:50%; display:grid; place-items:center; color:#fff; box-shadow:0 4px 15px rgba(79,70,229,0.25);"><i class="fa-solid fa-car"></i></div>
           <div
             style="position:absolute; top:35px; right:35px; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:#fff;"
             :style="leadGate?.estopArmed ? 'background:var(--danger-red); box-shadow:0 0 20px var(--danger-red);' : 'background:var(--safety-green); box-shadow:0 0 20px var(--safety-green);'"
@@ -46,17 +46,17 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
           </div>
         </div>
 
-        <div style="padding: 1.5rem; background:rgba(255,255,255,0.05); border-top-left-radius: 24px; border-top-right-radius: 24px; backdrop-filter:blur(10px);">
+        <div style="padding: 1.5rem; background:#ffffff; border-top-left-radius: 24px; border-top-right-radius: 24px; border-top: 1px solid var(--border-color); backdrop-filter:blur(10px);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:12px;">
-            <div style="color:#fff; font-size:18px; font-weight:700;">{{ zhText(route.nextInstruction) }}</div>
-            <div style="color:var(--brand); font-size:24px; font-weight:800; font-family:'Orbitron', sans-serif;">{{ route.walkingSpeedKph }} km/h</div>
+            <div style="color:var(--text-main); font-size:18px; font-weight:700;">{{ zhText(route.nextInstruction) }}</div>
+            <div style="color:var(--brand); font-size:24px; font-weight:800; font-family:'Outfit', sans-serif;">{{ route.walkingSpeedKph }} km/h</div>
           </div>
           <div style="display:flex; gap:10px;">
             <div
               v-for="(filled, index) in progressSegments"
               :key="index"
               style="flex:1; height:6px; border-radius:3px;"
-              :style="filled ? 'background:var(--brand);' : 'background:rgba(255,255,255,0.1);'"
+              :style="filled ? 'background:var(--brand);' : 'background:rgba(0,0,0,0.06);'"
             ></div>
           </div>
         </div>
@@ -80,11 +80,11 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
       </div>
 
       <div class="module-row" style="grid-template-columns: 1fr; margin-top:18px;">
-        <div :style="leadGate?.estopArmed ? 'background:rgba(239,68,68,0.1); border-color:var(--danger-red);' : 'background:rgba(56,189,248,0.1); border-color:var(--brand);'">
+        <div :style="leadGate?.estopArmed ? 'background:rgba(239,68,68,0.05); border-color:var(--danger-red);' : 'background:rgba(79,70,229,0.05); border-color:var(--brand);'">
           <b><i class="fa-solid" :class="leadGate?.estopArmed ? 'fa-triangle-exclamation' : 'fa-satellite-dish'"></i> 路线安全</b>
           <span>{{ zhText(route.safetyMessage) }}</span>
         </div>
-        <div style="background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08);">
+        <div style="background:rgba(0,0,0,0.015); border-color:var(--border-color);">
           <b><i class="fa-solid fa-robot"></i> AGV 同步</b>
           <span>{{ zhText(route.status) }}</span>
         </div>

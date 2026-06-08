@@ -1,6 +1,8 @@
 import { computed, reactive } from "vue";
 import { parkvisionApi } from "../api/parkvisionApi";
 import {
+  mockAdminOverview,
+  buildMockBillingComponents,
   buildMockIndoorRoute,
   buildMockPricingPreview,
   buildMockReport,
@@ -10,8 +12,10 @@ import {
   mockAccessList,
   mockAgvs,
   mockAlerts,
+  mockCustomerVehicles,
   mockDeviceOverview,
   mockForecast,
+  mockPayments,
   mockPricingRules,
   mockQueue,
   mockSummary,
@@ -38,9 +42,37 @@ export const state = reactive({
   agvs: structuredClone(mockAgvs),
   orders: createMockOrders(),
   adminOrders: createMockAdminOrders(),
+  adminOverview: { ...mockAdminOverview },
+  adminFilters: {
+    orderStatus: "",
+    orderKeyword: "",
+    orderDateFrom: "",
+    orderDateTo: "",
+    alertLevel: "",
+    alertStatus: "",
+    alertKeyword: "",
+    profileEnergyType: "",
+    profileMemberLevel: "",
+    profileKeyword: "",
+    paymentStatus: "",
+    paymentMethod: "",
+    paymentKeyword: "",
+    paymentDateFrom: "",
+    paymentDateTo: "",
+  },
   alerts: structuredClone(mockAlerts),
+  selectedAlertNo: "AL2026050601",
+  adminAlertDetail: null,
   pricingRules: structuredClone(mockPricingRules),
   accessList: structuredClone(mockAccessList),
+  customerVehicles: structuredClone(mockCustomerVehicles),
+  selectedCustomerOwnerId: "CUS0001",
+  adminCustomerDetail: null,
+  payments: structuredClone(mockPayments),
+  billingComponents: buildMockBillingComponents(),
+  selectedBillingOrderNo: "PV20260506004",
+  selectedAdminOrderNo: "PV20260506004",
+  adminOrderDetail: null,
   systemNodes: structuredClone(mockSystemNodes),
   queue: structuredClone(mockQueue),
   devices: structuredClone(mockDeviceOverview),
@@ -59,6 +91,10 @@ export const state = reactive({
     vision: false,
     ownerAction: false,
     report: false,
+    billing: false,
+    detail: false,
+    customerDetail: false,
+    alertDetail: false,
   },
 });
 
@@ -251,14 +287,49 @@ async function fetchOperationalData() {
 }
 
 async function fetchAdminData() {
-  const [adminOrders, alerts, pricingRules, accessList] = await Promise.all([
-    parkvisionApi.getAdminOrders(),
-    parkvisionApi.getAlerts(),
+  const ordersParams = {
+    status: state.adminFilters.orderStatus,
+    keyword: state.adminFilters.orderKeyword,
+    dateFrom: state.adminFilters.orderDateFrom,
+    dateTo: state.adminFilters.orderDateTo,
+  };
+  const alertsParams = {
+    level: state.adminFilters.alertLevel,
+    status: state.adminFilters.alertStatus,
+    keyword: state.adminFilters.alertKeyword,
+  };
+  const profilesParams = {
+    energyType: state.adminFilters.profileEnergyType,
+    memberLevel: state.adminFilters.profileMemberLevel,
+    keyword: state.adminFilters.profileKeyword,
+  };
+  const paymentsParams = {
+    status: state.adminFilters.paymentStatus,
+    method: state.adminFilters.paymentMethod,
+    keyword: state.adminFilters.paymentKeyword,
+    dateFrom: state.adminFilters.paymentDateFrom,
+    dateTo: state.adminFilters.paymentDateTo,
+  };
+
+  const [adminOrders, alerts, pricingRules, accessList, customerVehicles, payments, adminOverview] = await Promise.all([
+    parkvisionApi.getAdminOrders(ordersParams),
+    parkvisionApi.getAlerts(alertsParams),
     parkvisionApi.getPricingRules(),
     parkvisionApi.getAccessList(),
+    parkvisionApi.getCustomerVehicles(profilesParams),
+    parkvisionApi.getPayments(paymentsParams),
+    parkvisionApi.getAdminOverview(),
   ]);
 
-  return { adminOrders, alerts, pricingRules, accessList };
+  return {
+    adminOrders,
+    alerts,
+    pricingRules,
+    accessList,
+    customerVehicles,
+    payments,
+    adminOverview,
+  };
 }
 
 function applyOperationalData(data) {
@@ -548,4 +619,252 @@ function normalizeDevices(overview) {
     chargers: overview?.chargers || [],
     events: overview?.events || [],
   };
+}
+
+export async function updateAdminFilters(filters) {
+  Object.assign(state.adminFilters, filters);
+  await refreshAdminData();
+}
+
+export async function resetAdminFilters(tab) {
+  if (tab === "orders") {
+    state.adminFilters.orderStatus = "";
+    state.adminFilters.orderKeyword = "";
+    state.adminFilters.orderDateFrom = "";
+    state.adminFilters.orderDateTo = "";
+  } else if (tab === "alerts") {
+    state.adminFilters.alertLevel = "";
+    state.adminFilters.alertStatus = "";
+    state.adminFilters.alertKeyword = "";
+  } else if (tab === "profiles") {
+    state.adminFilters.profileEnergyType = "";
+    state.adminFilters.profileMemberLevel = "";
+    state.adminFilters.profileKeyword = "";
+  } else if (tab === "payments") {
+    state.adminFilters.paymentStatus = "";
+    state.adminFilters.paymentMethod = "";
+    state.adminFilters.paymentKeyword = "";
+    state.adminFilters.paymentDateFrom = "";
+    state.adminFilters.paymentDateTo = "";
+  }
+  await refreshAdminData();
+}
+
+export async function loadAdminOrderDetail(orderNo) {
+  state.selectedAdminOrderNo = orderNo;
+  state.adminOrderDetail = null;
+  state.busy.detail = true;
+  try {
+    state.adminOrderDetail = await parkvisionApi.getAdminOrderDetail(orderNo);
+  } catch {
+    state.adminOrderDetail = fallbackAdminOrderDetail(orderNo);
+  } finally {
+    state.busy.detail = false;
+  }
+}
+
+export async function loadAdminCustomerDetail(ownerId) {
+  state.selectedCustomerOwnerId = ownerId;
+  state.adminCustomerDetail = null;
+  state.busy.customerDetail = true;
+  try {
+    state.adminCustomerDetail = await parkvisionApi.getAdminCustomerDetail(ownerId);
+  } catch {
+    state.adminCustomerDetail = fallbackAdminCustomerDetail(ownerId);
+  } finally {
+    state.busy.customerDetail = false;
+  }
+}
+
+export async function loadAdminAlertDetail(alertNo) {
+  state.selectedAlertNo = alertNo;
+  state.adminAlertDetail = null;
+  state.busy.alertDetail = true;
+  try {
+    state.adminAlertDetail = await parkvisionApi.getAdminAlertDetail(alertNo);
+  } catch {
+    state.adminAlertDetail = fallbackAdminAlertDetail(alertNo);
+  } finally {
+    state.busy.alertDetail = false;
+  }
+}
+
+export async function loadBillingComponents(orderNo) {
+  state.selectedBillingOrderNo = orderNo;
+  state.billingComponents = [];
+  state.busy.billing = true;
+  try {
+    state.billingComponents = await parkvisionApi.getBillingComponents(orderNo);
+  } catch {
+    state.billingComponents = buildMockBillingComponents(orderNo);
+  } finally {
+    state.busy.billing = false;
+  }
+}
+
+function fallbackAdminOrderDetail(orderNo) {
+  const order = state.orders.find((item) => item.orderNo === orderNo);
+  if (!order) return null;
+  const orderRow = state.adminOrders.find((item) => item.orderNo === orderNo) || toAdminOrderRow(order);
+  const profile = mockCustomerVehicles.find((item) => item.plateNo === order.plateNo);
+  const payment = mockPayments.find((item) => item.orderNo === orderNo);
+  const billingComponents = state.billingComponents && state.billingComponents[0]?.orderNo === orderNo
+      ? state.billingComponents.map((item) => ({ ...item }))
+      : buildMockBillingComponents(orderNo);
+  const paidAt = order.paidAt || payment?.paidAt || null;
+  const durationMinutes =
+    order.durationMinutes ??
+    computeDurationMinutes(order.entryTime, order.exitTime || paidAt);
+
+  return {
+    orderNo: order.orderNo,
+    plateNo: order.plateNo,
+    slotId: order.slotId,
+    event: orderRow.event,
+    status: orderRow.status,
+    entryTime: normalizeAdminTime(order.entryTime),
+    exitTime: normalizeAdminTime(order.exitTime || paidAt),
+    durationMinutes,
+    amount: Number(order.amount || 0),
+    discountAmount: Number(order.discountAmount || 0),
+    paymentStatus: order.paymentStatus || (payment ? "PAID" : "UNPAID"),
+    paymentMethod: order.paymentMethod || payment?.method || null,
+    paidAt: normalizeAdminTime(paidAt),
+    customer: profile
+      ? {
+          ownerId: profile.ownerId,
+          ownerName: profile.ownerName,
+          phoneMasked: profile.phoneMasked,
+          memberLevel: profile.memberLevel,
+          accountStatus: profile.accountStatus,
+          balance: null,
+          createdAt: null,
+        }
+      : null,
+    vehicle: profile
+      ? {
+          plateNo: profile.plateNo,
+          ownerId: profile.ownerId,
+          vehicleType: "PASSENGER",
+          energyType: profile.energyType,
+          membershipType: profile.membershipType,
+          defaultAuthStatus: "ALLOW",
+          createdAt: null,
+        }
+      : null,
+    payment: payment
+      ? {
+          paymentNo: payment.paymentNo,
+          amount: Number(payment.amount || 0),
+          method: payment.method,
+          status: payment.status,
+          paidAt: normalizeAdminTime(payment.paidAt),
+        }
+      : null,
+    billingComponents,
+  };
+}
+
+function fallbackAdminCustomerDetail(ownerId) {
+  const profile = mockCustomerVehicles.find((item) => item.ownerId === ownerId);
+  if (!profile) return null;
+
+  const vehicles = mockCustomerVehicles
+    .filter((item) => item.ownerId === ownerId)
+    .map((item) => ({
+      plateNo: item.plateNo,
+      ownerId: item.ownerId,
+      vehicleType: "PASSENGER",
+      energyType: item.energyType,
+      membershipType: item.membershipType,
+      defaultAuthStatus: "ALLOW",
+      createdAt: item.createdAt || "2026-01-01T08:00:00Z",
+    }));
+
+  const recentOrders = state.orders
+    .filter((order) => vehicles.some((v) => v.plateNo === order.plateNo))
+    .slice(0, 5)
+    .map((order) => {
+      const orderRow = state.adminOrders.find((item) => item.orderNo === order.orderNo) || toAdminOrderRow(order);
+      return {
+        orderNo: order.orderNo,
+        entryTime: normalizeAdminTime(order.entryTime),
+        exitTime: normalizeAdminTime(order.exitTime || order.paidAt),
+        amount: Number(order.amount || 0),
+        status: orderRow.status,
+      };
+    });
+
+  const lastPayment = mockPayments
+    .filter((p) => p.ownerId === ownerId || recentOrders.some((o) => o.orderNo === p.orderNo))
+    .sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt))[0];
+
+  return {
+    ownerId: profile.ownerId,
+    ownerName: profile.ownerName,
+    phoneMasked: profile.phoneMasked,
+    memberLevel: profile.memberLevel,
+    accountStatus: profile.accountStatus,
+    balance: 100.00,
+    createdAt: profile.createdAt || "2026-01-01T08:00:00Z",
+    lastPaymentAt: lastPayment ? normalizeAdminTime(lastPayment.paidAt) : "无",
+    vehicles,
+    recentOrders,
+  };
+}
+
+function fallbackAdminAlertDetail(alertNo) {
+  const alert = state.alerts.find((item) => item.alertNo === alertNo);
+  if (!alert) return null;
+
+  const deviceEvents = state.devices.events.slice(0, 2).map((event) => ({
+    eventId: event.eventId,
+    deviceId: event.deviceId,
+    eventCode: event.eventCode,
+    severity: event.severity || "warning",
+    message: event.message,
+    eventTime: normalizeAdminTime(event.eventTime),
+  }));
+
+  const relatedOrders = state.orders.slice(0, 1).map((order) => {
+    const orderRow = state.adminOrders.find((item) => item.orderNo === order.orderNo) || toAdminOrderRow(order);
+    return {
+      orderNo: order.orderNo,
+      plateNo: order.plateNo,
+      slotId: order.slotId,
+      status: orderRow.status,
+      amount: order.amount,
+    };
+  });
+
+  return {
+    alertNo: alert.alertNo,
+    type: alert.type,
+    content: alert.content,
+    status: alert.status,
+    level: alert.level,
+    recommendedAction: alert.type === "INTRUSION" ? "立即查看监控并指派保安前往" : "检查车位传感器及网络连接",
+    deviceEvents,
+    relatedOrders,
+  };
+}
+
+function normalizeAdminTime(timeStr) {
+  if (!timeStr) return "无";
+  try {
+    const d = new Date(timeStr);
+    if (isNaN(d.getTime())) return timeStr;
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  } catch {
+    return timeStr;
+  }
+}
+
+function computeDurationMinutes(entryTime, exitTime) {
+  if (!entryTime) return 0;
+  const start = new Date(entryTime).getTime();
+  const end = exitTime ? new Date(exitTime).getTime() : Date.now();
+  if (isNaN(start) || isNaN(end)) return 0;
+  return Math.max(1, Math.ceil((end - start) / 60000));
 }

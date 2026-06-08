@@ -9,7 +9,7 @@ const activeCharger = computed(() => state.devices.chargers.find((charger) => ch
 </script>
 
 <template>
-  <section class="dispatch-layout">
+  <section>
     <article class="surface">
       <div class="section-head">
         <div>

@@ -242,7 +242,7 @@ const pipeline = [
   position: absolute;
   inset: auto -20% -50% -20%;
   height: 110px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 65%);
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.08), transparent 65%);
   pointer-events: none;
 }
 
@@ -256,14 +256,14 @@ const pipeline = [
 .ai-kpi strong {
   display: block;
   margin: 12px 0 8px;
-  color: #fff;
-  font-family: "Orbitron", sans-serif;
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
   font-size: 30px;
 }
 
 .ai-kpi b {
   display: block;
-  color: #e2e8f0;
+  color: var(--text-main);
   font-size: 15px;
 }
 
@@ -287,8 +287,8 @@ const pipeline = [
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
 }
@@ -299,10 +299,10 @@ const pipeline = [
   top: 18px;
   padding: 7px 10px;
   border-radius: 8px;
-  color: #fecaca;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  font-family: "Orbitron", sans-serif;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  font-family: "Outfit", sans-serif;
   font-size: 12px;
 }
 
@@ -318,7 +318,7 @@ const pipeline = [
   border: 2px dashed rgba(16, 185, 129, 0.65);
   color: #86efac;
   background: rgba(16, 185, 129, 0.06);
-  font-family: "Orbitron", sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 11px;
 }
 
@@ -363,9 +363,9 @@ const pipeline = [
 .ai-overlay span {
   padding: 7px 10px;
   border-radius: 999px;
-  color: #bae6fd;
-  background: rgba(2, 132, 199, 0.16);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: var(--brand);
+  background: rgba(79, 70, 229, 0.06);
+  border: 1px solid rgba(79, 70, 229, 0.15);
   font-size: 12px;
   font-weight: 700;
 }
@@ -391,7 +391,7 @@ const pipeline = [
   gap: 18px;
   padding: 18px 10px 4px;
   border-radius: 10px;
-  background: rgba(2, 6, 23, 0.42);
+  background: rgba(0, 0, 0, 0.015);
   border: 1px solid var(--border-color);
 }
 
@@ -435,8 +435,8 @@ const pipeline = [
 .bar-value {
   position: absolute;
   top: -2px;
-  color: #fff;
-  font-family: "Orbitron", sans-serif;
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
   font-size: 13px;
 }
 
@@ -449,15 +449,15 @@ const pipeline = [
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: 10px;
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: #92400e;
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.2);
   line-height: 1.6;
 }
 
 .decision-strip b {
   margin-right: 12px;
-  color: #fbbf24;
+  color: #d97706;
 }
 
 .intent-flow {
@@ -472,7 +472,7 @@ const pipeline = [
   align-items: center;
   padding: 14px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(0, 0, 0, 0.015);
   border: 1px solid var(--border-color);
 }
 
@@ -483,7 +483,7 @@ const pipeline = [
 }
 
 .intent-row b {
-  color: #f8fafc;
+  color: var(--text-main);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -505,23 +505,23 @@ const pipeline = [
   gap: 8px;
   padding: 14px;
   border-radius: 10px;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  background: rgba(79, 70, 229, 0.04);
+  border: 1px solid rgba(79, 70, 229, 0.15);
 }
 
 .pipeline-node span {
   color: var(--brand);
-  font-family: "Orbitron", sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 12px;
 }
 
 .pipeline-node b {
-  color: #fff;
+  color: var(--text-main);
   font-size: 14px;
 }
 
 .pipeline-arrow {
-  color: rgba(56, 189, 248, 0.75);
+  color: rgba(79, 70, 229, 0.5);
 }
 
 @media (max-width: 1320px) {

@@ -1,6 +1,8 @@
 package com.parkvision.cps.service;
 
 import com.parkvision.cps.common.BusinessException;
+import com.parkvision.cps.domain.billing.OrderBillingComponent;
+import com.parkvision.cps.domain.billing.PaymentTransaction;
 import com.parkvision.cps.domain.order.OrderStatus;
 import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.ParkingOrder;
@@ -64,7 +66,7 @@ public class OrderService {
         order.setStatus(status);
         syncSlotState(order, status);
         if (status == OrderStatus.FINISHED) {
-            order.setAmount(calculateAmount(order));
+            closeAndSettleOrder(order);
         }
         ParkingOrder saved = repository.saveOrder(order);
         if (status == OrderStatus.RETRIEVING) {
@@ -80,6 +82,54 @@ public class OrderService {
             deviceService.recordOrderClosed(saved);
         }
         return saved;
+    }
+
+    private void closeAndSettleOrder(ParkingOrder order) {
+        LocalDateTime settledAt = LocalDateTime.now();
+        int durationMinutes = (int) Math.max(30, Duration.between(order.getEntryTime(), settledAt).toMinutes());
+        BigDecimal amount = calculateAmount(order, durationMinutes);
+
+        order.setExitTime(settledAt);
+        order.setPaidAt(settledAt);
+        order.setPaymentStatus("PAID");
+        order.setPaymentMethod("AUTO_SETTLEMENT");
+        order.setDurationMinutes(durationMinutes);
+        order.setDiscountAmount(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        order.setAmount(amount);
+
+        repository.savePaymentTransaction(new PaymentTransaction(
+                "PAY-" + order.getOrderNo(),
+                order.getOrderNo(),
+                order.getPlateNo(),
+                amount,
+                "AUTO_SETTLEMENT",
+                "SUCCESS",
+                settledAt
+        ));
+
+        long billedHours = (long) Math.ceil(durationMinutes / 60.0);
+        BigDecimal parkingAmount = new BigDecimal("6.00");
+        if (billedHours > 1) {
+            parkingAmount = parkingAmount.add(new BigDecimal("4.00").multiply(BigDecimal.valueOf(billedHours - 1)));
+        }
+        repository.saveBillingComponent(new OrderBillingComponent(
+                "BILL-" + order.getOrderNo() + "-PARKING",
+                order.getOrderNo(),
+                "PARKING",
+                billedHours + " billed parking hour(s)",
+                parkingAmount.setScale(2, RoundingMode.HALF_UP),
+                settledAt
+        ));
+        if (isChargingPlate(order.getPlateNo())) {
+            repository.saveBillingComponent(new OrderBillingComponent(
+                    "BILL-" + order.getOrderNo() + "-CHARGING",
+                    order.getOrderNo(),
+                    "CHARGING",
+                    "EV charging service package",
+                    new BigDecimal("12.50"),
+                    settledAt
+            ));
+        }
     }
 
     private void syncSlotState(ParkingOrder order, OrderStatus status) {
@@ -100,8 +150,12 @@ public class OrderService {
     }
 
     private BigDecimal calculateAmount(ParkingOrder order) {
-        long minutes = Math.max(30, Duration.between(order.getEntryTime(), LocalDateTime.now()).toMinutes());
-        long billedHours = (long) Math.ceil(minutes / 60.0);
+        int minutes = (int) Math.max(30, Duration.between(order.getEntryTime(), LocalDateTime.now()).toMinutes());
+        return calculateAmount(order, minutes);
+    }
+
+    private BigDecimal calculateAmount(ParkingOrder order, int durationMinutes) {
+        long billedHours = (long) Math.ceil(durationMinutes / 60.0);
         BigDecimal amount = new BigDecimal("6.00");
         if (billedHours > 1) {
             amount = amount.add(new BigDecimal("4.00").multiply(BigDecimal.valueOf(billedHours - 1)));

@@ -43,6 +43,17 @@ export const mockSummary = {
   chargingTurnover: "7.4 次/日",
 };
 
+export const mockAdminOverview = {
+  activeOrders: 17,
+  settledOrders: 7,
+  customerCount: 24,
+  vehicleCount: 24,
+  paymentCount: 7,
+  liveAlerts: 8,
+  vipTasks: 2,
+  collectedRevenue: 257,
+};
+
 export const mockForecast = {
   history: [12, 18, 16, 22, 35, 48, 52, 42, 36, 58, 64, 49],
   prediction: [61, 57, 49, 43, 38, 32],
@@ -331,6 +342,98 @@ export function toAdminOrderRow(order) {
 
 export function createMockAdminOrders() {
   return createMockOrders().map(toAdminOrderRow);
+}
+
+export const mockCustomerVehicles = [
+  {
+    ownerId: "CUS0001",
+    ownerName: "Owner 1",
+    phoneMasked: "138****2000",
+    memberLevel: "VIP",
+    accountStatus: "ACTIVE",
+    plateNo: "SH-A7686",
+    energyType: "FUEL",
+    membershipType: "MONTHLY_CARD",
+    accessType: "Whitelist",
+  },
+  {
+    ownerId: "CUS0002",
+    ownerName: "Owner 2",
+    phoneMasked: "138****2001",
+    memberLevel: "STANDARD",
+    accountStatus: "ACTIVE",
+    plateNo: "SH-D5218",
+    energyType: "EV",
+    membershipType: "EV_PRIORITY",
+    accessType: "Whitelist",
+  },
+  {
+    ownerId: "CUS0003",
+    ownerName: "Owner 3",
+    phoneMasked: "138****2002",
+    memberLevel: "STANDARD",
+    accountStatus: "ACTIVE",
+    plateNo: "SU-M9021",
+    energyType: "FUEL",
+    membershipType: "TEMPORARY",
+    accessType: "Normal",
+  },
+];
+
+export const mockPayments = [
+  {
+    paymentNo: "PAY-PV20260506004",
+    orderNo: "PV20260506004",
+    plateNo: "SH-K1314",
+    amount: 16,
+    method: "AUTO_SETTLEMENT",
+    status: "SUCCESS",
+    paidAt: "2026-05-18T11:10:00",
+  },
+  {
+    paymentNo: "PAY-PV20260506009",
+    orderNo: "PV20260506009",
+    plateNo: "SH-N4820",
+    amount: 44,
+    method: "AUTO_SETTLEMENT",
+    status: "SUCCESS",
+    paidAt: "2026-05-18T12:45:00",
+  },
+];
+
+export function buildMockBillingComponents(orderNo = "PV20260506004") {
+  const commonTime = "2026-05-18 11:10";
+  const byOrder = {
+    PV20260506004: [
+      {
+        componentNo: "BILL-PV20260506004-PARKING",
+        orderNo,
+        componentType: "PARKING",
+        description: "Parking duration fee",
+        amount: 16,
+        createdAt: commonTime,
+      },
+    ],
+    PV20260506009: [
+      {
+        componentNo: "BILL-PV20260506009-PARKING",
+        orderNo,
+        componentType: "PARKING",
+        description: "Parking duration fee",
+        amount: 32,
+        createdAt: "2026-05-18 12:45",
+      },
+      {
+        componentNo: "BILL-PV20260506009-CHARGING",
+        orderNo,
+        componentType: "CHARGING",
+        description: "EV charging service package",
+        amount: 12,
+        createdAt: "2026-05-18 12:45",
+      },
+    ],
+  };
+  return (byOrder[orderNo] || byOrder.PV20260506004).map((item) => ({ ...item }));
 }
 
 export function buildMockReport(query = "最近 7 天 VIP 服务趋势") {

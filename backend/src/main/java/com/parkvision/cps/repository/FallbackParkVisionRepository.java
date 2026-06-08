@@ -4,6 +4,10 @@ import com.parkvision.cps.domain.admin.AccessListItem;
 import com.parkvision.cps.domain.admin.AlertEvent;
 import com.parkvision.cps.domain.admin.PricingRule;
 import com.parkvision.cps.domain.admin.SystemNodeStatus;
+import com.parkvision.cps.domain.billing.OrderBillingComponent;
+import com.parkvision.cps.domain.billing.PaymentTransaction;
+import com.parkvision.cps.domain.customer.CustomerAccount;
+import com.parkvision.cps.domain.customer.VehicleProfile;
 import com.parkvision.cps.domain.device.CameraDevice;
 import com.parkvision.cps.domain.device.ChargingStation;
 import com.parkvision.cps.domain.device.DeviceEvent;
@@ -32,6 +36,10 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     private final List<AlertEvent> alerts = new ArrayList<>();
     private final List<PricingRule> pricingRules = new ArrayList<>();
     private final List<AccessListItem> accessList = new ArrayList<>();
+    private final List<CustomerAccount> customerAccounts = new ArrayList<>();
+    private final List<VehicleProfile> vehicleProfiles = new ArrayList<>();
+    private final List<PaymentTransaction> paymentTransactions = new ArrayList<>();
+    private final List<OrderBillingComponent> billingComponents = new ArrayList<>();
     private final List<SystemNodeStatus> systemNodes = new ArrayList<>();
     private final List<AgvUnit> agvUnits = new ArrayList<>();
     private final List<DispatchTask> dispatchQueue = new ArrayList<>();
@@ -43,6 +51,7 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     public FallbackParkVisionRepository() {
         seedParkingSlots();
         seedOrders();
+        seedCustomerAndBillingData();
         seedAdminData();
         seedDispatchData();
         seedDeviceData();
@@ -93,6 +102,63 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         orders.removeIf(existing -> existing.getOrderNo().equals(order.getOrderNo()));
         orders.add(0, order);
         return order;
+    }
+
+    @Override
+    public List<CustomerAccount> findCustomerAccounts() {
+        return Collections.unmodifiableList(customerAccounts);
+    }
+
+    @Override
+    public CustomerAccount saveCustomerAccount(CustomerAccount account) {
+        customerAccounts.removeIf(existing -> existing.ownerId().equals(account.ownerId()));
+        customerAccounts.add(account);
+        return account;
+    }
+
+    @Override
+    public List<VehicleProfile> findVehicleProfiles() {
+        return Collections.unmodifiableList(vehicleProfiles);
+    }
+
+    @Override
+    public VehicleProfile saveVehicleProfile(VehicleProfile vehicle) {
+        vehicleProfiles.removeIf(existing -> existing.plateNo().equals(vehicle.plateNo()));
+        vehicleProfiles.add(vehicle);
+        return vehicle;
+    }
+
+    @Override
+    public List<PaymentTransaction> findPaymentTransactions() {
+        return Collections.unmodifiableList(paymentTransactions);
+    }
+
+    @Override
+    public Optional<PaymentTransaction> findPaymentByOrderNo(String orderNo) {
+        return paymentTransactions.stream()
+                .filter(payment -> payment.orderNo().equals(orderNo))
+                .findFirst();
+    }
+
+    @Override
+    public PaymentTransaction savePaymentTransaction(PaymentTransaction payment) {
+        paymentTransactions.removeIf(existing -> existing.paymentNo().equals(payment.paymentNo()));
+        paymentTransactions.add(0, payment);
+        return payment;
+    }
+
+    @Override
+    public List<OrderBillingComponent> findBillingComponentsByOrderNo(String orderNo) {
+        return billingComponents.stream()
+                .filter(component -> component.orderNo().equals(orderNo))
+                .toList();
+    }
+
+    @Override
+    public OrderBillingComponent saveBillingComponent(OrderBillingComponent component) {
+        billingComponents.removeIf(existing -> existing.componentNo().equals(component.componentNo()));
+        billingComponents.add(component);
+        return component;
     }
 
     @Override
@@ -264,6 +330,62 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         addSeedOrder("PV20260506022", "SH-W3099", "F10", now.minusMinutes(96), OrderStatus.PARKED, "9.00");
         addSeedOrder("PV20260506023", "SH-J5520", "B03", now.minusHours(6).minusMinutes(52), OrderStatus.FINISHED, "31.00");
         addSeedOrder("PV20260506024", "SH-Z9907", "C07", now.minusHours(4).minusMinutes(8), OrderStatus.PARKED, "22.00");
+    }
+
+    private void seedCustomerAndBillingData() {
+        LocalDateTime now = LocalDateTime.now();
+        List<String> plates = orders.stream().map(ParkingOrder::getPlateNo).distinct().toList();
+        for (int index = 0; index < plates.size(); index++) {
+            String ownerId = "CUS%04d".formatted(index + 1);
+            String plateNo = plates.get(index);
+            boolean ev = plateNo.startsWith("SH-D");
+            customerAccounts.add(new CustomerAccount(
+                    ownerId,
+                    "Owner " + (index + 1),
+                    "138****%04d".formatted(2000 + index),
+                    index % 5 == 0 ? "VIP" : index % 3 == 0 ? "MONTHLY" : "STANDARD",
+                    "ACTIVE",
+                    new BigDecimal(index % 4 == 0 ? "120.00" : "0.00"),
+                    now.minusDays(120L - index)
+            ));
+            vehicleProfiles.add(new VehicleProfile(
+                    plateNo,
+                    ownerId,
+                    "PASSENGER",
+                    ev ? "EV" : "FUEL",
+                    ev ? "EV_PRIORITY" : index % 3 == 0 ? "MONTHLY_CARD" : "TEMPORARY",
+                    "ALLOW",
+                    now.minusDays(90L - index)
+            ));
+        }
+
+        orders.stream()
+                .filter(order -> order.getStatus() == OrderStatus.FINISHED)
+                .forEach(order -> {
+                    LocalDateTime paidAt = order.getEntryTime().plusHours(2);
+                    order.setExitTime(paidAt);
+                    order.setPaidAt(paidAt);
+                    order.setPaymentStatus("PAID");
+                    order.setPaymentMethod("AUTO_SETTLEMENT");
+                    order.setDurationMinutes((int) java.time.Duration.between(order.getEntryTime(), paidAt).toMinutes());
+                    savePaymentTransaction(new PaymentTransaction(
+                            "PAY-" + order.getOrderNo(),
+                            order.getOrderNo(),
+                            order.getPlateNo(),
+                            order.getAmount(),
+                            "AUTO_SETTLEMENT",
+                            "SUCCESS",
+                            paidAt
+                    ));
+                    saveBillingComponent(new OrderBillingComponent(
+                            "BILL-" + order.getOrderNo() + "-BASE",
+                            order.getOrderNo(),
+                            "PARKING",
+                            "Parking duration fee",
+                            order.getAmount(),
+                            paidAt
+                    ));
+                });
     }
 
     private void seedAdminData() {

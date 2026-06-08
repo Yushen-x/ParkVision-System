@@ -34,7 +34,7 @@ const deviceRows = computed(() => [
 </script>
 
 <template>
-  <section class="dispatch-layout">
+  <section>
     <article class="surface">
       <div class="section-head">
         <div>

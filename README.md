@@ -42,11 +42,13 @@ The backend no longer depends on a globally installed Maven. The repository incl
 
 The default backend database is an H2 file database stored under `backend/data/parkvision.*`. It survives backend restarts and can be inspected through the built-in H2 console at `http://localhost:8080/h2-console`.
 
+The database model now covers parking slots, orders, customer accounts, vehicle profiles, pricing rules, access lists, payment transactions, billing components, dispatch tasks, AGV units, device telemetry, device events, and system alerts. Startup SQL can upgrade an existing local H2 file by adding the newer order settlement columns and tables automatically.
+
 ## What is complete now
 
 - Frontend pages for dashboard, AI vision, dispatch, admin console, owner portal, digital twin, system gateway, pricing, and indoor navigation
 - Backend APIs for slots, raw orders, admin order rows, alerts, pricing rules, access list, system nodes, dispatch queue, AGVs, pre-dispatch, VIP retrieval, vision inference, device telemetry, pricing preview, indoor navigation, and emergency control
-- Persistent JDBC repository with seeded operational data and device telemetry simulation for cameras, PLC gates, AGVs, and OCPP chargers
+- Persistent JDBC repository with seeded operational data, customer/vehicle profiles, payment settlement records, billing details, and device telemetry simulation for cameras, PLC gates, AGVs, and OCPP chargers
 - Fallback repository data that keeps the demo usable even if the backend is not running
 - Backend tests plus a Maven Wrapper so the backend can be built on a clean machine
 

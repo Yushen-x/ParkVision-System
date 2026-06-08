@@ -4,6 +4,10 @@ import com.parkvision.cps.domain.admin.AlertEvent;
 import com.parkvision.cps.domain.admin.AccessListItem;
 import com.parkvision.cps.domain.admin.PricingRule;
 import com.parkvision.cps.domain.admin.SystemNodeStatus;
+import com.parkvision.cps.domain.billing.OrderBillingComponent;
+import com.parkvision.cps.domain.billing.PaymentTransaction;
+import com.parkvision.cps.domain.customer.CustomerAccount;
+import com.parkvision.cps.domain.customer.VehicleProfile;
 import com.parkvision.cps.domain.device.CameraDevice;
 import com.parkvision.cps.domain.device.ChargingStation;
 import com.parkvision.cps.domain.device.DeviceEvent;
@@ -32,6 +36,24 @@ public interface ParkVisionRepository {
     Optional<ParkingOrder> findOrderByNo(String orderNo);
 
     ParkingOrder saveOrder(ParkingOrder order);
+
+    List<CustomerAccount> findCustomerAccounts();
+
+    CustomerAccount saveCustomerAccount(CustomerAccount account);
+
+    List<VehicleProfile> findVehicleProfiles();
+
+    VehicleProfile saveVehicleProfile(VehicleProfile vehicle);
+
+    List<PaymentTransaction> findPaymentTransactions();
+
+    Optional<PaymentTransaction> findPaymentByOrderNo(String orderNo);
+
+    PaymentTransaction savePaymentTransaction(PaymentTransaction payment);
+
+    List<OrderBillingComponent> findBillingComponentsByOrderNo(String orderNo);
+
+    OrderBillingComponent saveBillingComponent(OrderBillingComponent component);
 
     List<AlertEvent> findAlerts();
 

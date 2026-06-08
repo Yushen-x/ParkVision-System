@@ -31,10 +31,12 @@ const navItems = [
         <span>{{ label }}</span>
       </RouterLink>
     </nav>
-    <div class="sidebar-panel">
-      <span class="panel-label"><i class="fa-solid fa-circle-dot" style="color:var(--safety-green); margin-right:6px;"></i>运行模式</span>
-      <strong>{{ zhText(mode) }}</strong>
-      <p>前端优先读取实时 API 和数据库，只有后端不可用时才使用本地兜底数据。</p>
+    <div class="sidebar-footer">
+      <div class="system-status">
+        <span class="status-indicator-dot"></span>
+        <span>系统在线</span>
+      </div>
+      <span class="version-tag">PV-CPS v1.2.0</span>
     </div>
   </aside>
 </template>

@@ -38,6 +38,10 @@ class OrderServiceTest {
         assertThat(updatedOrder.getStatus()).isEqualTo(OrderStatus.FINISHED);
         assertThat(updatedOrder.getAmount()).isNotNull();
         assertThat(updatedOrder.getAmount().doubleValue()).isGreaterThan(0);
+        assertThat(updatedOrder.getPaymentStatus()).isEqualTo("PAID");
+        assertThat(updatedOrder.getPaidAt()).isNotNull();
+        assertThat(repository.findPaymentByOrderNo(updatedOrder.getOrderNo())).isPresent();
+        assertThat(repository.findBillingComponentsByOrderNo(updatedOrder.getOrderNo())).isNotEmpty();
         assertThat(repository.findSlotById(updatedOrder.getSlotId()))
                 .get()
                 .extracting(slot -> slot.getStatus())
