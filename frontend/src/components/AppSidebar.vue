@@ -1,18 +1,25 @@
 <script setup>
-import { zhText } from "../utils/localize";
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+import { logout, state } from "../stores/parkingStore";
 
 defineProps({ mode: { type: String, default: "后端优先" } });
+
+const router = useRouter();
+const currentUser = computed(() => state.auth.user);
+
+function doLogout() {
+  logout();
+  router.replace({ name: "login" });
+}
 
 const navItems = [
   ["dashboard", "/", "fa-solid fa-chart-line", "运营首页"],
   ["twin", "/twin", "fa-solid fa-cubes", "数字孪生"],
-  ["ai", "/ai", "fa-solid fa-eye", "AI 视觉感知"],
-  ["dispatch", "/dispatch", "fa-solid fa-network-wired", "调度中心"],
-  ["admin", "/admin", "fa-solid fa-chart-pie", "管理台"],
-  ["pricing", "/pricing", "fa-solid fa-tags", "动态计费"],
-  ["system", "/system", "fa-solid fa-server", "系统配置"],
-  ["owner", "/owner", "fa-solid fa-mobile-screen-button", "车主端"],
-  ["indoor-map", "/indoor-map", "fa-solid fa-map-location-dot", "室内导航"],
+  ["ai", "/ai", "fa-solid fa-robot", "AI 视觉中枢"],
+  ["dispatch", "/dispatch", "fa-solid fa-route", "履约中枢"],
+  ["admin", "/admin", "fa-solid fa-chart-pie", "管理台账"],
+  ["system", "/system", "fa-solid fa-server", "系统状态"],
 ];
 </script>
 
@@ -22,7 +29,7 @@ const navItems = [
       <div class="brand-mark">PV</div>
       <div>
         <strong>ParkVision</strong>
-        <span>智能停车 CPS 演示系统</span>
+        <span>智能停车履约演示系统</span>
       </div>
     </div>
     <nav class="nav-list" aria-label="主导航">
@@ -32,6 +39,16 @@ const navItems = [
       </RouterLink>
     </nav>
     <div class="sidebar-footer">
+      <div v-if="currentUser" class="sidebar-user">
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-avatar"><i class="fa-solid" :class="currentUser.role === 'admin' ? 'fa-user-shield' : 'fa-user'"></i></span>
+          <div>
+            <strong>{{ currentUser.username }}</strong>
+            <span>{{ currentUser.role === "admin" ? "管理端" : "车主端" }}</span>
+          </div>
+        </div>
+        <button class="sidebar-logout" title="退出登录" @click="doLogout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+      </div>
       <div class="system-status">
         <span class="status-indicator-dot"></span>
         <span>系统在线</span>
@@ -40,3 +57,67 @@ const navItems = [
     </div>
   </aside>
 </template>
+
+<style scoped>
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: rgba(79, 70, 229, 0.06);
+  border: 1px solid rgba(79, 70, 229, 0.12);
+}
+
+.sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+}
+
+.sidebar-user-info strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+.sidebar-user-info span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sidebar-logout {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-logout:hover {
+  color: var(--danger-red);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+</style>

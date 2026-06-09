@@ -28,7 +28,7 @@ onUnmounted(() => window.clearInterval(timer));
 <template>
   <header class="topbar">
     <div>
-      <p class="eyebrow"><i class="fa-solid fa-microchip"></i> AI 视觉、AGV 调度、设备联动和数据库驱动的智能停车系统</p>
+      <p class="eyebrow"><i class="fa-solid fa-microchip"></i> 车主请求、AGV 履约、跨楼层交接和数据库状态同步</p>
       <h1>{{ title }}</h1>
     </div>
     <div class="topbar-actions">

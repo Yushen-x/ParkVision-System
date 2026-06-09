@@ -26,10 +26,25 @@ import {
 
 const fallbackPlates = ["SH-A7686", "SH-D5218", "SU-M9021", "SH-K1314", "SH-V7780"];
 
+const AUTH_KEY = "pv-auth";
+function loadAuth() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+
+// Persistent overrides that survive the 5s poll (which rebuilds slots/alerts).
+const alertStatusOverride = {};
+
 export const state = reactive({
   onlineMode: "Checking backend",
   emergency: false,
   loading: false,
+  twinSignal: { scenario: "", seq: 0 },
+  auth: { user: loadAuth() },
+  reservations: [],
   activePlate: mockVisionResult.plate,
   summary: { ...mockSummary },
   forecast: structuredClone(mockForecast),
@@ -104,7 +119,35 @@ export const getters = {
   currentOrder: computed(
     () => state.orders.find((order) => order.status !== "FINISHED") || state.orders[0] || null,
   ),
+  isAuthenticated: computed(() => Boolean(state.auth.user)),
+  activeReservations: computed(() => state.reservations.filter((item) => item.status === "HELD")),
 };
+
+// --- Auth (mock login/landing) ---------------------------------------------
+export function login({ username, role } = {}) {
+  const user = {
+    username: username || (role === "admin" ? "运营管理员" : "演示车主"),
+    role: role || "owner",
+    loginAt: new Date().toISOString(),
+  };
+  state.auth.user = user;
+  try {
+    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  } catch {
+    /* storage blocked */
+  }
+  addEvent("用户登录", `${user.username}（${user.role === "admin" ? "管理员" : "车主"}）已登录系统。`);
+  return user;
+}
+
+export function logout() {
+  state.auth.user = null;
+  try {
+    localStorage.removeItem(AUTH_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
 
 export async function hydrate() {
   state.loading = true;
@@ -152,6 +195,179 @@ export function addEvent(title, detail) {
   state.events = state.events.slice(0, 12);
 }
 
+// Fire a one-shot signal the digital twin watches to play a transfer animation.
+export function signalTwin(scenario) {
+  state.twinSignal.scenario = scenario;
+  state.twinSignal.seq += 1;
+}
+
+// --- Reservation -> hold -> entry 业务闭环 ----------------------------------
+let reservationSeq = 1;
+
+export function createReservation({ plateNo, phone, energyType } = {}) {
+  const slot = state.slots.find((item) => item.status === "empty");
+  if (!slot) {
+    addEvent("预约失败", "当前没有空闲车位可锁定。");
+    return null;
+  }
+  slot.status = "reserved";
+  slot.available = false;
+
+  const now = Date.now();
+  const reservation = {
+    id: `RSV${String(reservationSeq++).padStart(4, "0")}`,
+    plateNo: (plateNo || "未填写").toUpperCase(),
+    phone: phone || "",
+    energyType: energyType || "Fuel",
+    slotId: slot.id,
+    status: "HELD",
+    createdAt: new Date(now).toISOString(),
+    expiresAt: new Date(now + 15 * 60_000).toISOString(),
+  };
+  state.reservations.unshift(reservation);
+  recomputeSummary();
+  addEvent("车位预约", `${reservation.plateNo} 已锁定车位 ${slot.id}，保留 15 分钟。`);
+  return reservation;
+}
+
+export function cancelReservation(id) {
+  const reservation = state.reservations.find((item) => item.id === id);
+  if (!reservation || reservation.status !== "HELD") return;
+  reservation.status = "CANCELLED";
+  releaseReservedSlot(reservation.slotId);
+  recomputeSummary();
+  addEvent("预约取消", `${reservation.plateNo} 的预约已取消，车位 ${reservation.slotId} 释放。`);
+}
+
+export function fulfillReservation(id) {
+  const reservation = state.reservations.find((item) => item.id === id);
+  if (!reservation || reservation.status !== "HELD") return null;
+
+  const slot = state.slots.find((item) => item.id === reservation.slotId);
+  if (slot) {
+    slot.status = reservation.energyType === "Electric" || reservation.plateNo.includes("D") ? "charging" : "occupied";
+    slot.available = false;
+  }
+  reservation.status = "FULFILLED";
+
+  const order = {
+    orderNo: `PV${Date.now().toString().slice(-9)}`,
+    plateNo: reservation.plateNo,
+    slotId: reservation.slotId,
+    entryTime: new Date().toISOString(),
+    status: "PARKED",
+    amount: 0,
+  };
+  state.orders.unshift(order);
+  state.adminOrders.unshift(toAdminOrderRow(order));
+  state.activePlate = reservation.plateNo;
+  recomputeSummary();
+  syncFallbackExperience(order);
+  addEvent("预约到场", `${reservation.plateNo} 已到场，车位 ${reservation.slotId} 转为正式停车订单。`);
+  signalTwin("storage");
+  return order;
+}
+
+function releaseReservedSlot(slotId) {
+  const slot = state.slots.find((item) => item.id === slotId);
+  if (slot && slot.status === "reserved") {
+    slot.status = "empty";
+    slot.available = true;
+  }
+}
+
+// Re-apply held reservations after the 5s poll rebuilds state.slots.
+function reapplyReservations() {
+  const held = new Set(state.reservations.filter((item) => item.status === "HELD").map((item) => item.slotId));
+  if (!held.size) return;
+  state.slots.forEach((slot) => {
+    if (held.has(slot.id) && slot.status === "empty") {
+      slot.status = "reserved";
+      slot.available = false;
+    }
+  });
+}
+
+// Register an entry for a recognised plate (drives AI 视觉中枢 → business loop).
+export function registerEntry({ plateNo, energyType } = {}) {
+  const slot = state.slots.find((item) => item.status === "empty");
+  if (!slot) {
+    addEvent("入场失败", "车位已满，无法分配新车位。");
+    return null;
+  }
+  const plate = (plateNo || fallbackPlates[Math.floor(Math.random() * fallbackPlates.length)]).toUpperCase();
+  slot.status = energyType === "Electric" || plate.includes("D") ? "charging" : "occupied";
+  slot.available = false;
+
+  const order = {
+    orderNo: `PV${Date.now().toString().slice(-9)}`,
+    plateNo: plate,
+    slotId: slot.id,
+    entryTime: new Date().toISOString(),
+    status: "PARKED",
+    amount: 0,
+  };
+  state.orders.unshift(order);
+  state.adminOrders.unshift(toAdminOrderRow(order));
+  state.activePlate = plate;
+  recomputeSummary();
+  syncFallbackExperience(order);
+  addEvent("车辆入场", `${plate} 经车牌识别放行，自动分配车位 ${slot.id}。`);
+  signalTwin("storage");
+  return order;
+}
+
+// --- Vehicle / customer CRUD (mock 数据库台账) ------------------------------
+export function upsertVehicle(vehicle = {}) {
+  const plateNo = String(vehicle.plateNo || "").trim().toUpperCase();
+  if (!plateNo) return null;
+  const existing = state.customerVehicles.find((item) => item.plateNo === plateNo);
+  if (existing) {
+    Object.assign(existing, { ...vehicle, plateNo });
+    addEvent("档案更新", `已更新车辆 ${plateNo}（${existing.ownerName}）。`);
+    return existing;
+  }
+  const row = {
+    ownerId: vehicle.ownerId || `CUS${String(Date.now()).slice(-4)}`,
+    ownerName: vehicle.ownerName || "新客户",
+    phoneMasked: vehicle.phoneMasked || "138****0000",
+    plateNo,
+    energyType: vehicle.energyType || "Fuel",
+    memberLevel: vehicle.memberLevel || "Standard",
+    membershipType: vehicle.membershipType || vehicle.memberLevel || "Standard",
+    accountStatus: vehicle.accountStatus || "Active",
+    accessType: vehicle.accessType || "Allow",
+    createdAt: new Date().toISOString(),
+  };
+  state.customerVehicles.unshift(row);
+  addEvent("档案新增", `已登记车辆 ${plateNo}（${row.ownerName}）。`);
+  return row;
+}
+
+export function removeVehicle(plateNo) {
+  const index = state.customerVehicles.findIndex((item) => item.plateNo === plateNo);
+  if (index < 0) return;
+  const [removed] = state.customerVehicles.splice(index, 1);
+  addEvent("档案删除", `已删除车辆 ${removed.plateNo} 的客户档案。`);
+}
+
+// --- Alert acknowledge / resolve -------------------------------------------
+export function acknowledgeAlert(alertNo) {
+  setAlertStatus(alertNo, "处理中", "告警确认");
+}
+
+export function resolveAlert(alertNo) {
+  setAlertStatus(alertNo, "已恢复", "告警解除");
+}
+
+function setAlertStatus(alertNo, status, title) {
+  alertStatusOverride[alertNo] = status;
+  const alert = state.alerts.find((item) => item.alertNo === alertNo);
+  if (alert) alert.status = status;
+  if (state.adminAlertDetail?.alertNo === alertNo) state.adminAlertDetail.status = status;
+  addEvent(title, `告警 ${alertNo} 已标记为「${status}」。`);
+}
+
 export async function simulateEntry() {
   state.busy.entry = true;
   try {
@@ -164,6 +380,7 @@ export async function simulateEntry() {
     fallbackSimulateEntry();
   } finally {
     state.busy.entry = false;
+    signalTwin("storage");
   }
 }
 
@@ -177,6 +394,7 @@ export async function triggerPreDispatch() {
     fallbackPreDispatch();
   } finally {
     state.busy.preDispatch = false;
+    signalTwin("retrieve");
   }
 }
 
@@ -192,6 +410,7 @@ export async function enqueueVip(orderNo = getters.currentOrder.value?.orderNo) 
     fallbackVip(orderNo);
   } finally {
     state.busy.ownerAction = false;
+    signalTwin("retrieve");
   }
 }
 
@@ -241,6 +460,8 @@ export async function runOwnerAction(action, orderNo = getters.currentOrder.valu
     fallbackOwnerAction(action, orderNo);
   } finally {
     state.busy.ownerAction = false;
+    if (action === "retrieve") signalTwin("retrieve");
+    else if (action === "touch") signalTwin("touch");
   }
 }
 
@@ -342,6 +563,7 @@ function applyOperationalData(data) {
   state.devices = normalizeDevices(data.devices);
   state.pricingPreview = data.pricingPreview;
   state.indoorRoute = data.indoorRoute;
+  reapplyReservations();
   syncVisionFromDevices();
   state.activePlate = getters.currentOrder.value?.plateNo || state.visionResult.plate || state.activePlate;
   state.emergency = deriveEmergencyState();
@@ -349,7 +571,9 @@ function applyOperationalData(data) {
 
 function applyAdminData(data) {
   state.adminOrders = data.adminOrders;
-  state.alerts = data.alerts;
+  state.alerts = data.alerts.map((alert) =>
+    alertStatusOverride[alert.alertNo] ? { ...alert, status: alertStatusOverride[alert.alertNo] } : alert,
+  );
   state.pricingRules = data.pricingRules;
   state.accessList = data.accessList;
 }
