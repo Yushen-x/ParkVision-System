@@ -2,7 +2,8 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { state } from "../stores/parkingStore";
+import { simulateEntry, state, refreshCore, refreshAdminData } from "../stores/parkingStore";
+import { parkvisionApi } from "../api/parkvisionApi";
 import { zhText } from "../utils/localize";
 
 /* ------------------------------------------------------------------ *
@@ -65,6 +66,7 @@ const STATUS_COLOR = {
   occupied: 0x3b82f6,
   buffer: 0xf59e0b,
   charging: 0x10b981,
+  reserved: 0x8b5cf6,
   maintenance: 0xef4444,
 };
 const CAR_COLORS = [0xe2474c, 0x3b82f6, 0x64748b, 0xeab308, 0x8b5cf6, 0x14b8a6];
@@ -558,12 +560,19 @@ function makeLiftAndTurntable() {
  * Slot content (car colour stable by index; charging shown by post)   *
  * ------------------------------------------------------------------ */
 function slotType(status) {
-  return status === "empty" ? "empty" : status === "maintenance" ? "cone" : "car";
+  if (status === "empty" || status === "reserved") return "empty";
+  return status === "maintenance" ? "cone" : "car";
 }
-function buildSlotContent(type, index) {
+function buildSlotContent(type, index, status) {
   const g = new THREE.Group();
   if (type === "car") g.add(makeCar(CAR_COLORS[index % CAR_COLORS.length]));
   else if (type === "cone") g.add(makeCone());
+  if (status === "reserved") {
+    const lbl = makeLabel("已预约", { color: "#7c3aed", px: 36, bg: "rgba(237,233,254,0.92)" });
+    lbl.position.set(0, 1.8, 0);
+    lbl.scale.set(2.6, 1.3, 1);
+    g.add(lbl);
+  }
   return g;
 }
 function setChargerState(idx) {
@@ -942,6 +951,7 @@ function advanceDemo(dt) {
     if (demoStepIndex.value + 1 >= steps.length) {
       demoStepElapsed.value = duration;
       demoPlaying.value = false;
+      lastStatusKey = "";
     } else {
       demoStepElapsed.value = 0;
       demoStepIndex.value += 1;
@@ -956,8 +966,47 @@ function playScenario(id, slotOverride = null) {
   demoStepIndex.value = 0;
   demoStepElapsed.value = 0;
   demoPlaying.value = true;
-  setCarouselTargets(slotOverride ?? sc.slotIndex);
-  if (scene) rebuildPayload(sc.carColor);
+  const idx = slotOverride ?? sc.slotIndex;
+  setCarouselTargets(idx);
+  const color = (id === "retrieve" || id === "touch") ? CAR_COLORS[idx % CAR_COLORS.length] : sc.carColor;
+  if (scene) rebuildPayload(color);
+}
+
+async function playScenarioWithApi(id, slotOverride = null) {
+  const sc = DEMO_SCENARIOS.find((s) => s.id === id) || DEMO_SCENARIOS[0];
+
+  if (id === "retrieve") {
+    const idx = slotOverride ?? sc.slotIndex;
+    const slot = state.slots[idx];
+    playScenario(id, slotOverride);
+    setTimeout(async () => {
+      if (slot && slot.status !== "empty") {
+        const order = state.orders.find((o) => o.slotId === slot.id && o.status !== "FINISHED");
+        try {
+          if (order) {
+            await parkvisionApi.retrieveOrder(order.orderNo);
+            await parkvisionApi.payOrder(order.orderNo);
+          } else {
+            await parkvisionApi.clearSlot(slot.id);
+          }
+        } catch {}
+      }
+      void refreshCore();
+      void refreshAdminData();
+    }, 6000);
+  } else if (id === "storage") {
+    try {
+      const order = await parkvisionApi.simulateEntry();
+      const slotIdx = state.slots.findIndex((s) => s.id === order.slotId);
+      playScenario(id, slotIdx >= 0 ? slotIdx : slotOverride);
+      void refreshCore();
+      void refreshAdminData();
+    } catch {
+      playScenario(id, slotOverride);
+    }
+  } else {
+    playScenario(id, slotOverride);
+  }
 }
 
 function rebuildPayload(color) {
@@ -977,7 +1026,12 @@ function rebuildPayload(color) {
 watch(
   () => state.twinSignal.seq,
   (seq, prev) => {
-    if (seq && seq !== prev && state.twinSignal.scenario) playScenario(state.twinSignal.scenario);
+    if (seq && seq !== prev && state.twinSignal.scenario && !demoPlaying.value) {
+      const slotIdx = state.twinSignal.slotId
+        ? state.slots.findIndex((s) => s.id === state.twinSignal.slotId)
+        : null;
+      playScenario(state.twinSignal.scenario, slotIdx >= 0 ? slotIdx : null);
+    }
   },
 );
 
@@ -1117,9 +1171,9 @@ function selectPick(pick, point) {
       badgeClass: slot.status,
       fields,
       actions: occupied
-        ? [{ label: "取车出库", icon: "fa-car-side", fn: () => playScenario("retrieve", pick.index) },
+        ? [{ label: "取车出库", icon: "fa-car-side", fn: () => playScenarioWithApi("retrieve", pick.index) },
            { label: "临停取物", icon: "fa-box-open", fn: () => playScenario("touch", pick.index) }]
-        : [{ label: "存车入库", icon: "fa-arrow-right-to-bracket", fn: () => playScenario("storage", pick.index) }],
+        : [{ label: "存车入库", icon: "fa-arrow-right-to-bracket", fn: () => playScenarioWithApi("storage", pick.index) }],
       anchor: point.clone(),
     };
   } else if (pick.kind === "charger") {
@@ -1196,8 +1250,11 @@ function syncSlots() {
   if (key === lastStatusKey) return;
   lastStatusKey = key;
 
+  const animIdx = demoPlaying.value ? (activeSlotOverride.value ?? demoScenario.value.slotIndex) : -1;
+
   state.slots.forEach((slot, idx) => {
     if (!slotPlacement[idx]) return;
+    if (idx === animIdx) return;
     const status = slot.status || "empty";
     const level = levelOf(idx);
     const within = withinOf(idx);
@@ -1209,12 +1266,12 @@ function syncSlots() {
 
     const type = slotType(status);
     const prev = slotContent.get(idx);
-    if (prev && prev.type === type) return;
+    if (prev && prev.type === type && prev.status === status) return;
     if (prev) {
       prev.group.parent?.remove(prev.group);
       disposeGroup(prev.group);
     }
-    const content = buildSlotContent(type, idx);
+    const content = buildSlotContent(type, idx, status);
     if (content.children.length) {
       const x = Math.sin(b.angle) * b.R;
       const z = Math.cos(b.angle) * b.R;
@@ -1225,7 +1282,7 @@ function syncSlots() {
       content.scale.setScalar(0.01);
       ringCar[level][b.ring].add(content);
     }
-    slotContent.set(idx, { group: content, type });
+    slotContent.set(idx, { group: content, type, status });
   });
 }
 
@@ -1519,7 +1576,7 @@ onBeforeUnmount(() => {
             :key="scenario.id"
             type="button"
             :class="{ active: demoPlaying && scenario.id === demoScenarioId }"
-            @click="playScenario(scenario.id)"
+            @click="playScenarioWithApi(scenario.id)"
           >
             <i class="fa-solid" :class="scenario.icon"></i>{{ scenario.label }}
           </button>

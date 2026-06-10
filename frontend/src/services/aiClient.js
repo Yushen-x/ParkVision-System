@@ -25,7 +25,7 @@ import { parkvisionApi } from "../api/parkvisionApi";
 const STORAGE_KEY = "pv-ai-config";
 
 const DEFAULT_CONFIG = {
-  enabled: false, // master switch; when false we always use the mock
+  enabled: true, // master switch; when false we always use the mock
   provider: "mock", // "mock" | "openai" | "anthropic"
   baseURL: "", // e.g. https://api.deepseek.com/v1  或  https://api.anthropic.com
   apiKey: "",

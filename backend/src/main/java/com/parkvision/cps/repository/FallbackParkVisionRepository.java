@@ -400,16 +400,18 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         updateSlot("A09", SlotStatus.BUFFER);
         updateSlot("B01", SlotStatus.EMPTY);
         updateSlot("C05", SlotStatus.CHARGING);
+        updateSlot("E05", SlotStatus.OCCUPIED);
         updateSlot("E06", SlotStatus.OCCUPIED);
     }
 
     private void seedOrders() {
         LocalDateTime now = LocalDateTime.now();
-        addSeedOrder("PV20260506001", "SH-A7686", "E06", now.minusHours(2).minusMinutes(5), OrderStatus.PARKED, "18.00");
+        addSeedOrder("PV20260506001", "SH-A7686", "E06", now.minusHours(2).minusMinutes(5), OrderStatus.PARKED, "10.00");
         addSeedOrder("PV20260506002", "SH-D5218", "C05", now.minusHours(4).minusMinutes(5), OrderStatus.RETRIEVING, "42.50");
         addSeedOrder("PV20260506003", "SU-M9021", "A09", now.minusHours(3).minusMinutes(12), OrderStatus.TOUCHING, "25.00");
         addSeedOrder("PV20260506004", "SH-K1314", "B01", now.minusHours(1).minusMinutes(8), OrderStatus.FINISHED, "16.00");
         addSeedOrder("PV20260506005", "SH-P3308", "D04", now.minusHours(5).minusMinutes(18), OrderStatus.PARKED, "26.00");
+        addSeedOrder("PV20260506006", "SH-F2233", "E05", now.minusHours(1).minusMinutes(30), OrderStatus.PARKED, "12.00");
         addSeedOrder("PV20260506006", "SH-R1188", "F08", now.minusHours(8).minusMinutes(30), OrderStatus.FINISHED, "38.00");
         addSeedOrder("PV20260506007", "SH-L5521", "C02", now.minusHours(2).minusMinutes(48), OrderStatus.PARKED, "14.00");
         addSeedOrder("PV20260506008", "SH-T6502", "D11", now.minusHours(3).minusMinutes(40), OrderStatus.PAYING, "28.00");

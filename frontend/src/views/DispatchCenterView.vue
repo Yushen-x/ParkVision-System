@@ -294,7 +294,7 @@ async function submitVip() {
                 <div class="queue-rank">{{ index + 1 }}</div>
                 <div class="queue-body">
                   <b>{{ zhText(task.type) }} - {{ task.plateNo }}</b>
-                  <span>{{ taskStatusText(task) }} · {{ zhText(task.tag) }}<template v-if="task.agvId"> · {{ task.agvId }}</template></span>
+                  <span>{{ taskStatusText(task) }} · {{ zhText(task.tag) }}<template v-if="task.slotId"> · 车位 {{ task.slotId }}</template><template v-if="task.agvId"> · {{ task.agvId }}</template></span>
                   <div v-if="task.status === 'IN_PROGRESS'" class="queue-progress">
                     <i :style="{ width: (task.progress || 0) + '%' }"></i>
                   </div>

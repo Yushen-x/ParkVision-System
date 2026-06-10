@@ -43,7 +43,7 @@ export const state = reactive({
   onlineMode: "Checking backend",
   emergency: false,
   loading: false,
-  twinSignal: { scenario: "", seq: 0 },
+  twinSignal: { scenario: "", slotId: null, seq: 0 },
   auth: { user: loadAuth() },
   owner: { profile: null, vehicles: [], orders: [], wallet: null },
   adminUsers: [],
@@ -305,8 +305,9 @@ export function addEvent(title, detail) {
 }
 
 // Fire a one-shot signal the digital twin watches to play a transfer animation.
-export function signalTwin(scenario) {
+export function signalTwin(scenario, slotId = null) {
   state.twinSignal.scenario = scenario;
+  state.twinSignal.slotId = slotId;
   state.twinSignal.seq += 1;
 }
 
@@ -328,7 +329,28 @@ function resolveTwinStreamUrl() {
 function applyTwinSnapshot(snapshot) {
   if (!snapshot) return;
   if (snapshot.summary) state.summary = snapshot.summary;
-  if (Array.isArray(snapshot.slots)) state.slots = snapshot.slots;
+  if (Array.isArray(snapshot.slots)) {
+    const oldSlots = state.slots;
+    const newSlots = snapshot.slots;
+    let detected = null;
+    let changedSlotId = null;
+    for (let i = 0; i < newSlots.length; i++) {
+      const oldStatus = oldSlots[i]?.status;
+      const newStatus = newSlots[i]?.status;
+      if (oldStatus === "empty" && newStatus && newStatus !== "empty") {
+        detected = "storage";
+        changedSlotId = newSlots[i]?.id;
+        break;
+      }
+      if (oldStatus && oldStatus !== "empty" && newStatus === "empty") {
+        detected = "retrieve";
+        changedSlotId = newSlots[i]?.id;
+        break;
+      }
+    }
+    state.slots = newSlots;
+    if (detected) signalTwin(detected, changedSlotId);
+  }
   if (Array.isArray(snapshot.agvs)) state.agvs = normalizeAgvs(snapshot.agvs);
   if (Array.isArray(snapshot.queue)) state.queue = snapshot.queue;
   reapplyReservations();
@@ -380,6 +402,7 @@ export async function createReservation({ plateNo, phone, energyType } = {}) {
     addEvent("车位预约", `${reservation.plateNo} 已锁定车位 ${reservation.slotId}，保留 15 分钟。`);
     await loadOwnerData();
     await refreshCore();
+    signalTwin("reservation", reservation.slotId);
     return { ok: true, reservation };
   } catch (error) {
     addEvent("预约失败", error.message || "预约失败。");
@@ -406,7 +429,7 @@ export async function fulfillReservation(id) {
     addEvent("预约到场", `${reservation.plateNo} 已到场，车位 ${reservation.slotId} 转为正式停车订单。`);
     await loadOwnerData();
     await refreshCore();
-    signalTwin("storage");
+    signalTwin("storage", reservation.slotId);
     return { ok: true, reservation };
   } catch (error) {
     return { ok: false, error: error.message || "到场确认失败" };
@@ -426,7 +449,7 @@ export async function registerEntry({ plateNo, energyType } = {}) {
     addEvent("车辆入场", `${order.plateNo} 经车牌识别放行，自动分配车位 ${order.slotId}。`);
     await refreshCore();
     await refreshAdminData();
-    signalTwin("storage");
+    signalTwin("storage", order.slotId);
     return { ok: true, order };
   } catch (error) {
     registerEntryLocal({ plateNo, energyType });
@@ -718,6 +741,7 @@ export async function runOwnerAction(action, orderNo) {
   try {
     if (action === "retrieve") {
       await (isOwner ? parkvisionApi.ownerRetrieve(targetNo) : parkvisionApi.retrieveOrder(targetNo));
+      try { await parkvisionApi.payOrder(targetNo); } catch { /* settle best-effort */ }
       pushOwnerTimeline("取车已启动", "AGV 取车任务已加入实时调度队列。");
       addEvent("车主请求", `订单 ${targetNo} 已提交取车请求。`);
     } else if (action === "touch") {
@@ -743,8 +767,10 @@ export async function runOwnerAction(action, orderNo) {
     return { ok: false, error: error?.message || "网络异常，已本地处理" };
   } finally {
     state.busy.ownerAction = false;
-    if (action === "retrieve") signalTwin("retrieve");
-    else if (action === "touch") signalTwin("touch");
+    if (action === "retrieve") {
+      const order = state.orders.find((o) => o.orderNo === targetNo);
+      signalTwin("retrieve", order?.slotId);
+    } else if (action === "touch") signalTwin("touch");
   }
 }
 
@@ -826,6 +852,26 @@ export async function toggleEmergency() {
     await refreshCore();
   } catch {
     fallbackToggleEmergency(nextState);
+  }
+}
+
+export async function resetSystem() {
+  try {
+    await parkvisionApi.resetSystem();
+    Object.keys(alertStatusOverride).forEach((k) => delete alertStatusOverride[k]);
+    state.adminReport = buildMockReport();
+    state.reservations = [];
+    state.events = [
+      ["系统上线", "运营首页与实时数据源已初始化。"],
+      ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
+      ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
+    ];
+    await hydrate();
+    if (state.auth.user?.role === "owner") await loadOwnerData();
+    addEvent("系统重置", "所有业务数据已恢复到初始状态。");
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error?.message || "重置失败" };
   }
 }
 

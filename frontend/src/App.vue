@@ -9,6 +9,7 @@ import {
   disconnectTwinStream,
   hydrate,
   pollRealtime,
+  resetSystem,
   simulateEntry,
   state,
   toggleEmergency,
@@ -46,6 +47,7 @@ onUnmounted(() => {
         @entry="simulateEntry"
         @pre-dispatch="triggerPreDispatch"
         @emergency="toggleEmergency"
+        @reset="resetSystem"
       />
       <RouterView v-slot="{ Component }">
         <Suspense timeout="0">

@@ -369,6 +369,12 @@ export const parkvisionApi = {
   payOrder(orderNo) {
     return request(`/orders/${orderNo}/pay`, { method: "POST" });
   },
+  clearSlot(slotId) {
+    return request(`/slots/${slotId}/clear`, { method: "POST" });
+  },
+  resetSystem() {
+    return request("/system/reset", { method: "POST" });
+  },
   triggerPreDispatch() {
     return request("/dispatch/pre-dispatch", { method: "POST" });
   },
@@ -393,6 +399,9 @@ export const parkvisionApi = {
   },
   getRecognitions(params = {}) {
     return request(withQuery("/admin/recognitions", params));
+  },
+  resetSystem() {
+    return request("/system/reset", { method: "POST" });
   },
   setEmergency(active) {
     return request(withQuery("/devices/emergency", { active }), { method: "POST" });

@@ -8,7 +8,7 @@ defineProps({
   dispatchBusy: { type: Boolean, default: false },
 });
 
-defineEmits(["entry", "pre-dispatch", "emergency"]);
+defineEmits(["entry", "pre-dispatch", "emergency", "reset"]);
 
 const clock = ref("--:--:--");
 let timer;
@@ -48,6 +48,30 @@ onUnmounted(() => window.clearInterval(timer));
         <i class="fa-solid" :class="emergency ? 'fa-lock-open' : 'fa-triangle-exclamation'"></i>
         {{ emergency ? "解除急停" : "紧急停车" }}
       </button>
+      <button class="reset-button" @click="$emit('reset')" title="重置所有数据到初始状态">
+        <i class="fa-solid fa-arrows-rotate"></i> 重置演示
+      </button>
     </div>
   </header>
 </template>
+
+<style scoped>
+.reset-button {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--brand, #6366f1);
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+.reset-button:hover {
+  background: var(--brand, #6366f1);
+  color: #fff;
+}
+</style>

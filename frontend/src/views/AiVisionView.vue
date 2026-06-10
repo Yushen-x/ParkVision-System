@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { getters, refreshCore, state } from "../stores/parkingStore";
+import { getters, refreshCore, state, signalTwin } from "../stores/parkingStore";
 import { parkvisionApi } from "../api/parkvisionApi";
 import SlotGrid from "../components/SlotGrid.vue";
 import TrafficChart from "../components/TrafficChart.vue";
@@ -35,7 +35,7 @@ const phaseText = computed(() => {
     case "detected":
       return `识别成功 · ${cur?.plate}`;
     case "passed":
-      return `已自动建单 · 道闸抬杆放行${cur?.orderNo ? " · " + cur.orderNo : ""}`;
+      return `已自动建单 · 车位 ${cur?.slotId || "分配中"} · ${cur?.orderNo || ""}`;
     case "held":
       return cur?.decision === "DENY" ? `已拦截 · ${cur?.reason || "禁止入场"}` : `转人工复核 · ${cur?.reason || "需确认"}`;
     default:
@@ -104,6 +104,7 @@ async function runGateEntry() {
     decision: result.decision,
     reason: result.reason,
     orderNo: result.orderNo,
+    slotId: result.slotId || null,
     tone: decisionTone(result.decision),
   };
 
@@ -113,6 +114,7 @@ async function runGateEntry() {
     phase.value = result.decision === "ALLOW" ? "passed" : "held";
     void refreshCore();
     void loadConsole();
+    if (result.decision === "ALLOW") signalTwin("storage", result.slotId);
   }, 2400);
   schedule(() => {
     phase.value = "idle";
@@ -267,7 +269,7 @@ const trendUp = computed(() => {
               <div class="rec-plate">{{ r.plateNo }}</div>
               <div class="rec-info">
                 <b>{{ (r.confidence * 100).toFixed(1) }}% · {{ r.cameraId }}</b>
-                <span>{{ r.time }} · {{ r.reason }}</span>
+                <span>{{ r.time }} · {{ r.reason }}<template v-if="r.orderNo"> · {{ r.orderNo }}</template></span>
               </div>
               <span class="rec-pass" :class="decisionTone(r.decision)">
                 <i class="fa-solid" :class="r.decision === 'ALLOW' ? 'fa-circle-check' : r.decision === 'DENY' ? 'fa-circle-xmark' : 'fa-circle-exclamation'"></i>

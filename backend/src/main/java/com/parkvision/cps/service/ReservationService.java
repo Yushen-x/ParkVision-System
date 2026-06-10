@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.parkvision.cps.domain.dispatch.DispatchTask;
+
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -28,11 +30,14 @@ public class ReservationService {
     private final ParkVisionRepository repository;
     private final AuthUserRepository authUserRepository;
     private final OrderService orderService;
+    private final DispatchService dispatchService;
 
-    public ReservationService(ParkVisionRepository repository, AuthUserRepository authUserRepository, OrderService orderService) {
+    public ReservationService(ParkVisionRepository repository, AuthUserRepository authUserRepository,
+                              OrderService orderService, DispatchService dispatchService) {
         this.repository = repository;
         this.authUserRepository = authUserRepository;
         this.orderService = orderService;
+        this.dispatchService = dispatchService;
     }
 
     public List<Reservation> listForOwner(String username) {
@@ -80,7 +85,10 @@ public class ReservationService {
                 now,
                 now.plusMinutes(HOLD_MINUTES)
         );
-        return repository.saveReservation(reservation);
+        Reservation saved = repository.saveReservation(reservation);
+        repository.enqueueDispatchTask(
+                new DispatchTask(plate, "车位预约锁定", "预约", "15:00", false, slot.getId()));
+        return saved;
     }
 
     @Transactional

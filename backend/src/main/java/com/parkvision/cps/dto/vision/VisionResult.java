@@ -11,6 +11,7 @@ public record VisionResult(
         String listType,
         String decision,
         String reason,
-        String orderNo
+        String orderNo,
+        String slotId
 ) {
 }

@@ -97,6 +97,7 @@ public class VisionService {
                     "识别失败",
                     "REVIEW",
                     "未在图像中识别到车牌，请上传更清晰、包含车辆或完整车牌的照片",
+                    null,
                     null
             );
             persist(unrecognized);
@@ -122,6 +123,7 @@ public class VisionService {
         String listType;
         String reason;
         String orderNo = null;
+        String slotId = null;
 
         if (intrusion) {
             decision = "REVIEW";
@@ -138,6 +140,7 @@ public class VisionService {
                         try {
                             ParkingOrder order = orderService.entryForPlate(plate);
                             orderNo = order.getOrderNo();
+                            slotId = order.getSlotId();
                             reason = reason + "；已创建入场订单 " + orderNo;
                         } catch (BusinessException ex) {
                             decision = "REVIEW";
@@ -178,7 +181,8 @@ public class VisionService {
                 listType,
                 decision,
                 reason,
-                orderNo
+                orderNo,
+                slotId
         );
 
         persist(result);
