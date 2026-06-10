@@ -2,7 +2,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { getters, refreshCore, state } from "../stores/parkingStore";
 import { parkvisionApi } from "../api/parkvisionApi";
-import { aiVisionPlate } from "../services/aiClient";
 import SlotGrid from "../components/SlotGrid.vue";
 import TrafficChart from "../components/TrafficChart.vue";
 
@@ -13,6 +12,8 @@ import TrafficChart from "../components/TrafficChart.vue";
 const phase = ref("idle"); // idle | incoming | scanning | detected | passed | held
 const playing = ref(false);
 const current = ref(null);
+const gateFile = ref(null);
+const gateImage = ref(""); // uploaded car photo (data URL), shown in the camera stage
 const records = ref([]);
 const stats = ref({ total: 0, today: 0, allow: 0, deny: 0, review: 0, avgConfidence: 0 });
 const consoleError = ref("");
@@ -38,7 +39,7 @@ const phaseText = computed(() => {
     case "held":
       return cur?.decision === "DENY" ? `已拦截 · ${cur?.reason || "禁止入场"}` : `转人工复核 · ${cur?.reason || "需确认"}`;
     default:
-      return "等待车辆进入识别区";
+      return gateImage.value ? "点击重新上传可再次识别入场" : "上传车辆照片，模拟车辆驶入识别";
   }
 });
 
@@ -62,15 +63,31 @@ async function loadConsole() {
   }
 }
 
-async function startRecognition() {
-  if (playing.value) return;
+// 上传一张真实车辆照片即模拟车辆入场：后端用 HyperLPR 真实识别车牌 →
+// 名单校验 → 放行则真实建单入场，全程落库；摄像头舞台用真实结果驱动动画。
+function onGateFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    gateImage.value = String(reader.result || "");
+    void runGateEntry();
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runGateEntry() {
+  if (playing.value || !gateImage.value) return;
+  timers.forEach((t) => window.clearTimeout(t));
+  timers = [];
   playing.value = true;
   current.value = null;
+  consoleError.value = "";
   phase.value = "incoming";
 
   let result = null;
   try {
-    const res = await parkvisionApi.gateVision({});
+    const res = await parkvisionApi.gateVision({ imageUrl: gateImage.value, cameraId: "CAM-IN-01" });
     result = res?.data || res;
   } catch (error) {
     consoleError.value = error?.message || "识别失败";
@@ -123,56 +140,6 @@ const kpis = computed(() => {
 });
 
 const freeCount = getters.freeCount;
-
-// ---------------------------------------------------------------------------
-// 上传识别
-// ---------------------------------------------------------------------------
-const plateFile = ref(null);
-const plateImage = ref("");
-const plateBusy = ref(false);
-const plateResult = ref(null);
-
-function onPlateFile(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  plateResult.value = null;
-  const reader = new FileReader();
-  reader.onload = () => {
-    plateImage.value = String(reader.result || "");
-    void recognizePlate();
-  };
-  reader.readAsDataURL(file);
-}
-
-async function recognizePlate() {
-  if (!plateImage.value || plateBusy.value) return;
-  plateBusy.value = true;
-  try {
-    const ocr = await aiVisionPlate({ imageDataUrl: plateImage.value });
-    // Persist the OCR result through the backend so it gets a real access
-    // decision and shows up in the recognition history.
-    let decision = null;
-    let reason = "";
-    try {
-      const res = await parkvisionApi.inferVision({ plateNo: ocr.plate, cameraId: "CAM-UPLOAD" });
-      const data = res?.data || res;
-      decision = data?.decision || null;
-      reason = data?.reason || "";
-      await loadConsole();
-    } catch {
-      /* keep OCR result even if logging fails */
-    }
-    plateResult.value = { ...ocr, decision, reason };
-  } finally {
-    plateBusy.value = false;
-  }
-}
-
-function clearPlate() {
-  plateImage.value = "";
-  plateResult.value = null;
-  if (plateFile.value) plateFile.value.value = "";
-}
 
 // ---------------------------------------------------------------------------
 // 车位占用智能检测（基于车位状态的视觉感知结果）
@@ -228,32 +195,39 @@ const trendUp = computed(() => {
         <div class="section-head">
           <div>
             <h2>入口车牌识别</h2>
-            <p>实时检测驶入车辆，OCR 识别车牌后自动建单并联动道闸放行——可点击播放完整识别过程。</p>
+            <p>上传真实车辆照片模拟入场：HyperLPR 识别车牌 → 名单校验 → 放行自动建单，全程落库。</p>
           </div>
-          <button class="primary-button small" :disabled="playing" @click="startRecognition">
-            <i class="fa-solid" :class="playing ? 'fa-spinner fa-spin' : 'fa-play'"></i>
-            {{ playing ? "识别中..." : "开始识别" }}
-          </button>
+          <label class="primary-button small" :class="{ disabled: playing }">
+            <input ref="gateFile" type="file" accept="image/*" hidden :disabled="playing" @change="onGateFile" />
+            <i class="fa-solid" :class="playing ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'"></i>
+            {{ playing ? "识别中..." : gateImage ? "重新上传车辆照片" : "上传车辆照片" }}
+          </label>
         </div>
 
-        <div class="cam-stage" :class="phase">
-          <div class="cam-grid"></div>
+        <div class="cam-stage" :class="[phase, { 'has-photo': gateImage }]">
+          <img v-if="gateImage" class="cam-photo" :src="gateImage" alt="入场车辆" />
+          <div v-else class="cam-grid"></div>
           <div class="cam-tag"><i class="fa-solid fa-video"></i> CAM-IN-01 · 入口</div>
-          <div class="lane left"></div>
-          <div class="lane right"></div>
+          <template v-if="!gateImage">
+            <div class="lane left"></div>
+            <div class="lane right"></div>
+            <div class="cam-car">
+              <span class="windshield"></span>
+              <span class="roof"></span>
+              <span class="plate-tag">{{ current?.plate || "" }}</span>
+            </div>
+          </template>
 
           <div class="gate-post"></div>
           <div class="gate-bar"></div>
 
-          <div class="cam-car">
-            <span class="windshield"></span>
-            <span class="roof"></span>
-            <span class="plate-tag">{{ current?.plate || "" }}</span>
-          </div>
-
           <div class="scan-line"></div>
-          <div class="det-box vehicle"><span>车辆 {{ ((current?.confidence || 0.96) * 100).toFixed(0) }}%</span></div>
-          <div class="det-box plate"><span>车牌</span></div>
+          <template v-if="!gateImage">
+            <div class="det-box vehicle"><span>车辆 {{ ((current?.confidence || 0.96) * 100).toFixed(0) }}%</span></div>
+            <div class="det-box plate"><span>车牌</span></div>
+          </template>
+
+          <div v-if="!gateImage" class="cam-hint"><i class="fa-solid fa-cloud-arrow-up"></i> 上传车辆照片开始识别</div>
 
           <div class="plate-readout">
             <b>{{ current?.plate }}</b>
@@ -280,42 +254,6 @@ const trendUp = computed(() => {
       </article>
 
       <aside class="ai-side">
-        <article class="surface upload-card">
-          <div class="section-head compact">
-            <div>
-              <h2>图片识别</h2>
-              <p>上传车辆图片识别车牌。</p>
-            </div>
-          </div>
-          <label class="up-drop" :class="{ filled: plateImage }">
-            <input ref="plateFile" type="file" accept="image/*" hidden @change="onPlateFile" />
-            <template v-if="!plateImage">
-              <i class="fa-solid fa-cloud-arrow-up"></i>
-              <b>点击上传图片</b>
-            </template>
-            <template v-else>
-              <img :src="plateImage" alt="上传图片" />
-              <div v-if="plateBusy" class="up-scan"><i class="fa-solid fa-spinner fa-spin"></i> 识别中…</div>
-            </template>
-          </label>
-          <div v-if="plateResult" class="up-result">
-            <div class="up-plate" :class="{ green: String(plateResult.color || '').includes('绿') }">{{ plateResult.plate }}</div>
-            <div class="up-meta">
-              <span>置信度 {{ (plateResult.confidence * 100).toFixed(1) }}%</span>
-              <span>{{ plateResult.color || "—" }}</span>
-            </div>
-            <span
-              v-if="plateResult.decision"
-              class="up-decision"
-              :class="decisionTone(plateResult.decision)"
-            >
-              {{ plateResult.decision === "ALLOW" ? "放行" : plateResult.decision === "DENY" ? "拦截" : "复核" }}
-              · {{ plateResult.reason }}
-            </span>
-            <button class="ghost-button small" @click="clearPlate"><i class="fa-solid fa-xmark"></i> 清除</button>
-          </div>
-        </article>
-
         <article class="surface rec-card">
           <div class="section-head compact">
             <div>
@@ -337,7 +275,7 @@ const trendUp = computed(() => {
               </span>
             </div>
           </div>
-          <p v-else class="rec-empty">点击「开始识别」运行一次真实入场识别。</p>
+          <p v-else class="rec-empty">上传一张车辆照片，运行一次真实入场识别。</p>
         </article>
       </aside>
     </section>
@@ -462,6 +400,46 @@ const trendUp = computed(() => {
     linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
   background-size: 40px 40px;
   mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+}
+
+.cam-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.84) contrast(1.04);
+}
+
+.cam-stage.has-photo {
+  background: #0b1220;
+}
+
+.cam-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.cam-hint i {
+  font-size: 30px;
+  color: #64748b;
+}
+
+label.primary-button {
+  cursor: pointer;
+}
+
+.primary-button.disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .cam-tag {
@@ -796,85 +774,6 @@ const trendUp = computed(() => {
   gap: 20px;
 }
 
-.up-drop {
-  position: relative;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  min-height: 150px;
-  margin-top: 14px;
-  border-radius: 12px;
-  border: 2px dashed rgba(79, 70, 229, 0.3);
-  background: rgba(79, 70, 229, 0.03);
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.up-drop.filled {
-  border-style: solid;
-  border-color: var(--border-color);
-  background: #0f172a;
-}
-
-.up-drop > i {
-  font-size: 26px;
-  color: var(--brand);
-}
-
-.up-drop b {
-  color: var(--text-main);
-  font-size: 14px;
-}
-
-.up-drop img {
-  width: 100%;
-  max-height: 220px;
-  object-fit: contain;
-}
-
-.up-scan {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 8px;
-  text-align: center;
-  color: #fff;
-  background: rgba(79, 70, 229, 0.85);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.up-result {
-  margin-top: 14px;
-  display: grid;
-  gap: 10px;
-  justify-items: center;
-}
-
-.up-plate {
-  width: 100%;
-  padding: 12px;
-  text-align: center;
-  border-radius: 10px;
-  color: #fff;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  font-family: "Outfit", sans-serif;
-  font-size: 24px;
-  letter-spacing: 2px;
-  font-weight: 800;
-}
-
-.up-plate.green {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.up-meta {
-  display: flex;
-  gap: 16px;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
 .rec-list {
   margin-top: 14px;
   display: grid;
@@ -946,29 +845,6 @@ const trendUp = computed(() => {
   color: #b91c1c;
   background: rgba(239, 68, 68, 0.08);
   font-size: 12px;
-}
-
-.up-decision {
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.up-decision.allow {
-  color: #047857;
-  background: rgba(16, 185, 129, 0.12);
-}
-
-.up-decision.deny {
-  color: #b91c1c;
-  background: rgba(239, 68, 68, 0.12);
-}
-
-.up-decision.review {
-  color: #b45309;
-  background: rgba(245, 158, 11, 0.12);
 }
 
 /* ---- 下方：占用检测 + 车流预测 ---- */

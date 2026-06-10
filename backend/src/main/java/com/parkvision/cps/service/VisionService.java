@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -35,16 +36,19 @@ public class VisionService {
     private final DeviceService deviceService;
     private final OrderService orderService;
     private final AccessControlService accessControlService;
+    private final PlateRecognitionService plateRecognitionService;
     private final Random random = new Random();
 
     public VisionService(ParkVisionRepository repository,
                          DeviceService deviceService,
                          OrderService orderService,
-                         AccessControlService accessControlService) {
+                         AccessControlService accessControlService,
+                         PlateRecognitionService plateRecognitionService) {
         this.repository = repository;
         this.deviceService = deviceService;
         this.orderService = orderService;
         this.accessControlService = accessControlService;
+        this.plateRecognitionService = plateRecognitionService;
     }
 
     /**
@@ -70,9 +74,49 @@ public class VisionService {
         String cameraId = request == null || isBlank(request.cameraId())
                 ? (intrusion ? "CAM-HANDOFF-02" : "CAM-SOUTH-01")
                 : request.cameraId();
-        String plate = resolvePlate(request);
-        double confidence = Math.round((0.94 + random.nextDouble() * 0.05) * 1000.0) / 1000.0;
-        String energyType = resolveEnergy(plate);
+        // Prefer a real OCR reading when an image is supplied (and a provider is
+        // configured); otherwise fall back to the built-in engine. An explicit
+        // plateNo in the request always wins (manual entry / re-check).
+        Optional<PlateRecognitionService.PlateReading> reading =
+                (request != null && !isBlank(request.plateNo()))
+                        ? Optional.empty()
+                        : plateRecognitionService.recognize(request == null ? null : request.imageUrl());
+
+        // A real recognition provider is configured and an image was supplied, but
+        // no plate was found. Surface this honestly instead of fabricating a plate.
+        boolean imageProvided = request != null && !isBlank(request.imageUrl()) && isBlank(request.plateNo());
+        if (!intrusion && reading.isEmpty() && imageProvided && plateRecognitionService.isEnabled()) {
+            VisionResult unrecognized = new VisionResult(
+                    "edge-" + System.currentTimeMillis() % 1_000_000,
+                    cameraId,
+                    "未识别车牌",
+                    0.0,
+                    false,
+                    "HOLD_FOR_REVIEW",
+                    "未知",
+                    "识别失败",
+                    "REVIEW",
+                    "未在图像中识别到车牌，请上传更清晰、包含车辆或完整车牌的照片",
+                    null
+            );
+            persist(unrecognized);
+            deviceService.recordVisionInference(unrecognized);
+            return unrecognized;
+        }
+
+        String plate;
+        double confidence;
+        String energyType;
+        if (reading.isPresent()) {
+            PlateRecognitionService.PlateReading r = reading.get();
+            plate = r.plate();
+            confidence = r.confidence();
+            energyType = r.newEnergy() ? "新能源" : resolveEnergy(plate);
+        } else {
+            plate = resolvePlate(request);
+            confidence = Math.round((0.94 + random.nextDouble() * 0.05) * 1000.0) / 1000.0;
+            energyType = resolveEnergy(plate);
+        }
 
         String decision;
         String listType;

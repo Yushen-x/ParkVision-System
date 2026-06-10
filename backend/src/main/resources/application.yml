@@ -37,6 +37,15 @@ parkvision:
       expiration-minutes: ${PARKVISION_JWT_EXPIRATION_MINUTES:720}
   ai:
     inference-mode: ${PARKVISION_AI_INFERENCE_MODE:device-simulated}
+  vision:
+    lpr:
+      # 车牌识别引擎：none=内置引擎；hyperlpr=本地 HyperLPR 服务；baidu=百度车牌识别 OCR
+      provider: ${PARKVISION_LPR_PROVIDER:none}
+      hyperlpr:
+        url: ${PARKVISION_HYPERLPR_URL:http://localhost:8715/recognize}
+      baidu:
+        api-key: ${BAIDU_OCR_API_KEY:}
+        secret-key: ${BAIDU_OCR_SECRET_KEY:}
   devices:
     simulation-enabled: ${PARKVISION_DEVICE_SIMULATION_ENABLED:true}
     simulation-interval-ms: ${PARKVISION_DEVICE_SIMULATION_INTERVAL_MS:4000}

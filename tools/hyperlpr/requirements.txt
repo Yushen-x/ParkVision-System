@@ -1,0 +1,2 @@
+# HyperLPR3 pulls in opencv-python, onnxruntime, numpy, fastapi, uvicorn.
+hyperlpr3
