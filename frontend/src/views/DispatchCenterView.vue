@@ -54,6 +54,24 @@ const selectedQueue = computed(() => {
   return matched.length ? matched : state.queue.slice(0, 4);
 });
 
+function taskStatusText(task) {
+  if (task.status === "DONE") return "已完成";
+  if (task.status === "IN_PROGRESS") return `搬运中 ${task.progress || 0}%`;
+  return `排队中 · 预计 ${task.wait || "--:--"}`;
+}
+
+function taskBadge(task) {
+  if (task.status === "DONE") return "完成";
+  if (task.status === "IN_PROGRESS") return "执行中";
+  return "排队";
+}
+
+function taskTone(task) {
+  if (task.status === "DONE") return "done";
+  if (task.status === "IN_PROGRESS") return "active";
+  return "";
+}
+
 const relatedEvents = computed(() => {
   const order = selectedOrder.value;
   if (!order) return [];
@@ -146,7 +164,7 @@ async function submitVip() {
     <article class="surface ops-toolbar">
       <div>
         <h2>车辆 / 订单检索</h2>
-        <p>员工先找到要处理的车辆，再查看订单、AGV 队列、交接状态、计费和事件证据。</p>
+        <p>选中一辆车，即可在右侧看到它从入场到取车放行的完整履约链路。</p>
       </div>
       <div class="ops-filters">
         <div class="search-field">
@@ -216,7 +234,7 @@ async function submitVip() {
             <div class="section-head compact">
               <div>
                 <h2>履约进度</h2>
-                <p>这个进度只针对当前选中车辆，不再是固定说明文档。</p>
+                <p>当前车辆的实时履约节点。</p>
               </div>
             </div>
             <div class="fulfillment-timeline">
@@ -262,64 +280,67 @@ async function submitVip() {
             </div>
           </section>
         </div>
-      </article>
-    </section>
 
-    <section class="ops-bottom-grid" v-if="selectedOrder">
-      <article class="surface">
-        <div class="section-head compact">
-          <div>
-            <h2>相关队列</h2>
-            <p>优先展示当前车牌对应任务；没有匹配时展示队列前几项方便调度员判断。</p>
-          </div>
-        </div>
-        <div class="queue-list">
-          <div v-for="(task, index) in selectedQueue" :key="`${task.plateNo}-${index}`" class="queue-item" :class="{ vip: task.vip }">
-            <div class="queue-rank">{{ index + 1 }}</div>
-            <div>
-              <b>{{ zhText(task.type) }} - {{ task.plateNo }}</b>
-              <span>预计等待 {{ task.wait }} / {{ zhText(task.tag) }}</span>
+        <div class="ops-related-grid">
+          <section class="ops-subcard">
+            <div class="section-head compact">
+              <div>
+                <h2>相关队列</h2>
+                <p>当前车辆相关的调度任务。</p>
+              </div>
             </div>
-            <span class="queue-tag">{{ task.plateNo === selectedOrder.plateNo ? "当前车" : "参考" }}</span>
-          </div>
-        </div>
-      </article>
-
-      <article class="surface">
-        <div class="section-head compact">
-          <div>
-            <h2>费用追溯</h2>
-            <p>从订单进入到取车放行，费用按当前车辆的业务事件解释。</p>
-          </div>
-          <strong class="amount-total">{{ zhMoney(selectedOrder.amount || state.pricingPreview.totalAmount) }}</strong>
-        </div>
-        <div class="billing-list">
-          <div v-for="item in billingRows" :key="item.label">
-            <span>{{ zhText(item.label) }}</span>
-            <b>{{ zhMoney(item.amount) }}</b>
-            <small>{{ zhText(item.formula) }}</small>
-          </div>
-        </div>
-      </article>
-
-      <article class="surface">
-        <div class="section-head compact">
-          <div>
-            <h2>事件证据</h2>
-            <p>按车牌、订单号和车位聚合出来的可追溯记录。</p>
-          </div>
-        </div>
-        <div class="queue-list">
-          <div v-for="event in relatedEvents" :key="event.eventId" class="queue-item event-proof">
-            <div>
-              <b>{{ zhText(event.eventCode) }} - {{ event.deviceId }}</b>
-              <span>{{ zhText(event.message) }}</span>
+            <div class="queue-list">
+              <div v-for="(task, index) in selectedQueue" :key="task.id ?? `${task.plateNo}-${index}`" class="queue-item" :class="{ vip: task.vip }">
+                <div class="queue-rank">{{ index + 1 }}</div>
+                <div class="queue-body">
+                  <b>{{ zhText(task.type) }} - {{ task.plateNo }}</b>
+                  <span>{{ taskStatusText(task) }} · {{ zhText(task.tag) }}<template v-if="task.agvId"> · {{ task.agvId }}</template></span>
+                  <div v-if="task.status === 'IN_PROGRESS'" class="queue-progress">
+                    <i :style="{ width: (task.progress || 0) + '%' }"></i>
+                  </div>
+                </div>
+                <span class="queue-tag" :class="taskTone(task)">{{ taskBadge(task) }}</span>
+              </div>
             </div>
-            <span class="status-pill" :class="event.severity === 'critical' || event.severity === 'high' ? 'warning' : 'stable'">
-              {{ zhText(event.severity) }}
-            </span>
-          </div>
-          <div v-if="!relatedEvents.length" class="empty-proof">暂无匹配事件，说明当前订单还没有新的设备侧记录。</div>
+          </section>
+
+          <section class="ops-subcard">
+            <div class="section-head compact">
+              <div>
+                <h2>费用追溯</h2>
+                <p>当前车辆的费用构成。</p>
+              </div>
+              <strong class="amount-total">{{ zhMoney(selectedOrder.amount || state.pricingPreview.totalAmount) }}</strong>
+            </div>
+            <div class="billing-list">
+              <div v-for="item in billingRows" :key="item.label">
+                <span>{{ zhText(item.label) }}</span>
+                <b>{{ zhMoney(item.amount) }}</b>
+                <small>{{ zhText(item.formula) }}</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="ops-subcard">
+            <div class="section-head compact">
+              <div>
+                <h2>相关事件</h2>
+                <p>与当前车辆关联的设备与业务记录。</p>
+              </div>
+            </div>
+            <div class="queue-list">
+              <div v-for="event in relatedEvents" :key="event.eventId" class="queue-item event-proof">
+                <div>
+                  <b>{{ zhText(event.eventCode) }} - {{ event.deviceId }}</b>
+                  <span>{{ zhText(event.message) }}</span>
+                </div>
+                <span class="status-pill" :class="event.severity === 'critical' || event.severity === 'high' ? 'warning' : 'stable'">
+                  {{ zhText(event.severity) }}
+                </span>
+              </div>
+              <div v-if="!relatedEvents.length" class="empty-proof">当前车辆暂无新的关联记录。</div>
+            </div>
+          </section>
         </div>
       </article>
     </section>
@@ -562,10 +583,17 @@ async function submitVip() {
   gap: 10px;
 }
 
-.ops-bottom-grid {
+.ops-related-grid {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr) minmax(340px, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr) minmax(0, 1fr);
   gap: 20px;
+}
+
+.ops-subcard {
+  min-width: 0;
 }
 
 .amount-total {
@@ -623,7 +651,7 @@ async function submitVip() {
   }
 
   .trace-card-grid,
-  .ops-bottom-grid {
+  .ops-related-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -632,12 +660,43 @@ async function submitVip() {
   .ops-layout,
   .ops-detail-grid,
   .trace-card-grid,
-  .ops-bottom-grid {
+  .ops-related-grid {
     grid-template-columns: 1fr;
   }
 
   .search-field {
     min-width: min(300px, 100%);
   }
+}
+
+.queue-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.queue-progress {
+  margin-top: 6px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.queue-progress i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  transition: width 0.5s ease;
+}
+
+.queue-tag.active {
+  color: var(--brand);
+  background: rgba(79, 70, 229, 0.12);
+}
+
+.queue-tag.done {
+  color: var(--safety-green, #16a34a);
+  background: rgba(22, 163, 74, 0.12);
 }
 </style>

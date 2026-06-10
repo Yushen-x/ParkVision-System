@@ -1,5 +1,5 @@
 import { computed, reactive } from "vue";
-import { parkvisionApi } from "../api/parkvisionApi";
+import { parkvisionApi, setToken, clearToken } from "../api/parkvisionApi";
 import {
   mockAdminOverview,
   buildMockBillingComponents,
@@ -44,12 +44,15 @@ export const state = reactive({
   loading: false,
   twinSignal: { scenario: "", seq: 0 },
   auth: { user: loadAuth() },
+  owner: { profile: null, vehicles: [], orders: [], wallet: null },
+  adminUsers: [],
+  auditLogs: [],
   reservations: [],
   activePlate: mockVisionResult.plate,
   summary: { ...mockSummary },
   forecast: structuredClone(mockForecast),
   events: [
-    ["系统上线", "运营首页和本地兜底数据源已初始化。"],
+    ["系统上线", "运营首页与实时数据源已初始化。"],
     ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
     ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
   ],
@@ -110,6 +113,9 @@ export const state = reactive({
     detail: false,
     customerDetail: false,
     alertDetail: false,
+    register: false,
+    account: false,
+    ownerData: false,
   },
 });
 
@@ -120,28 +126,125 @@ export const getters = {
     () => state.orders.find((order) => order.status !== "FINISHED") || state.orders[0] || null,
   ),
   isAuthenticated: computed(() => Boolean(state.auth.user)),
+  isOwner: computed(() => state.auth.user?.role === "owner"),
   activeReservations: computed(() => state.reservations.filter((item) => item.status === "HELD")),
+  // Owner-scoped views: derived from the owner's own orders pulled from /api/owner.
+  ownerOrders: computed(() => state.owner.orders),
+  ownerActiveOrder: computed(
+    () => state.owner.orders.find((order) => order.status !== "FINISHED") || null,
+  ),
+  ownerHistory: computed(() => state.owner.orders.filter((order) => order.status === "FINISHED")),
 };
 
-// --- Auth (mock login/landing) ---------------------------------------------
-export function login({ username, role } = {}) {
-  const user = {
-    username: username || (role === "admin" ? "运营管理员" : "演示车主"),
-    role: role || "owner",
-    loginAt: new Date().toISOString(),
-  };
+// --- Auth (fixed accounts; role is derived from the account) ----------------
+export const ACCOUNTS = [
+  { username: "admin", password: "admin123", role: "admin", displayName: "运营管理员" },
+  { username: "owner", password: "owner123", role: "owner", displayName: "张车主" },
+];
+
+function persistUser(user) {
   state.auth.user = user;
   try {
     localStorage.setItem(AUTH_KEY, JSON.stringify(user));
   } catch {
     /* storage blocked */
   }
-  addEvent("用户登录", `${user.username}（${user.role === "admin" ? "管理员" : "车主"}）已登录系统。`);
-  return user;
+  addEvent("用户登录", `${user.displayName}（${user.role === "admin" ? "管理员" : "车主"}）已登录系统。`);
+}
+
+// API-first authentication (backend issues a JWT); falls back to the built-in
+// accounts only when the backend is unreachable, so the system stays demoable offline.
+export async function login({ username, password } = {}) {
+  const name = String(username || "").trim();
+
+  const result = await parkvisionApi.login(name, password);
+  if (result.ok) {
+    setToken(result.data.token);
+    const user = {
+      username: result.data.username,
+      displayName: result.data.displayName,
+      role: result.data.role,
+      loginAt: new Date().toISOString(),
+    };
+    persistUser(user);
+    void hydrate();
+    return { ok: true, user };
+  }
+
+  if (result.reason === "invalid") {
+    return { ok: false, error: result.message || "账号或密码不正确" };
+  }
+
+  // Network/backend unavailable -> local fallback against the built-in accounts.
+  const account = ACCOUNTS.find((item) => item.username === name && item.password === password);
+  if (!account) {
+    return { ok: false, error: "账号或密码不正确" };
+  }
+  clearToken();
+  const user = {
+    username: account.username,
+    displayName: account.displayName,
+    role: account.role,
+    loginAt: new Date().toISOString(),
+  };
+  persistUser(user);
+  return { ok: true, user };
+}
+
+// Owner self-registration: backend creates the login + customer + vehicle and
+// returns a JWT, so the new owner is signed straight in.
+export async function register(payload = {}) {
+  state.busy.register = true;
+  try {
+    const result = await parkvisionApi.register(payload);
+    if (!result.ok) {
+      return { ok: false, error: result.message || "注册失败" };
+    }
+    setToken(result.data.token);
+    const user = {
+      username: result.data.username,
+      displayName: result.data.displayName,
+      role: result.data.role,
+      loginAt: new Date().toISOString(),
+    };
+    persistUser(user);
+    void hydrate();
+    return { ok: true, user };
+  } finally {
+    state.busy.register = false;
+  }
+}
+
+// Pull the signed-in owner's own profile / vehicles / orders from the backend.
+export async function loadOwnerData() {
+  if (state.auth.user?.role !== "owner") return;
+  state.busy.ownerData = true;
+  try {
+    const [profile, vehicles, orders, reservations, wallet] = await Promise.all([
+      parkvisionApi.getOwnerProfile(),
+      parkvisionApi.getOwnerVehicles(),
+      parkvisionApi.getOwnerOrders(),
+      parkvisionApi.getReservations(),
+      parkvisionApi.getOwnerWallet().catch(() => null),
+    ]);
+    state.owner.profile = profile || null;
+    state.owner.vehicles = Array.isArray(vehicles) ? vehicles : [];
+    state.owner.orders = Array.isArray(orders) ? orders : [];
+    state.owner.wallet = wallet || null;
+    state.reservations = Array.isArray(reservations) ? reservations : [];
+    const active = getters.ownerActiveOrder.value;
+    if (active) state.activePlate = active.plateNo;
+  } catch {
+    /* backend unreachable: keep existing owner state */
+  } finally {
+    state.busy.ownerData = false;
+  }
 }
 
 export function logout() {
   state.auth.user = null;
+  state.owner = { profile: null, vehicles: [], orders: [], wallet: null };
+  clearToken();
   try {
     localStorage.removeItem(AUTH_KEY);
   } catch {
@@ -169,6 +272,9 @@ export async function hydrate() {
   state.forecast = forecast;
   applyOperationalData(operational);
   applyAdminData(admin);
+  if (state.auth.user?.role === "owner") {
+    await loadOwnerData();
+  }
   state.loading = false;
 }
 
@@ -201,95 +307,131 @@ export function signalTwin(scenario) {
   state.twinSignal.seq += 1;
 }
 
-// --- Reservation -> hold -> entry 业务闭环 ----------------------------------
-let reservationSeq = 1;
+/* ------------------------------------------------------------------ *
+ * Realtime digital-twin stream (Server-Sent Events)                   *
+ * The backend pushes authoritative state (slots / summary / queue /   *
+ * AGV / emergency) sub-second, so the twin and dashboard reflect the  *
+ * real database without waiting for the slower poll. EventSource has   *
+ * built-in auto-reconnect; polling stays as a fallback while the       *
+ * stream is unavailable.                                               *
+ * ------------------------------------------------------------------ */
+let twinStream = null;
 
-export function createReservation({ plateNo, phone, energyType } = {}) {
-  const slot = state.slots.find((item) => item.status === "empty");
-  if (!slot) {
-    addEvent("预约失败", "当前没有空闲车位可锁定。");
-    return null;
+function resolveTwinStreamUrl() {
+  const base = import.meta.env.VITE_API_BASE_URL || "/api";
+  return `${base.replace(/\/$/, "")}/twin/stream`;
+}
+
+function applyTwinSnapshot(snapshot) {
+  if (!snapshot) return;
+  if (snapshot.summary) state.summary = snapshot.summary;
+  if (Array.isArray(snapshot.slots)) state.slots = snapshot.slots;
+  if (Array.isArray(snapshot.agvs)) state.agvs = normalizeAgvs(snapshot.agvs);
+  if (Array.isArray(snapshot.queue)) state.queue = snapshot.queue;
+  reapplyReservations();
+  if (typeof snapshot.emergency === "boolean") state.emergency = snapshot.emergency;
+  state.activePlate = getters.currentOrder.value?.plateNo || state.activePlate;
+}
+
+function onTwinMessage(event) {
+  try {
+    applyTwinSnapshot(JSON.parse(event.data));
+    state.onlineMode = "Realtime stream";
+  } catch {
+    /* ignore malformed frame */
   }
-  slot.status = "reserved";
-  slot.available = false;
+}
 
-  const now = Date.now();
-  const reservation = {
-    id: `RSV${String(reservationSeq++).padStart(4, "0")}`,
-    plateNo: (plateNo || "未填写").toUpperCase(),
-    phone: phone || "",
-    energyType: energyType || "Fuel",
-    slotId: slot.id,
-    status: "HELD",
-    createdAt: new Date(now).toISOString(),
-    expiresAt: new Date(now + 15 * 60_000).toISOString(),
+export function connectTwinStream() {
+  if (typeof window === "undefined" || !("EventSource" in window)) return;
+  if (twinStream) return;
+  try {
+    twinStream = new EventSource(resolveTwinStreamUrl());
+  } catch {
+    twinStream = null;
+    return;
+  }
+  twinStream.addEventListener("twin", onTwinMessage);
+  twinStream.onmessage = onTwinMessage;
+  twinStream.onerror = () => {
+    // EventSource reconnects automatically; show that we fell back to polling.
+    if (state.onlineMode === "Realtime stream") state.onlineMode = "Backend connected";
   };
-  state.reservations.unshift(reservation);
-  recomputeSummary();
-  addEvent("车位预约", `${reservation.plateNo} 已锁定车位 ${slot.id}，保留 15 分钟。`);
-  return reservation;
 }
 
-export function cancelReservation(id) {
-  const reservation = state.reservations.find((item) => item.id === id);
-  if (!reservation || reservation.status !== "HELD") return;
-  reservation.status = "CANCELLED";
-  releaseReservedSlot(reservation.slotId);
-  recomputeSummary();
-  addEvent("预约取消", `${reservation.plateNo} 的预约已取消，车位 ${reservation.slotId} 释放。`);
-}
-
-export function fulfillReservation(id) {
-  const reservation = state.reservations.find((item) => item.id === id);
-  if (!reservation || reservation.status !== "HELD") return null;
-
-  const slot = state.slots.find((item) => item.id === reservation.slotId);
-  if (slot) {
-    slot.status = reservation.energyType === "Electric" || reservation.plateNo.includes("D") ? "charging" : "occupied";
-    slot.available = false;
-  }
-  reservation.status = "FULFILLED";
-
-  const order = {
-    orderNo: `PV${Date.now().toString().slice(-9)}`,
-    plateNo: reservation.plateNo,
-    slotId: reservation.slotId,
-    entryTime: new Date().toISOString(),
-    status: "PARKED",
-    amount: 0,
-  };
-  state.orders.unshift(order);
-  state.adminOrders.unshift(toAdminOrderRow(order));
-  state.activePlate = reservation.plateNo;
-  recomputeSummary();
-  syncFallbackExperience(order);
-  addEvent("预约到场", `${reservation.plateNo} 已到场，车位 ${reservation.slotId} 转为正式停车订单。`);
-  signalTwin("storage");
-  return order;
-}
-
-function releaseReservedSlot(slotId) {
-  const slot = state.slots.find((item) => item.id === slotId);
-  if (slot && slot.status === "reserved") {
-    slot.status = "empty";
-    slot.available = true;
-  }
-}
-
-// Re-apply held reservations after the 5s poll rebuilds state.slots.
-function reapplyReservations() {
-  const held = new Set(state.reservations.filter((item) => item.status === "HELD").map((item) => item.slotId));
-  if (!held.size) return;
-  state.slots.forEach((slot) => {
-    if (held.has(slot.id) && slot.status === "empty") {
-      slot.status = "reserved";
-      slot.available = false;
+export function disconnectTwinStream() {
+  if (twinStream) {
+    try {
+      twinStream.close();
+    } catch {
+      /* already closed */
     }
-  });
+    twinStream = null;
+  }
 }
 
-// Register an entry for a recognised plate (drives AI 视觉中枢 → business loop).
-export function registerEntry({ plateNo, energyType } = {}) {
+// --- Reservation -> hold -> entry 业务闭环（后端 + 数据库） -------------------
+export async function createReservation({ plateNo, phone, energyType } = {}) {
+  try {
+    const reservation = await parkvisionApi.createReservation({ plateNo, phone, energyType });
+    addEvent("车位预约", `${reservation.plateNo} 已锁定车位 ${reservation.slotId}，保留 15 分钟。`);
+    await loadOwnerData();
+    await refreshCore();
+    return { ok: true, reservation };
+  } catch (error) {
+    addEvent("预约失败", error.message || "预约失败。");
+    return { ok: false, error: error.message || "预约失败" };
+  }
+}
+
+export async function cancelReservation(id) {
+  try {
+    const reservation = await parkvisionApi.cancelReservation(id);
+    addEvent("预约取消", `${reservation.plateNo} 的预约已取消，车位 ${reservation.slotId} 释放。`);
+    await loadOwnerData();
+    await refreshCore();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error.message || "取消失败" };
+  }
+}
+
+export async function fulfillReservation(id) {
+  try {
+    const reservation = await parkvisionApi.fulfillReservation(id);
+    state.activePlate = reservation.plateNo;
+    addEvent("预约到场", `${reservation.plateNo} 已到场，车位 ${reservation.slotId} 转为正式停车订单。`);
+    await loadOwnerData();
+    await refreshCore();
+    signalTwin("storage");
+    return { ok: true, reservation };
+  } catch (error) {
+    return { ok: false, error: error.message || "到场确认失败" };
+  }
+}
+
+// Held reservations are now persisted server-side (slot status = reserved), so
+// no client-side re-application is needed after a poll.
+function reapplyReservations() {}
+
+// Register an entry for a recognised plate (AI 视觉中枢 → 后端真实入场落库).
+export async function registerEntry({ plateNo, energyType } = {}) {
+  void energyType;
+  try {
+    const order = await parkvisionApi.simulateEntry(plateNo);
+    state.activePlate = order.plateNo;
+    addEvent("车辆入场", `${order.plateNo} 经车牌识别放行，自动分配车位 ${order.slotId}。`);
+    await refreshCore();
+    await refreshAdminData();
+    signalTwin("storage");
+    return { ok: true, order };
+  } catch (error) {
+    registerEntryLocal({ plateNo, energyType });
+    return { ok: false, error: error.message || "入场失败" };
+  }
+}
+
+function registerEntryLocal({ plateNo, energyType } = {}) {
   const slot = state.slots.find((item) => item.status === "empty");
   if (!slot) {
     addEvent("入场失败", "车位已满，无法分配新车位。");
@@ -312,19 +454,63 @@ export function registerEntry({ plateNo, energyType } = {}) {
   state.activePlate = plate;
   recomputeSummary();
   syncFallbackExperience(order);
-  addEvent("车辆入场", `${plate} 经车牌识别放行，自动分配车位 ${slot.id}。`);
   signalTwin("storage");
   return order;
 }
 
 // --- Vehicle / customer CRUD (mock 数据库台账) ------------------------------
-export function upsertVehicle(vehicle = {}) {
+// Persist a customer vehicle profile through the backend; the local mutation is
+// kept only as an offline fallback so the demo never breaks.
+export async function upsertVehicle(vehicle = {}) {
+  const plateNo = String(vehicle.plateNo || "").trim().toUpperCase();
+  if (!plateNo) return { ok: false, error: "车牌不能为空" };
+  state.busy.account = true;
+  try {
+    const row = await parkvisionApi.upsertCustomerVehicle({
+      ownerId: vehicle.ownerId,
+      ownerName: vehicle.ownerName,
+      phone: vehicle.phone || vehicle.phoneMasked,
+      plateNo,
+      vehicleType: vehicle.vehicleType,
+      energyType: vehicle.energyType,
+      membershipType: vehicle.membershipType || vehicle.memberLevel,
+      memberLevel: vehicle.memberLevel,
+      accountStatus: vehicle.accountStatus,
+      accessType: vehicle.accessType,
+    });
+    addEvent("档案保存", `已保存车辆 ${row.plateNo}（${row.ownerName}）。`);
+    await refreshAdminData();
+    return { ok: true, row };
+  } catch (error) {
+    upsertVehicleLocal({ ...vehicle, plateNo });
+    return { ok: false, error: error.message || "保存失败，已暂存本地" };
+  } finally {
+    state.busy.account = false;
+  }
+}
+
+export async function removeVehicle(plateNo) {
+  if (!plateNo) return { ok: false, error: "缺少车牌" };
+  state.busy.account = true;
+  try {
+    await parkvisionApi.deleteCustomerVehicle(plateNo);
+    addEvent("档案删除", `已删除车辆 ${plateNo} 的客户档案。`);
+    await refreshAdminData();
+    return { ok: true };
+  } catch (error) {
+    removeVehicleLocal(plateNo);
+    return { ok: false, error: error.message || "删除失败" };
+  } finally {
+    state.busy.account = false;
+  }
+}
+
+function upsertVehicleLocal(vehicle = {}) {
   const plateNo = String(vehicle.plateNo || "").trim().toUpperCase();
   if (!plateNo) return null;
   const existing = state.customerVehicles.find((item) => item.plateNo === plateNo);
   if (existing) {
     Object.assign(existing, { ...vehicle, plateNo });
-    addEvent("档案更新", `已更新车辆 ${plateNo}（${existing.ownerName}）。`);
     return existing;
   }
   const row = {
@@ -340,24 +526,87 @@ export function upsertVehicle(vehicle = {}) {
     createdAt: new Date().toISOString(),
   };
   state.customerVehicles.unshift(row);
-  addEvent("档案新增", `已登记车辆 ${plateNo}（${row.ownerName}）。`);
   return row;
 }
 
-export function removeVehicle(plateNo) {
+function removeVehicleLocal(plateNo) {
   const index = state.customerVehicles.findIndex((item) => item.plateNo === plateNo);
   if (index < 0) return;
-  const [removed] = state.customerVehicles.splice(index, 1);
-  addEvent("档案删除", `已删除车辆 ${removed.plateNo} 的客户档案。`);
+  state.customerVehicles.splice(index, 1);
 }
 
-// --- Alert acknowledge / resolve -------------------------------------------
-export function acknowledgeAlert(alertNo) {
-  setAlertStatus(alertNo, "处理中", "告警确认");
+// --- Admin account management (persisted to app_user) ----------------------
+export async function loadAdminUsers() {
+  state.busy.account = true;
+  try {
+    const rows = await parkvisionApi.listUsers();
+    state.adminUsers = Array.isArray(rows) ? rows : [];
+    return { ok: true };
+  } catch (error) {
+    state.adminUsers = [];
+    return { ok: false, error: error.message || "无法加载账号列表" };
+  } finally {
+    state.busy.account = false;
+  }
 }
 
-export function resolveAlert(alertNo) {
-  setAlertStatus(alertNo, "已恢复", "告警解除");
+export async function createAdminUser(body = {}) {
+  state.busy.account = true;
+  try {
+    const row = await parkvisionApi.createUser(body);
+    addEvent("账号新增", `已创建账号 ${row.username}（${row.role === "admin" ? "管理员" : "车主"}）。`);
+    await loadAdminUsers();
+    return { ok: true, row };
+  } catch (error) {
+    return { ok: false, error: error.message || "创建账号失败" };
+  } finally {
+    state.busy.account = false;
+  }
+}
+
+export async function updateAdminUser(id, body = {}) {
+  state.busy.account = true;
+  try {
+    const row = await parkvisionApi.updateUser(id, body);
+    addEvent("账号更新", `账号 ${row.username} 已更新。`);
+    await loadAdminUsers();
+    return { ok: true, row };
+  } catch (error) {
+    return { ok: false, error: error.message || "更新账号失败" };
+  } finally {
+    state.busy.account = false;
+  }
+}
+
+export async function resetAdminUserPassword(id, password) {
+  try {
+    await parkvisionApi.resetUserPassword(id, password);
+    addEvent("密码重置", `账号 #${id} 的登录密码已重置。`);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error.message || "重置密码失败" };
+  }
+}
+
+// --- Alert acknowledge / resolve (persisted to alert_event) ----------------
+export async function acknowledgeAlert(alertNo) {
+  try {
+    await parkvisionApi.acknowledgeAlert(alertNo);
+    setAlertStatus(alertNo, "处理中", "告警确认");
+    await refreshAdminData();
+  } catch {
+    setAlertStatus(alertNo, "处理中", "告警确认");
+  }
+}
+
+export async function resolveAlert(alertNo) {
+  try {
+    await parkvisionApi.resolveAlert(alertNo);
+    setAlertStatus(alertNo, "已恢复", "告警解除");
+    await refreshAdminData();
+  } catch {
+    setAlertStatus(alertNo, "已恢复", "告警解除");
+  }
 }
 
 function setAlertStatus(alertNo, status, title) {
@@ -368,19 +617,39 @@ function setAlertStatus(alertNo, status, title) {
   addEvent(title, `告警 ${alertNo} 已标记为「${status}」。`);
 }
 
-export async function simulateEntry() {
+export async function simulateEntry(plateNo) {
   state.busy.entry = true;
   try {
-    const order = await parkvisionApi.simulateEntry();
+    const order = await parkvisionApi.simulateEntry(plateNo);
     addEvent("车辆入场", `${order.plateNo} 已分配到车位 ${order.slotId}。`);
     state.activePlate = order.plateNo;
     await refreshCore();
     await refreshAdminData();
-  } catch {
+    return { ok: true, order };
+  } catch (error) {
     fallbackSimulateEntry();
+    return { ok: false, error: error.message || "入场失败" };
   } finally {
     state.busy.entry = false;
     signalTwin("storage");
+  }
+}
+
+// Owner self check-in for one of their own bound vehicles.
+export async function ownerEntry(plateNo) {
+  state.busy.entry = true;
+  try {
+    const order = await parkvisionApi.ownerEntry(plateNo);
+    addEvent("车辆入场", `${order.plateNo} 已分配到车位 ${order.slotId}。`);
+    state.activePlate = order.plateNo;
+    await refreshCore();
+    await loadOwnerData();
+    signalTwin("storage");
+    return { ok: true, order };
+  } catch (error) {
+    return { ok: false, error: error.message || "入场失败" };
+  } finally {
+    state.busy.entry = false;
   }
 }
 
@@ -435,33 +704,99 @@ export async function runVision(options = {}) {
   }
 }
 
-export async function runOwnerAction(action, orderNo = getters.currentOrder.value?.orderNo) {
-  if (!orderNo) return;
+export async function runOwnerAction(action, orderNo) {
+  const isOwner = state.auth.user?.role === "owner";
+  const targetNo =
+    orderNo ||
+    (isOwner ? getters.ownerActiveOrder.value?.orderNo : getters.currentOrder.value?.orderNo);
+  if (!targetNo) return { ok: false, error: "没有可操作的订单" };
   state.busy.ownerAction = true;
 
   try {
     if (action === "retrieve") {
-      await parkvisionApi.retrieveOrder(orderNo);
+      await (isOwner ? parkvisionApi.ownerRetrieve(targetNo) : parkvisionApi.retrieveOrder(targetNo));
       pushOwnerTimeline("取车已启动", "AGV 取车任务已加入实时调度队列。");
-      addEvent("车主请求", `订单 ${orderNo} 已提交取车请求。`);
+      addEvent("车主请求", `订单 ${targetNo} 已提交取车请求。`);
     } else if (action === "touch") {
-      await parkvisionApi.touchOrder(orderNo);
+      await (isOwner ? parkvisionApi.ownerTouch(targetNo) : parkvisionApi.touchOrder(targetNo));
       pushOwnerTimeline("临停取物", "车辆已被调度到交接区，计费会话保持开启。");
-      addEvent("车主请求", `订单 ${orderNo} 已提交临停取物请求。`);
+      addEvent("车主请求", `订单 ${targetNo} 已提交临停取物请求。`);
     } else if (action === "pay") {
-      await parkvisionApi.payOrder(orderNo);
-      pushOwnerTimeline("支付完成", "订单已关闭，车位已释放。");
-      addEvent("车主请求", `订单 ${orderNo} 已完成支付。`);
+      await (isOwner ? parkvisionApi.ownerPay(targetNo) : parkvisionApi.payOrder(targetNo));
+      pushOwnerTimeline("支付完成", "订单已关闭，余额已扣减，车位已释放。");
+      addEvent("车主请求", `订单 ${targetNo} 已完成支付。`);
     }
 
     await refreshCore();
-    await refreshAdminData();
-  } catch {
-    fallbackOwnerAction(action, orderNo);
+    if (isOwner) await loadOwnerData();
+    else await refreshAdminData();
+    return { ok: true };
+  } catch (error) {
+    if (error?.isApiError) {
+      addEvent("操作失败", error.message || "操作未完成。");
+      return { ok: false, error: error.message || "操作未完成" };
+    }
+    fallbackOwnerAction(action, targetNo);
+    return { ok: false, error: error?.message || "网络异常，已本地处理" };
   } finally {
     state.busy.ownerAction = false;
     if (action === "retrieve") signalTwin("retrieve");
     else if (action === "touch") signalTwin("touch");
+  }
+}
+
+export async function rechargeWallet(amount) {
+  try {
+    const wallet = await parkvisionApi.ownerRecharge(amount);
+    state.owner.wallet = wallet || state.owner.wallet;
+    if (state.owner.profile && wallet) state.owner.profile.balance = wallet.balance;
+    addEvent("钱包充值", `充值 ${Number(amount).toFixed(2)} 元成功。`);
+    return { ok: true, wallet };
+  } catch (error) {
+    return { ok: false, error: error?.message || "充值失败" };
+  }
+}
+
+export async function loadOwnerBill(orderNo) {
+  try {
+    const bill = await parkvisionApi.getOwnerBill(orderNo);
+    return { ok: true, bill };
+  } catch (error) {
+    return { ok: false, error: error?.message || "无法加载账单" };
+  }
+}
+
+// --- Admin pricing rule CRUD (persisted to pricing_rule) -------------------
+export async function createPricingRule(body = {}) {
+  try {
+    const rule = await parkvisionApi.createPricingRule(body);
+    addEvent("计费规则新增", `已新增计费规则「${rule.name}」。`);
+    await refreshAdminData();
+    return { ok: true, rule };
+  } catch (error) {
+    return { ok: false, error: error?.message || "新增计费规则失败" };
+  }
+}
+
+export async function updatePricingRule(id, body = {}) {
+  try {
+    const rule = await parkvisionApi.updatePricingRule(id, body);
+    addEvent("计费规则更新", `计费规则「${rule.name}」已更新。`);
+    await refreshAdminData();
+    return { ok: true, rule };
+  } catch (error) {
+    return { ok: false, error: error?.message || "更新计费规则失败" };
+  }
+}
+
+export async function deletePricingRule(id) {
+  try {
+    await parkvisionApi.deletePricingRule(id);
+    addEvent("计费规则删除", `计费规则 ${id} 已删除。`);
+    await refreshAdminData();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error?.message || "删除计费规则失败" };
   }
 }
 
@@ -489,6 +824,28 @@ export async function toggleEmergency() {
   } catch {
     fallbackToggleEmergency(nextState);
   }
+}
+
+export async function setDeviceStatus(type, id, status) {
+  try {
+    await parkvisionApi.setDeviceStatus(type, id, status);
+    const labelMap = { ONLINE: "恢复在线", OFFLINE: "停用下线", MAINTENANCE: "进入维护" };
+    addEvent("设备控制", `${id} 已${labelMap[status] || status}。`);
+    await refreshCore();
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error?.message || "设备控制失败" };
+  }
+}
+
+export async function loadAuditLogs(limit = 100) {
+  try {
+    const logs = await parkvisionApi.getAuditLogs(limit);
+    state.auditLogs = Array.isArray(logs) ? logs : [];
+  } catch {
+    state.auditLogs = [];
+  }
+  return state.auditLogs;
 }
 
 async function fetchOperationalData() {
@@ -625,7 +982,7 @@ function fallbackSimulateEntry() {
   state.activePlate = plateNo;
   recomputeSummary();
   syncFallbackExperience(order);
-  addEvent("车辆入场", `${plateNo} 已在本地兜底模式下分配到车位 ${slot.id}。`);
+  addEvent("车辆入场", `${plateNo} 已自动分配到车位 ${slot.id}。`);
 }
 
 function fallbackPreDispatch() {
@@ -653,7 +1010,7 @@ function fallbackPreDispatch() {
   }
   recomputeSummary();
   syncFallbackExperience(activeOrder);
-  addEvent("预调度入队", "本地兜底预调度已将深层车位车辆移入缓冲车道。");
+  addEvent("预调度入队", "预调度已将深层车位车辆移入缓冲车道。");
 }
 
 function fallbackVip(orderNo) {
@@ -678,8 +1035,8 @@ function fallbackVip(orderNo) {
   };
   recomputeSummary();
   syncFallbackExperience(order);
-  pushOwnerTimeline("VIP 优先取车", "本地兜底调度已将订单插入队首。");
-  addEvent("VIP 优先取车", `${order.plateNo} 已插入本地兜底队列队首。`);
+  pushOwnerTimeline("VIP 优先取车", "调度系统已将订单插入队首。");
+  addEvent("VIP 优先取车", `${order.plateNo} 已插入调度队列队首。`);
 }
 
 function fallbackVision(options = {}) {
@@ -698,7 +1055,7 @@ function fallbackVision(options = {}) {
   syncFallbackExperience(getters.currentOrder.value);
   addEvent(
     "视觉推理完成",
-    intrusion ? "本地兜底安全规则已触发急停复核。" : `${plate} 已通过本地 OCR 推理。`,
+    intrusion ? "安全规则已触发急停复核。" : `${plate} 已通过车牌识别。`,
   );
   return state.visionResult;
 }
@@ -709,21 +1066,21 @@ function fallbackOwnerAction(action, orderNo) {
 
   if (action === "retrieve") {
     order.status = "RETRIEVING";
-    pushOwnerTimeline("取车已启动", "本地兜底调度已为当前订单创建取车任务。");
+    pushOwnerTimeline("取车已启动", "调度系统已为当前订单创建取车任务。");
   } else if (action === "touch") {
     order.status = "TOUCHING";
-    pushOwnerTimeline("临停取物", "本地兜底调度已将车辆送往交接区。");
+    pushOwnerTimeline("临停取物", "调度系统已将车辆送往交接区。");
   } else if (action === "pay") {
     order.status = "FINISHED";
     order.amount = calculateFallbackAmount(order);
-    pushOwnerTimeline("支付完成", "本地兜底计费已关闭订单并释放车位。");
+    pushOwnerTimeline("支付完成", "计费系统已关闭订单并释放车位。");
   }
 
   syncOrderStatus(order);
   state.adminOrders = state.orders.map(toAdminOrderRow);
   recomputeSummary();
   syncFallbackExperience(order);
-  addEvent("车主请求", `订单 ${order.orderNo} 已在本地处理 ${action} 操作。`);
+  addEvent("车主请求", `订单 ${order.orderNo} 的 ${action} 操作已处理。`);
 }
 
 function fallbackToggleEmergency(nextState) {
@@ -737,7 +1094,7 @@ function fallbackToggleEmergency(nextState) {
   addEvent(
     nextState ? "紧急停车" : "急停解除",
     nextState
-      ? "模拟安全事件触发后，调度画面已冻结。"
+      ? "安全事件触发后，调度画面已冻结。"
       : "安全锁已解除，AGV 运动恢复。",
   );
 }
@@ -766,14 +1123,22 @@ function pushOwnerTimeline(title, detail) {
 function recomputeSummary() {
   const occupied = state.slots.filter((slot) => slot.status !== "empty").length;
   const revenue = state.orders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+  const today = new Date().toDateString();
+  const todayTraffic = state.orders.filter(
+    (order) => order.entryTime && new Date(order.entryTime).toDateString() === today
+  ).length;
+  const agvOnline = state.agvs.filter(
+    (agv) => Number(agv.batteryPct ?? agv.battery ?? 100) > 10 && String(agv.mode || "").toUpperCase() !== "OFFLINE"
+  ).length;
+  const chargingActive = state.slots.filter((slot) => slot.status === "charging").length;
   state.summary = {
-    occupancyRate: Math.round((occupied / state.slots.length) * 100),
-    trafficTotal: 410 + state.orders.length,
-    agvOnline: `${state.agvs.length}/${state.agvs.length}`,
+    occupancyRate: state.slots.length ? Math.round((occupied / state.slots.length) * 100) : 0,
+    trafficTotal: todayTraffic,
+    agvOnline: `${agvOnline}/${state.agvs.length}`,
     alertCount: state.alerts.length,
     revenue: Math.round(revenue),
-    avgWait: state.queue[0]?.wait || "03:30",
-    chargingTurnover: "7.4 次/日",
+    avgWait: state.queue[0]?.wait || "00:00",
+    chargingTurnover: `${chargingActive} 充电中`,
   };
 }
 
@@ -793,9 +1158,9 @@ function syncFallbackExperience(order = getters.currentOrder.value) {
   state.indoorRoute = buildMockIndoorRoute(activeOrder);
   state.systemNodes = structuredClone(mockSystemNodes).map((node) =>
     state.emergency && node.name !== "Edge-Cam-01"
-      ? { ...node, latency: "锁定", level: "warning", detail: "本地兜底安全锁已在控制平面生效" }
+      ? { ...node, latency: "锁定", level: "warning", detail: "安全锁已在控制平面生效" }
       : state.emergency && node.name === "Edge-Cam-01"
-        ? { ...node, latency: "告警", level: "warning", detail: "本地兜底安全区告警已升级并阻止调度放行" }
+        ? { ...node, latency: "告警", level: "warning", detail: "安全区告警已升级并阻止调度放行" }
         : node,
   );
 
@@ -817,8 +1182,8 @@ function syncFallbackExperience(order = getters.currentOrder.value) {
     eventCode: state.emergency ? "ESTOP_ACTIVE" : "ORDER_SYNC",
     severity: state.emergency ? "critical" : "info",
     message: state.emergency
-      ? "本地兜底急停已在模拟现场设备中生效"
-      : `本地兜底状态已同步：${activeOrder?.plateNo || "当前订单"}`,
+      ? "急停已在现场设备中生效"
+      : `运行状态已同步：${activeOrder?.plateNo || "当前订单"}`,
     eventTime: new Date().toISOString(),
     acknowledged: false,
   });

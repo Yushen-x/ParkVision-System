@@ -22,16 +22,47 @@ import {
 } from "../data/mockData";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+const TOKEN_KEY = "pv-token";
+
+export function getToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+export function setToken(token) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
+
+export function clearToken() {
+  setToken("");
+}
+
+function authHeaders() {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) },
     ...options,
   });
 
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(payload?.message || `API ${path} failed with ${response.status}`);
+    const error = new Error(payload?.message || `API ${path} failed with ${response.status}`);
+    error.code = payload?.code || null;
+    error.status = response.status;
+    error.isApiError = true;
+    throw error;
   }
   if (!payload) {
     throw new Error(`API ${path} returned a non-JSON or empty response`);
@@ -49,13 +80,14 @@ async function withFallback(fetcher, fallback) {
 }
 
 function withQuery(path, params = {}) {
-  const url = new URL(`${API_BASE}${path}`, window.location.origin);
+  const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
-      url.searchParams.set(key, value);
+      search.set(key, value);
     }
   });
-  return url.pathname + url.search;
+  const qs = search.toString();
+  return qs ? `${path}?${qs}` : path;
 }
 
 function includesIgnoreCase(value, keyword) {
@@ -122,8 +154,110 @@ function filterPaymentsFallback(params = {}) {
 }
 
 export const parkvisionApi = {
+  async login(username, password) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (response.ok && payload?.success && payload?.data?.token) {
+        return { ok: true, data: payload.data };
+      }
+      return { ok: false, reason: "invalid", message: payload?.message || "账号或密码不正确" };
+    } catch {
+      return { ok: false, reason: "network" };
+    }
+  },
+  async register(payload = {}) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await response.json().catch(() => null);
+      if (response.ok && body?.success && body?.data?.token) {
+        return { ok: true, data: body.data };
+      }
+      return { ok: false, reason: "invalid", message: body?.message || "注册失败" };
+    } catch {
+      return { ok: false, reason: "network", message: "无法连接服务器" };
+    }
+  },
   probeBackend() {
     return request("/dashboard/summary");
+  },
+  // --- Owner self-service (scoped to the signed-in owner) -------------------
+  getOwnerProfile() {
+    return request("/owner/me");
+  },
+  getOwnerVehicles() {
+    return request("/owner/vehicles");
+  },
+  getOwnerOrders() {
+    return request("/owner/orders");
+  },
+  ownerEntry(plateNo) {
+    return request(withQuery("/owner/entry", { plateNo }), { method: "POST" });
+  },
+  getReservations() {
+    return request("/owner/reservations");
+  },
+  createReservation(body) {
+    return request("/owner/reservations", { method: "POST", body: JSON.stringify(body || {}) });
+  },
+  cancelReservation(id) {
+    return request(`/owner/reservations/${encodeURIComponent(id)}/cancel`, { method: "POST" });
+  },
+  fulfillReservation(id) {
+    return request(`/owner/reservations/${encodeURIComponent(id)}/fulfill`, { method: "POST" });
+  },
+  ownerRetrieve(orderNo) {
+    return request(`/owner/orders/${orderNo}/retrieve`, { method: "POST" });
+  },
+  ownerTouch(orderNo) {
+    return request(`/owner/orders/${orderNo}/touch-and-go`, { method: "POST" });
+  },
+  ownerPay(orderNo) {
+    return request(`/owner/orders/${orderNo}/pay`, { method: "POST" });
+  },
+  getOwnerWallet() {
+    return request("/owner/wallet");
+  },
+  ownerRecharge(amount) {
+    return request("/owner/wallet/recharge", { method: "POST", body: JSON.stringify({ amount }) });
+  },
+  getOwnerBill(orderNo) {
+    return request(`/owner/orders/${encodeURIComponent(orderNo)}/bill`);
+  },
+  // --- Admin account management (ROLE_ADMIN) -------------------------------
+  listUsers() {
+    return request("/admin/users");
+  },
+  createUser(body) {
+    return request("/admin/users", { method: "POST", body: JSON.stringify(body || {}) });
+  },
+  updateUser(id, body) {
+    return request(`/admin/users/${id}`, { method: "PUT", body: JSON.stringify(body || {}) });
+  },
+  resetUserPassword(id, password) {
+    return request(`/admin/users/${id}/password`, { method: "POST", body: JSON.stringify({ password }) });
+  },
+  // --- Admin customer/vehicle profile writes ------------------------------
+  upsertCustomerVehicle(body) {
+    return request("/admin/customer-vehicles", { method: "POST", body: JSON.stringify(body || {}) });
+  },
+  deleteCustomerVehicle(plateNo) {
+    return request(`/admin/customer-vehicles/${encodeURIComponent(plateNo)}`, { method: "DELETE" });
+  },
+  // --- Admin alert lifecycle ----------------------------------------------
+  acknowledgeAlert(alertNo) {
+    return request(`/admin/alerts/${encodeURIComponent(alertNo)}/ack`, { method: "POST" });
+  },
+  resolveAlert(alertNo) {
+    return request(`/admin/alerts/${encodeURIComponent(alertNo)}/resolve`, { method: "POST" });
   },
   getAdminOverview() {
     return withFallback(() => request("/admin/overview"), mockAdminOverview);
@@ -151,6 +285,24 @@ export const parkvisionApi = {
   },
   getPricingRules() {
     return withFallback(() => request("/admin/pricing-rules"), mockPricingRules);
+  },
+  createPricingRule(body) {
+    return request("/admin/pricing-rules", { method: "POST", body: JSON.stringify(body || {}) });
+  },
+  updatePricingRule(id, body) {
+    return request(`/admin/pricing-rules/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(body || {}) });
+  },
+  deletePricingRule(id) {
+    return request(`/admin/pricing-rules/${encodeURIComponent(id)}`, { method: "DELETE" });
+  },
+  createPricingRule(body) {
+    return request("/admin/pricing-rules", { method: "POST", body: JSON.stringify(body || {}) });
+  },
+  updatePricingRule(id, body) {
+    return request(`/admin/pricing-rules/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(body || {}) });
+  },
+  deletePricingRule(id) {
+    return request(`/admin/pricing-rules/${encodeURIComponent(id)}`, { method: "DELETE" });
   },
   getAccessList() {
     return withFallback(() => request("/admin/access-list"), mockAccessList);
@@ -198,8 +350,8 @@ export const parkvisionApi = {
       () => buildMockReport(query),
     );
   },
-  simulateEntry() {
-    return request("/orders/entry", { method: "POST" });
+  simulateEntry(plateNo) {
+    return request(withQuery("/orders/entry", { plateNo }), { method: "POST" });
   },
   retrieveOrder(orderNo) {
     return request(`/orders/${orderNo}/retrieve`, { method: "POST" });
@@ -226,7 +378,22 @@ export const parkvisionApi = {
       mockVisionResult,
     );
   },
+  gateVision(body) {
+    return request("/edge/vision/gate-entry", {
+      method: "POST",
+      body: JSON.stringify(body || {}),
+    });
+  },
+  getRecognitions(params = {}) {
+    return request(withQuery("/admin/recognitions", params));
+  },
   setEmergency(active) {
     return request(withQuery("/devices/emergency", { active }), { method: "POST" });
+  },
+  setDeviceStatus(type, id, status) {
+    return request(withQuery(`/admin/devices/${type}/${encodeURIComponent(id)}/status`, { status }), { method: "POST" });
+  },
+  getAuditLogs(limit = 100) {
+    return request(withQuery("/admin/audit-logs", { limit }));
   },
 };

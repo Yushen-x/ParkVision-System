@@ -5,5 +5,6 @@ public enum SlotStatus {
     OCCUPIED,
     CHARGING,
     BUFFER,
+    RESERVED,
     MAINTENANCE
 }

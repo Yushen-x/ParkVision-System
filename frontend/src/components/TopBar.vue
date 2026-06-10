@@ -38,7 +38,7 @@ onUnmounted(() => window.clearInterval(timer));
       </div>
       <button class="ghost-button" :disabled="entryBusy" @click="$emit('entry')">
         <i class="fa-solid fa-car"></i>
-        {{ entryBusy ? "提交中..." : "模拟入场" }}
+        {{ entryBusy ? "提交中..." : "登记入场" }}
       </button>
       <button class="primary-button" :disabled="dispatchBusy" @click="$emit('pre-dispatch')">
         <i class="fa-solid fa-forward-fast"></i>

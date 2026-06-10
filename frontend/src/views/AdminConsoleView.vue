@@ -3,14 +3,21 @@ import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
   acknowledgeAlert,
+  createAdminUser,
+  createPricingRule,
+  deletePricingRule,
   generateAdminReport,
   loadAdminAlertDetail,
   loadAdminCustomerDetail,
   loadAdminOrderDetail,
+  loadAdminUsers,
   loadBillingComponents,
   removeVehicle,
+  resetAdminUserPassword,
   resolveAlert,
   state,
+  updatePricingRule,
+  updateAdminUser,
   upsertVehicle,
 } from "../stores/parkingStore";
 import { zhMoney, zhText } from "../utils/localize";
@@ -23,6 +30,7 @@ const reportStatus = computed(() => aiStatusLabel());
 const orderKeyword = ref("");
 const customerKeyword = ref("");
 const alertKeyword = ref("");
+const pricingKeyword = ref("");
 const selectedOrderNo = ref(state.selectedAdminOrderNo || state.adminOrders[0]?.orderNo || "");
 const selectedOwnerId = ref(state.selectedCustomerOwnerId || state.customerVehicles[0]?.ownerId || "");
 const selectedAlertNo = ref(state.selectedAlertNo || state.alerts[0]?.alertNo || "");
@@ -31,7 +39,9 @@ const reportQuery = ref("今天停车收入、VIP 服务和异常处理有什么
 const sections = [
   ["overview", "经营概览", "看今天发生了什么"],
   ["orders", "订单结算", "查订单、支付、计费"],
+  ["pricing", "计费规则", "查计费规则与费用构成"],
   ["customers", "客户与车辆", "查车主、会员、准入"],
+  ["accounts", "账号管理", "管理登录账号与权限"],
   ["exceptions", "异常处理", "处理告警和复核"],
 ];
 const sectionKeys = sections.map(([key]) => key);
@@ -144,6 +154,104 @@ const settlementSummary = computed(() => {
   ];
 });
 
+const filteredPricingRules = computed(() => {
+  const keyword = pricingKeyword.value.trim().toLowerCase();
+  return state.pricingRules.filter((rule) =>
+    !keyword ||
+    zhText(rule.name).toLowerCase().includes(keyword) ||
+    String(rule.vehicleType || "").toLowerCase().includes(keyword) ||
+    String(rule.status || "").toLowerCase().includes(keyword),
+  );
+});
+
+const vehicleTypeLabels = { ALL: "全部车型", FUEL: "燃油车", EV: "新能源" };
+const pricingStatusLabels = { ACTIVE: "启用", INACTIVE: "停用" };
+const emptyRuleForm = () => ({
+  id: "",
+  name: "",
+  vehicleType: "ALL",
+  freeMinutes: 15,
+  firstHourFee: 6,
+  hourlyFee: 4,
+  dailyCap: 48,
+  peakStartHour: 17,
+  peakEndHour: 21,
+  peakMultiplier: 1.5,
+  status: "ACTIVE",
+});
+const ruleForm = reactive(emptyRuleForm());
+const ruleError = ref("");
+const ruleBusy = ref(false);
+const editingRuleId = computed(() => ruleForm.id);
+
+function editRule(rule) {
+  ruleError.value = "";
+  Object.assign(ruleForm, {
+    id: rule.id || "",
+    name: rule.name || "",
+    vehicleType: rule.vehicleType || "ALL",
+    freeMinutes: Number(rule.freeMinutes ?? 0),
+    firstHourFee: Number(rule.firstHourFee ?? 0),
+    hourlyFee: Number(rule.hourlyFee ?? 0),
+    dailyCap: Number(rule.dailyCap ?? 0),
+    peakStartHour: Number(rule.peakStartHour ?? 0),
+    peakEndHour: Number(rule.peakEndHour ?? 0),
+    peakMultiplier: Number(rule.peakMultiplier ?? 1),
+    status: rule.status || "ACTIVE",
+  });
+}
+
+function resetRuleForm() {
+  Object.assign(ruleForm, emptyRuleForm());
+  ruleError.value = "";
+}
+
+async function saveRule() {
+  ruleError.value = "";
+  if (!ruleForm.name.trim()) {
+    ruleError.value = "请填写规则名称";
+    return;
+  }
+  ruleBusy.value = true;
+  const body = {
+    name: ruleForm.name.trim(),
+    vehicleType: ruleForm.vehicleType,
+    freeMinutes: Number(ruleForm.freeMinutes),
+    firstHourFee: Number(ruleForm.firstHourFee),
+    hourlyFee: Number(ruleForm.hourlyFee),
+    dailyCap: Number(ruleForm.dailyCap),
+    peakStartHour: Number(ruleForm.peakStartHour),
+    peakEndHour: Number(ruleForm.peakEndHour),
+    peakMultiplier: Number(ruleForm.peakMultiplier),
+    status: ruleForm.status,
+  };
+  const result = ruleForm.id
+    ? await updatePricingRule(ruleForm.id, body)
+    : await createPricingRule(body);
+  ruleBusy.value = false;
+  if (result.ok) resetRuleForm();
+  else ruleError.value = result.error || "保存失败";
+}
+
+async function removeRule(rule) {
+  if (!window.confirm(`确定删除计费规则「${rule.name}」？`)) return;
+  const result = await deletePricingRule(rule.id);
+  if (!result.ok) ruleError.value = result.error || "删除失败";
+  else if (ruleForm.id === rule.id) resetRuleForm();
+}
+
+const pricingPreview = computed(() => state.pricingPreview);
+
+const pricingComponents = computed(() =>
+  (state.pricingPreview.components || []).filter((item) => Number(item.amount || 0) > 0),
+);
+
+const pricingDuration = computed(() => {
+  const minutes = Number(state.pricingPreview.durationMinutes || 0);
+  const hours = String(Math.floor(minutes / 60)).padStart(2, "0");
+  return `${hours}:${String(minutes % 60).padStart(2, "0")}`;
+});
+
 async function selectOrder(orderNo) {
   selectedOrderNo.value = orderNo;
   await loadBillingComponents(orderNo);
@@ -210,16 +318,74 @@ function editVehicle(vehicle) {
   showVehicleForm.value = true;
 }
 
-function saveVehicle() {
+const vehicleError = ref("");
+
+async function saveVehicle() {
   if (!vehicleForm.plateNo.trim()) return;
-  const row = upsertVehicle({ ...vehicleForm });
+  vehicleError.value = "";
+  const result = await upsertVehicle({ ...vehicleForm });
+  if (!result.ok) {
+    vehicleError.value = result.error || "保存失败";
+    return;
+  }
   showVehicleForm.value = false;
-  if (row) selectCustomer(row.ownerId);
+  if (result.row) selectCustomer(result.row.ownerId);
 }
 
-function deleteVehicle(plateNo) {
-  removeVehicle(plateNo);
+async function deleteVehicle(plateNo) {
+  await removeVehicle(plateNo);
   if (selectedOwnerId.value) selectCustomer(selectedOwnerId.value);
+}
+
+// --- 账号管理（登录账号） ---
+const userForm = reactive({ username: "", password: "", displayName: "", role: "owner" });
+const accountError = ref("");
+const accountNotice = ref("");
+
+async function createUser() {
+  accountError.value = "";
+  accountNotice.value = "";
+  if (!userForm.username.trim() || !userForm.password || !userForm.displayName.trim()) {
+    accountError.value = "请填写用户名、密码和姓名";
+    return;
+  }
+  const result = await createAdminUser({ ...userForm, username: userForm.username.trim(), displayName: userForm.displayName.trim() });
+  if (!result.ok) {
+    accountError.value = result.error || "创建失败";
+    return;
+  }
+  accountNotice.value = `已创建账号 ${result.row.username}`;
+  Object.assign(userForm, { username: "", password: "", displayName: "", role: "owner" });
+}
+
+async function toggleUserStatus(user) {
+  accountError.value = "";
+  const next = user.status === "ACTIVE" ? "FROZEN" : "ACTIVE";
+  const result = await updateAdminUser(user.id, { status: next });
+  if (!result.ok) accountError.value = result.error || "操作失败";
+}
+
+async function changeUserRole(user, role) {
+  accountError.value = "";
+  const result = await updateAdminUser(user.id, { role });
+  if (!result.ok) accountError.value = result.error || "操作失败";
+}
+
+async function resetUserPassword(user) {
+  accountError.value = "";
+  accountNotice.value = "";
+  const pwd = window.prompt(`为账号 ${user.username} 设置新密码（至少 6 位）`, "");
+  if (pwd === null) return;
+  if (pwd.length < 6) {
+    accountError.value = "密码至少 6 位";
+    return;
+  }
+  const result = await resetUserPassword(user.id, pwd);
+  if (!result.ok) {
+    accountError.value = result.error || "重置失败";
+    return;
+  }
+  accountNotice.value = `账号 ${user.username} 密码已重置`;
 }
 
 function buildReportContext() {
@@ -239,7 +405,6 @@ function buildReportContext() {
 }
 
 async function generateOverviewReport() {
-  // 接入真实大模型时走 LLM 智能问数；否则回退到内置报表生成（buildMockReport）。
   if (isAiLive()) {
     reportBusy.value = true;
     try {
@@ -294,6 +459,23 @@ function buildExportRows() {
     ];
   }
 
+  if (section.value === "pricing") {
+    return [
+      ["规则名称", "车型", "免费分钟", "首小时", "续费/时", "封顶", "高峰时段", "高峰倍率", "状态"],
+      ...filteredPricingRules.value.map((rule) => [
+        zhText(rule.name),
+        vehicleTypeLabels[rule.vehicleType] || rule.vehicleType,
+        rule.freeMinutes,
+        rule.firstHourFee,
+        rule.hourlyFee,
+        rule.dailyCap,
+        `${rule.peakStartHour}:00-${rule.peakEndHour}:00`,
+        rule.peakMultiplier,
+        pricingStatusLabels[rule.status] || rule.status,
+      ]),
+    ];
+  }
+
   return [
     ["指标", "数值"],
     ...overviewCards.value.map((card) => [card.label, card.value]),
@@ -315,6 +497,7 @@ onMounted(async () => {
   if (selectedAlertNo.value) {
     await selectAlert(selectedAlertNo.value);
   }
+  await loadAdminUsers();
   await nextTick();
 });
 </script>
@@ -324,7 +507,7 @@ onMounted(async () => {
     <article class="surface ledger-nav">
       <div>
         <h2>管理台账</h2>
-        <p>按员工任务重组：先看经营状态，再查订单、客户或异常，不再让人面对一排数据库表。</p>
+        <p>经营概览、订单结算、计费规则、客户车辆与异常处理，集中在一个工作台完成。</p>
       </div>
       <div class="ledger-tabs">
         <button
@@ -387,7 +570,7 @@ onMounted(async () => {
           <div class="section-head compact">
             <div>
               <h2>需要优先处理</h2>
-              <p>把员工最该关注的对象聚合出来，而不是让人自己找 Tab。</p>
+              <p>点击可直接跳转到对应模块处理。</p>
             </div>
           </div>
           <div class="priority-list">
@@ -415,7 +598,7 @@ onMounted(async () => {
       <article class="surface ledger-toolbar">
         <div>
           <h2>订单结算</h2>
-          <p>合并原来的订单台账、支付流水和计费明细。员工查一个订单就能看到完整结算链路。</p>
+          <p>查一个订单即可看到时间线、车主车辆、支付与计费明细。</p>
         </div>
         <div class="toolbar-actions">
           <div class="search-field">
@@ -509,11 +692,120 @@ onMounted(async () => {
       </section>
     </template>
 
+    <template v-if="section === 'pricing'">
+      <article class="surface ledger-toolbar">
+        <div>
+          <h2>计费规则</h2>
+          <p>查看启用中的计费规则，以及当前订单按规则合成的费用构成。</p>
+        </div>
+        <div class="toolbar-actions">
+          <div class="search-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input v-model="pricingKeyword" placeholder="搜索规则名称、时段、计费方式或状态" />
+          </div>
+          <button class="ghost-button small" @click="exportCurrentView">导出</button>
+        </div>
+      </article>
+
+      <section class="ledger-layout">
+        <article class="surface">
+          <div class="section-head compact">
+            <h2>计费规则</h2>
+            <span class="admin-count">{{ filteredPricingRules.length }} 条</span>
+          </div>
+          <div class="pricing-table">
+            <div class="pricing-head wide">
+              <span>规则名称</span>
+              <span>车型</span>
+              <span>免费</span>
+              <span>首时/续费</span>
+              <span>封顶</span>
+              <span>高峰</span>
+              <span>状态</span>
+              <span>操作</span>
+            </div>
+            <div v-for="rule in filteredPricingRules" :key="rule.id" class="pricing-row wide">
+              <b>{{ zhText(rule.name) }}</b>
+              <span>{{ vehicleTypeLabels[rule.vehicleType] || rule.vehicleType }}</span>
+              <span>{{ rule.freeMinutes }} 分</span>
+              <span>{{ zhMoney(rule.firstHourFee) }} / {{ zhMoney(rule.hourlyFee) }}</span>
+              <span>{{ Number(rule.dailyCap) > 0 ? zhMoney(rule.dailyCap) : "不封顶" }}</span>
+              <span>{{ rule.peakStartHour }}-{{ rule.peakEndHour }}h ×{{ rule.peakMultiplier }}</span>
+              <span class="status-pill" :class="rule.status === 'ACTIVE' ? 'stable' : 'muted'">{{ pricingStatusLabels[rule.status] || rule.status }}</span>
+              <span class="rule-actions">
+                <button class="ghost-button tiny" @click="editRule(rule)">编辑</button>
+                <button class="ghost-button tiny danger" @click="removeRule(rule)">删除</button>
+              </span>
+            </div>
+            <p v-if="!filteredPricingRules.length" class="empty-state">没有匹配的计费规则。</p>
+          </div>
+
+          <div class="rule-editor">
+            <h3>{{ editingRuleId ? "编辑规则" : "新增规则" }}</h3>
+            <div class="rule-grid">
+              <label>规则名称<input v-model="ruleForm.name" placeholder="如：标准燃油车计费" /></label>
+              <label>适用车型
+                <select v-model="ruleForm.vehicleType">
+                  <option value="ALL">全部车型</option>
+                  <option value="FUEL">燃油车</option>
+                  <option value="EV">新能源</option>
+                </select>
+              </label>
+              <label>免费分钟<input v-model.number="ruleForm.freeMinutes" type="number" min="0" /></label>
+              <label>首小时费用<input v-model.number="ruleForm.firstHourFee" type="number" min="0" step="0.5" /></label>
+              <label>续费单价/时<input v-model.number="ruleForm.hourlyFee" type="number" min="0" step="0.5" /></label>
+              <label>单次封顶（0=不封顶）<input v-model.number="ruleForm.dailyCap" type="number" min="0" step="1" /></label>
+              <label>高峰开始(时)<input v-model.number="ruleForm.peakStartHour" type="number" min="0" max="23" /></label>
+              <label>高峰结束(时)<input v-model.number="ruleForm.peakEndHour" type="number" min="0" max="23" /></label>
+              <label>高峰倍率<input v-model.number="ruleForm.peakMultiplier" type="number" min="0" step="0.1" /></label>
+              <label>状态
+                <select v-model="ruleForm.status">
+                  <option value="ACTIVE">启用</option>
+                  <option value="INACTIVE">停用</option>
+                </select>
+              </label>
+            </div>
+            <p v-if="ruleError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ ruleError }}</p>
+            <div class="rule-buttons">
+              <button class="ghost-button small" type="button" @click="resetRuleForm" v-if="editingRuleId">取消编辑</button>
+              <button class="primary-button small" type="button" :disabled="ruleBusy" @click="saveRule">
+                {{ ruleBusy ? "保存中…" : editingRuleId ? "保存修改" : "新增规则" }}
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <aside class="surface">
+          <div class="section-head compact">
+            <div>
+              <h2>当前费用构成</h2>
+              <p>订单 {{ pricingPreview.orderNo || "—" }} / {{ pricingPreview.plateNo || "—" }}</p>
+            </div>
+            <span class="status-pill stable">{{ zhText(pricingPreview.pricingWindow) }}</span>
+          </div>
+          <div class="fee-summary">
+            <div><span>停车时长</span><strong>{{ pricingDuration }}</strong></div>
+            <div><span>基础金额</span><strong>{{ zhMoney(pricingPreview.baseAmount) }}</strong></div>
+            <div class="fee-total"><span>当前合计</span><strong>{{ zhMoney(pricingPreview.totalAmount) }}</strong></div>
+          </div>
+          <div class="fee-breakdown">
+            <div v-for="item in pricingComponents" :key="item.label" class="fee-item">
+              <div>
+                <b>{{ zhText(item.label) }}</b>
+                <small>{{ zhText(item.formula) }}</small>
+              </div>
+              <strong>{{ zhMoney(item.amount) }}</strong>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </template>
+
     <template v-if="section === 'customers'">
       <article class="surface ledger-toolbar">
         <div>
           <h2>客户与车辆</h2>
-          <p>合并原来的客户车辆和准入名单。围绕车主查看车辆、会员权益、白名单/黑名单和最近订单。</p>
+          <p>围绕车主查看车辆、会员权益、准入名单和最近订单。</p>
         </div>
         <div class="toolbar-actions">
           <div class="search-field">
@@ -557,8 +849,9 @@ onMounted(async () => {
             </select>
           </label>
         </div>
+        <p v-if="vehicleError" class="account-msg error"><i class="fa-solid fa-circle-exclamation"></i> {{ vehicleError }}</p>
         <div class="vehicle-form-actions">
-          <button class="primary-button small" :disabled="!vehicleForm.plateNo.trim()" @click="saveVehicle">
+          <button class="primary-button small" :disabled="!vehicleForm.plateNo.trim() || state.busy.account" @click="saveVehicle">
             <i class="fa-solid fa-floppy-disk"></i> {{ vehicleEditing ? "保存修改" : "登记车辆" }}
           </button>
         </div>
@@ -654,7 +947,7 @@ onMounted(async () => {
       <article class="surface ledger-toolbar">
         <div>
           <h2>异常处理</h2>
-          <p>告警记录不再只是表格。员工需要看到告警内容、关联设备事件、订单线索和建议动作。</p>
+          <p>查看告警内容、关联设备事件、订单线索和建议动作并处置。</p>
         </div>
         <div class="toolbar-actions">
           <div class="search-field">
@@ -741,6 +1034,64 @@ onMounted(async () => {
         </article>
       </section>
     </template>
+
+    <template v-if="section === 'accounts'">
+      <article class="surface account-panel">
+        <div class="section-head">
+          <div>
+            <h3>账号管理</h3>
+            <p>管理系统登录账号：新建账号、启用 / 冻结、调整角色、重置密码。</p>
+          </div>
+        </div>
+
+        <form class="account-form" @submit.prevent="createUser">
+          <input v-model.trim="userForm.username" type="text" placeholder="用户名" autocomplete="off" />
+          <input v-model="userForm.password" type="password" placeholder="初始密码（≥6 位）" autocomplete="new-password" />
+          <input v-model.trim="userForm.displayName" type="text" placeholder="姓名" autocomplete="off" />
+          <select v-model="userForm.role">
+            <option value="owner">车主</option>
+            <option value="admin">管理员</option>
+          </select>
+          <button class="primary-button" type="submit" :disabled="state.busy.account">
+            <i class="fa-solid fa-user-plus"></i> 新建账号
+          </button>
+        </form>
+        <p v-if="accountError" class="account-msg error"><i class="fa-solid fa-circle-exclamation"></i> {{ accountError }}</p>
+        <p v-else-if="accountNotice" class="account-msg ok"><i class="fa-solid fa-circle-check"></i> {{ accountNotice }}</p>
+
+        <div class="account-table">
+          <div class="account-row account-row-head">
+            <span>用户名</span>
+            <span>姓名</span>
+            <span>角色</span>
+            <span>状态</span>
+            <span>最近登录</span>
+            <span>操作</span>
+          </div>
+          <div v-for="user in state.adminUsers" :key="user.id" class="account-row">
+            <span>{{ user.username }}</span>
+            <span>{{ user.displayName }}</span>
+            <span>
+              <select class="account-role" :value="user.role" @change="changeUserRole(user, $event.target.value)">
+                <option value="owner">车主</option>
+                <option value="admin">管理员</option>
+              </select>
+            </span>
+            <span>
+              <em class="account-status" :class="user.status === 'ACTIVE' ? 'active' : 'frozen'">
+                {{ user.status === 'ACTIVE' ? '启用' : '冻结' }}
+              </em>
+            </span>
+            <span class="account-muted">{{ user.lastLogin || '从未登录' }}</span>
+            <span class="account-actions">
+              <button type="button" @click="toggleUserStatus(user)">{{ user.status === 'ACTIVE' ? '冻结' : '启用' }}</button>
+              <button type="button" @click="resetUserPassword(user)">重置密码</button>
+            </span>
+          </div>
+          <p v-if="!state.adminUsers.length" class="empty-state">暂无账号数据。</p>
+        </div>
+      </article>
+    </template>
   </section>
 </template>
 
@@ -767,8 +1118,337 @@ onMounted(async () => {
 
 .ledger-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
+}
+
+.account-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.account-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.8fr auto;
+  gap: 10px;
+}
+
+.account-form input,
+.account-form select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  font-size: 13px;
+  color: var(--text-main);
+  outline: none;
+}
+
+.account-form input:focus,
+.account-form select:focus {
+  border-color: var(--brand);
+}
+
+.account-msg {
+  margin: 0;
+  font-size: 13px;
+}
+
+.account-msg.error {
+  color: var(--danger-red);
+}
+
+.account-msg.ok {
+  color: var(--safety-green);
+}
+
+.account-table {
+  display: grid;
+  gap: 8px;
+}
+
+.account-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.9fr 0.7fr 1.1fr 1.3fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  color: var(--text-main);
+}
+
+.account-row-head {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 12px;
+  padding-bottom: 0;
+}
+
+.account-role {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  font-size: 12px;
+  color: var(--text-main);
+}
+
+.account-status {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.account-status.active {
+  color: var(--safety-green);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.account-status.frozen {
+  color: var(--danger-red);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.account-muted {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.account-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.account-actions button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+  .account-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .account-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .account-row-head {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .ledger-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pricing-table {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.pricing-head,
+.pricing-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.4fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.pricing-head {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.pricing-row {
+  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.pricing-head.wide,
+.pricing-row.wide {
+  grid-template-columns: 1.4fr 0.8fr 0.6fr 1.2fr 0.9fr 1.2fr 0.7fr 1fr;
+}
+
+.pricing-row b {
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.pricing-row span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.rule-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.ghost-button.tiny {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.ghost-button.tiny.danger {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+.status-pill.muted {
+  background: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+}
+
+.rule-editor {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.rule-editor h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.rule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rule-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.rule-grid input,
+.rule-grid select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.rule-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .rule-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fee-summary {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.fee-summary > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.fee-summary span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.fee-summary strong {
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
+  font-size: 16px;
+}
+
+.fee-summary .fee-total {
+  border-color: rgba(79, 70, 229, 0.3);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.fee-summary .fee-total strong {
+  color: var(--brand);
+  font-size: 20px;
+}
+
+.fee-breakdown {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.fee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.fee-item b {
+  display: block;
+  color: var(--text-main);
+  font-size: 13px;
+}
+
+.fee-item small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.fee-item strong {
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .pricing-head,
+  .pricing-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .ledger-tab {

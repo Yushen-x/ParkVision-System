@@ -1,37 +1,42 @@
 <script setup>
-import { computed, onBeforeUnmount, ref } from "vue";
-import { getters, registerEntry, state } from "../stores/parkingStore";
-import { zhText } from "../utils/localize";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { getters, refreshCore, state } from "../stores/parkingStore";
+import { parkvisionApi } from "../api/parkvisionApi";
 import { aiVisionPlate } from "../services/aiClient";
+import SlotGrid from "../components/SlotGrid.vue";
+import TrafficChart from "../components/TrafficChart.vue";
 
 // ---------------------------------------------------------------------------
-// 入场识别：可播放的识别流程（驶入 → 扫描 → 框出车牌 → 放行建单）
+// 入场识别：识别走后端统一管线（识别 → 名单校验 → 放行/拦截/复核 → 落库建单）
+// 记录与 KPI 全部来自后端 recognition_event 表，非前端模拟。
 // ---------------------------------------------------------------------------
-const PLATES = [
-  { plate: "沪A·7686Z", confidence: 0.983, energy: "Fuel", color: "蓝牌" },
-  { plate: "沪D·5218N", confidence: 0.971, energy: "Electric", color: "绿牌·新能源" },
-  { plate: "苏M·9021X", confidence: 0.965, energy: "Fuel", color: "蓝牌" },
-  { plate: "沪K·1314Q", confidence: 0.978, energy: "Fuel", color: "蓝牌" },
-  { plate: "浙B·6602H", confidence: 0.959, energy: "Electric", color: "绿牌·新能源" },
-];
-
-const phase = ref("idle"); // idle | incoming | scanning | detected | passed
+const phase = ref("idle"); // idle | incoming | scanning | detected | passed | held
 const playing = ref(false);
 const current = ref(null);
 const records = ref([]);
-let recIndex = 0;
+const stats = ref({ total: 0, today: 0, allow: 0, deny: 0, review: 0, avgConfidence: 0 });
+const consoleError = ref("");
 let timers = [];
 
+function decisionTone(decision) {
+  if (decision === "ALLOW") return "allow";
+  if (decision === "DENY") return "deny";
+  return "review";
+}
+
 const phaseText = computed(() => {
+  const cur = current.value;
   switch (phase.value) {
     case "incoming":
       return "检测到车辆驶入入口…";
     case "scanning":
       return "正在扫描车牌区域…";
     case "detected":
-      return `识别成功 · ${current.value?.plate}`;
+      return `识别成功 · ${cur?.plate}`;
     case "passed":
-      return "已自动建单 · 道闸抬杆放行";
+      return `已自动建单 · 道闸抬杆放行${cur?.orderNo ? " · " + cur.orderNo : ""}`;
+    case "held":
+      return cur?.decision === "DENY" ? `已拦截 · ${cur?.reason || "禁止入场"}` : `转人工复核 · ${cur?.reason || "需确认"}`;
     default:
       return "等待车辆进入识别区";
   }
@@ -41,49 +46,79 @@ function schedule(fn, ms) {
   timers.push(window.setTimeout(fn, ms));
 }
 
-function startRecognition() {
+function colorOf(energyType) {
+  return energyType === "新能源" ? "绿牌·新能源" : "蓝牌";
+}
+
+async function loadConsole() {
+  try {
+    const res = await parkvisionApi.getRecognitions({});
+    const data = res?.data || res;
+    stats.value = data.stats || stats.value;
+    records.value = (data.records || []).slice(0, 12);
+    consoleError.value = "";
+  } catch (error) {
+    consoleError.value = error?.message || "识别记录加载失败";
+  }
+}
+
+async function startRecognition() {
   if (playing.value) return;
   playing.value = true;
-  const pick = PLATES[recIndex % PLATES.length];
-  recIndex += 1;
-  current.value = pick;
+  current.value = null;
   phase.value = "incoming";
 
-  schedule(() => (phase.value = "scanning"), 950);
-  schedule(() => (phase.value = "detected"), 1900);
+  let result = null;
+  try {
+    const res = await parkvisionApi.gateVision({});
+    result = res?.data || res;
+  } catch (error) {
+    consoleError.value = error?.message || "识别失败";
+    phase.value = "idle";
+    playing.value = false;
+    return;
+  }
+
+  current.value = {
+    plate: result.plate,
+    confidence: result.confidence,
+    energyType: result.energyType,
+    color: colorOf(result.energyType),
+    decision: result.decision,
+    reason: result.reason,
+    orderNo: result.orderNo,
+    tone: decisionTone(result.decision),
+  };
+
+  schedule(() => (phase.value = "scanning"), 700);
+  schedule(() => (phase.value = "detected"), 1500);
   schedule(() => {
-    phase.value = "passed";
-    const gate = state.devices.gates?.[0]?.gateId || "GATE-IN-01";
-    registerEntry({ plateNo: pick.plate, energyType: pick.energy });
-    records.value.unshift({
-      time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      plate: pick.plate,
-      confidence: pick.confidence,
-      color: pick.color,
-      gate,
-    });
-    records.value = records.value.slice(0, 8);
-  }, 3000);
+    phase.value = result.decision === "ALLOW" ? "passed" : "held";
+    void refreshCore();
+    void loadConsole();
+  }, 2400);
   schedule(() => {
     phase.value = "idle";
     playing.value = false;
-  }, 4400);
+  }, 4200);
 }
+
+onMounted(loadConsole);
 
 onBeforeUnmount(() => {
   timers.forEach((t) => window.clearTimeout(t));
   timers = [];
 });
 
-// KPI（基于识别记录派生，避免硬编码静态值）
+// KPI（全部来自后端识别记录统计）
 const kpis = computed(() => {
-  const recs = records.value;
-  const avg = recs.length ? recs.reduce((s, r) => s + r.confidence, 0) / recs.length : 0.974;
+  const s = stats.value;
+  const passRate = s.total ? ((s.allow / s.total) * 100).toFixed(1) : "0.0";
   return [
-    { label: "今日识别车辆", value: 1286 + recs.length, hint: "入口/出口摄像头累计", icon: "fa-car-side" },
-    { label: "平均识别置信度", value: `${(avg * 100).toFixed(1)}%`, hint: "车牌 OCR 置信度均值", icon: "fa-bullseye" },
-    { label: "自动放行率", value: "99.2%", hint: "无需人工干预的比例", icon: "fa-gauge-high" },
-    { label: "异常拦截", value: state.emergency ? 1 : 0, hint: "交接区入侵 / 复核", icon: "fa-shield-halved" },
+    { label: "今日识别车辆", value: s.today, hint: `累计 ${s.total} 次识别`, icon: "fa-car-side" },
+    { label: "平均识别置信度", value: `${(s.avgConfidence * 100).toFixed(1)}%`, hint: "车牌 OCR 置信度均值", icon: "fa-bullseye" },
+    { label: "自动放行率", value: `${passRate}%`, hint: `放行 ${s.allow} · 复核 ${s.review}`, icon: "fa-gauge-high" },
+    { label: "拦截 / 复核", value: s.deny + s.review, hint: `黑名单拦截 ${s.deny}`, icon: "fa-shield-halved" },
   ];
 });
 
@@ -113,7 +148,21 @@ async function recognizePlate() {
   if (!plateImage.value || plateBusy.value) return;
   plateBusy.value = true;
   try {
-    plateResult.value = await aiVisionPlate({ imageDataUrl: plateImage.value });
+    const ocr = await aiVisionPlate({ imageDataUrl: plateImage.value });
+    // Persist the OCR result through the backend so it gets a real access
+    // decision and shows up in the recognition history.
+    let decision = null;
+    let reason = "";
+    try {
+      const res = await parkvisionApi.inferVision({ plateNo: ocr.plate, cameraId: "CAM-UPLOAD" });
+      const data = res?.data || res;
+      decision = data?.decision || null;
+      reason = data?.reason || "";
+      await loadConsole();
+    } catch {
+      /* keep OCR result even if logging fails */
+    }
+    plateResult.value = { ...ocr, decision, reason };
   } finally {
     plateBusy.value = false;
   }
@@ -124,6 +173,41 @@ function clearPlate() {
   plateResult.value = null;
   if (plateFile.value) plateFile.value.value = "";
 }
+
+// ---------------------------------------------------------------------------
+// 车位占用智能检测（基于车位状态的视觉感知结果）
+// ---------------------------------------------------------------------------
+const occupancy = computed(() => {
+  const slots = state.slots;
+  const total = slots.length || 1;
+  const free = slots.filter((s) => s.status === "empty").length;
+  const charging = slots.filter((s) => s.status === "charging").length;
+  const buffer = slots.filter((s) => s.status === "buffer").length;
+  const occupied = total - free;
+  return {
+    total,
+    free,
+    charging,
+    buffer,
+    occupied,
+    rate: Math.round((occupied / total) * 100),
+  };
+});
+
+// ---------------------------------------------------------------------------
+// 车流预测
+// ---------------------------------------------------------------------------
+const forecast = computed(() => state.forecast);
+const peakPrediction = computed(() => {
+  const list = forecast.value.prediction || [];
+  return list.length ? Math.max(...list) : 0;
+});
+const nextHourPrediction = computed(() => (forecast.value.prediction || [])[0] ?? 0);
+const trendUp = computed(() => {
+  const history = forecast.value.history || [];
+  const last = history[history.length - 1] ?? 0;
+  return nextHourPrediction.value >= last;
+});
 </script>
 
 <template>
@@ -174,21 +258,24 @@ function clearPlate() {
           <div class="plate-readout">
             <b>{{ current?.plate }}</b>
             <em>{{ current?.color }} · 置信度 {{ ((current?.confidence || 0) * 100).toFixed(1) }}%</em>
+            <em v-if="current?.decision" class="readout-decision" :class="current?.tone">
+              {{ current?.decision === "ALLOW" ? "名单校验通过 · 放行" : current?.decision === "DENY" ? "名单拦截 · 禁止入场" : "转人工复核" }}
+            </em>
           </div>
 
-          <div class="cam-ribbon" :class="phase">
+          <div class="cam-ribbon" :class="[phase, current?.tone]">
             <i
               class="fa-solid"
-              :class="phase === 'detected' || phase === 'passed' ? 'fa-circle-check' : phase === 'idle' ? 'fa-circle-pause' : 'fa-magnifying-glass'"
+              :class="phase === 'held' ? 'fa-triangle-exclamation' : phase === 'detected' || phase === 'passed' ? 'fa-circle-check' : phase === 'idle' ? 'fa-circle-pause' : 'fa-magnifying-glass'"
             ></i>
             {{ phaseText }}
           </div>
         </div>
 
         <div class="cam-foot">
-          <div><span>识别模型</span><b>YOLOv8 + CRNN OCR</b></div>
           <div><span>当前空位</span><b>{{ freeCount }} 个</b></div>
           <div><span>放行联动</span><b>道闸 / 立体库入库</b></div>
+          <div><span>识别状态</span><b>{{ playing ? "识别进行中" : "实时监测中" }}</b></div>
         </div>
       </article>
 
@@ -217,6 +304,14 @@ function clearPlate() {
               <span>置信度 {{ (plateResult.confidence * 100).toFixed(1) }}%</span>
               <span>{{ plateResult.color || "—" }}</span>
             </div>
+            <span
+              v-if="plateResult.decision"
+              class="up-decision"
+              :class="decisionTone(plateResult.decision)"
+            >
+              {{ plateResult.decision === "ALLOW" ? "放行" : plateResult.decision === "DENY" ? "拦截" : "复核" }}
+              · {{ plateResult.reason }}
+            </span>
             <button class="ghost-button small" @click="clearPlate"><i class="fa-solid fa-xmark"></i> 清除</button>
           </div>
         </article>
@@ -225,22 +320,69 @@ function clearPlate() {
           <div class="section-head compact">
             <div>
               <h2>识别记录</h2>
-              <p>最近通过入口识别的车辆。</p>
+              <p>来自后端识别库的实时入场记录（含名单校验结果）。</p>
             </div>
           </div>
+          <p v-if="consoleError" class="rec-error">{{ consoleError }}</p>
           <div v-if="records.length" class="rec-list">
-            <div v-for="(r, i) in records" :key="i" class="rec-item">
-              <div class="rec-plate">{{ r.plate }}</div>
+            <div v-for="r in records" :key="r.id" class="rec-item">
+              <div class="rec-plate">{{ r.plateNo }}</div>
               <div class="rec-info">
-                <b>{{ (r.confidence * 100).toFixed(1) }}% · {{ r.gate }}</b>
-                <span>{{ r.time }} · {{ r.color }}</span>
+                <b>{{ (r.confidence * 100).toFixed(1) }}% · {{ r.cameraId }}</b>
+                <span>{{ r.time }} · {{ r.reason }}</span>
               </div>
-              <span class="rec-pass"><i class="fa-solid fa-circle-check"></i> 放行</span>
+              <span class="rec-pass" :class="decisionTone(r.decision)">
+                <i class="fa-solid" :class="r.decision === 'ALLOW' ? 'fa-circle-check' : r.decision === 'DENY' ? 'fa-circle-xmark' : 'fa-circle-exclamation'"></i>
+                {{ r.decisionLabel }}
+              </span>
             </div>
           </div>
-          <p v-else class="rec-empty">点击「开始识别」演示一次入场识别。</p>
+          <p v-else class="rec-empty">点击「开始识别」运行一次真实入场识别。</p>
         </article>
       </aside>
+    </section>
+
+    <section class="ai-grid lower">
+      <article class="surface occupancy-card">
+        <div class="section-head">
+          <div>
+            <h2>车位占用智能检测</h2>
+            <p>视觉算法对每个车位实时判定占用状态，自动同步至调度与数字孪生。</p>
+          </div>
+          <span class="status-pill" :class="occupancy.rate >= 85 ? 'warning' : 'stable'">占用率 {{ occupancy.rate }}%</span>
+        </div>
+        <div class="occ-stats">
+          <div><span>空闲</span><strong>{{ occupancy.free }}</strong></div>
+          <div><span>已占用</span><strong>{{ occupancy.occupied }}</strong></div>
+          <div><span>充电中</span><strong>{{ occupancy.charging }}</strong></div>
+          <div><span>周转区</span><strong>{{ occupancy.buffer }}</strong></div>
+        </div>
+        <SlotGrid :slots="state.slots" :limit="90" />
+      </article>
+
+      <article class="surface forecast-card">
+        <div class="section-head">
+          <div>
+            <h2>车流预测</h2>
+            <p>基于历史车流的 AI 预测，提前为高峰时段调度运力。</p>
+          </div>
+          <span class="status-pill" :class="trendUp ? 'warning' : 'stable'">
+            <i class="fa-solid" :class="trendUp ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'"></i>
+            {{ trendUp ? "上行" : "回落" }}
+          </span>
+        </div>
+        <div class="forecast-stats">
+          <div><span>下一时段预测</span><strong>{{ nextHourPrediction }} 辆/时</strong></div>
+          <div><span>预测峰值</span><strong>{{ peakPrediction }} 辆/时</strong></div>
+        </div>
+        <div class="forecast-chart">
+          <TrafficChart :history="forecast.history" :prediction="forecast.prediction" />
+        </div>
+        <div class="forecast-legend">
+          <span><i class="dot history"></i>历史车流</span>
+          <span><i class="dot prediction"></i>AI 预测</span>
+        </div>
+      </article>
     </section>
   </section>
 </template>
@@ -585,6 +727,42 @@ function clearPlate() {
   border-color: rgba(16, 185, 129, 0.45);
 }
 
+.cam-stage.held .cam-ribbon.deny {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(127, 29, 29, 0.55);
+}
+
+.cam-stage.held .cam-ribbon.review {
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(120, 53, 15, 0.5);
+}
+
+.readout-decision {
+  margin-top: 8px !important;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px !important;
+  font-weight: 700;
+  width: fit-content;
+}
+
+.readout-decision.allow {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.readout-decision.deny {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.readout-decision.review {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.18);
+}
+
 .cam-foot {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -747,10 +925,135 @@ function clearPlate() {
   white-space: nowrap;
 }
 
+.rec-pass.deny {
+  color: #ef4444;
+}
+
+.rec-pass.review {
+  color: #f59e0b;
+}
+
 .rec-empty {
   margin-top: 14px;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.rec-error {
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  font-size: 12px;
+}
+
+.up-decision {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.up-decision.allow {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.up-decision.deny {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.up-decision.review {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+}
+
+/* ---- 下方：占用检测 + 车流预测 ---- */
+.ai-grid.lower {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 1fr);
+}
+
+.occ-stats,
+.forecast-stats {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.occ-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forecast-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.occ-stats > div,
+.forecast-stats > div {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+.occ-stats span,
+.forecast-stats span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.occ-stats strong,
+.forecast-stats strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-main);
+  font-family: "Outfit", sans-serif;
+  font-size: 22px;
+}
+
+.forecast-chart {
+  margin-top: 6px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.forecast-chart canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.forecast-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.forecast-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.forecast-legend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.forecast-legend .dot.history {
+  background: #3b82f6;
+}
+
+.forecast-legend .dot.prediction {
+  background: #f59e0b;
 }
 
 @media (max-width: 1180px) {
@@ -758,8 +1061,13 @@ function clearPlate() {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ai-grid {
+  .ai-grid,
+  .ai-grid.lower {
     grid-template-columns: 1fr;
+  }
+
+  .occ-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 </style>

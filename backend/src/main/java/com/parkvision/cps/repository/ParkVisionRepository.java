@@ -16,6 +16,8 @@ import com.parkvision.cps.domain.dispatch.AgvUnit;
 import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.ParkingOrder;
 import com.parkvision.cps.domain.parking.ParkingSlot;
+import com.parkvision.cps.domain.reservation.Reservation;
+import com.parkvision.cps.domain.vision.RecognitionEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,12 @@ public interface ParkVisionRepository {
 
     ParkingOrder saveOrder(ParkingOrder order);
 
+    List<Reservation> findReservations();
+
+    Optional<Reservation> findReservationById(String id);
+
+    Reservation saveReservation(Reservation reservation);
+
     List<CustomerAccount> findCustomerAccounts();
 
     CustomerAccount saveCustomerAccount(CustomerAccount account);
@@ -44,6 +52,8 @@ public interface ParkVisionRepository {
     List<VehicleProfile> findVehicleProfiles();
 
     VehicleProfile saveVehicleProfile(VehicleProfile vehicle);
+
+    void deleteVehicleProfile(String plateNo);
 
     List<PaymentTransaction> findPaymentTransactions();
 
@@ -61,9 +71,25 @@ public interface ParkVisionRepository {
 
     List<PricingRule> findPricingRules();
 
+    Optional<PricingRule> findPricingRuleById(String id);
+
+    PricingRule savePricingRule(PricingRule rule);
+
+    void deletePricingRule(String id);
+
     List<AccessListItem> findAccessList();
 
+    Optional<AccessListItem> findAccessListItem(String plateNo);
+
+    List<RecognitionEvent> findRecognitionEvents();
+
+    RecognitionEvent saveRecognitionEvent(RecognitionEvent event);
+
     List<SystemNodeStatus> findSystemNodes();
+
+    List<com.parkvision.cps.domain.admin.AuditLog> findAuditLogs(int limit);
+
+    com.parkvision.cps.domain.admin.AuditLog saveAuditLog(com.parkvision.cps.domain.admin.AuditLog log);
 
     SystemNodeStatus saveSystemNode(SystemNodeStatus node);
 
@@ -76,6 +102,8 @@ public interface ParkVisionRepository {
     List<DispatchTask> findDispatchQueue();
 
     DispatchTask enqueueDispatchTask(DispatchTask task);
+
+    DispatchTask saveDispatchTask(DispatchTask task);
 
     List<CameraDevice> findCameraDevices();
 

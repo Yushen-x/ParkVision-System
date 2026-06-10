@@ -119,6 +119,195 @@ public class DeviceService {
         return active;
     }
 
+    /**
+     * Admin device health control: bring a camera / gate / charger ONLINE, OFFLINE,
+     * or into MAINTENANCE. The change is persisted, a device event is recorded, and
+     * taking a device offline raises an alert.
+     */
+    public DeviceOverview setDeviceHealth(String type, String id, String action) {
+        String status = normalizeHealth(action);
+        LocalDateTime now = LocalDateTime.now();
+        String kind = type == null ? "" : type.toLowerCase();
+        boolean changed = false;
+        String detail = healthDetail(status);
+
+        switch (kind) {
+            case "camera" -> {
+                CameraDevice camera = repository.findCameraDeviceById(id)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "摄像头不存在: " + id));
+                repository.saveCameraDevice(new CameraDevice(
+                        camera.cameraId(), camera.profile(), camera.codec(), camera.streamUrl(),
+                        camera.fps(), camera.bitrateKbps(), status, camera.lastPlate(), now,
+                        camera.tamperAlarm(), camera.intrusionState(), detail));
+                changed = true;
+            }
+            case "gate" -> {
+                GateDevice gate = repository.findGateDeviceById(id)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "闸机不存在: " + id));
+                String gateState = "ONLINE".equals(status) ? nextGateState(gate.queueDepth(), false) : status;
+                repository.saveGateDevice(new GateDevice(
+                        gate.gateId(), gate.protocol(), gate.endpoint(), gate.coilAddress(),
+                        gate.queueDepth(), gateState, gate.loopOccupied(), gate.estopArmed(),
+                        gate.lastDecision(), now, detail));
+                changed = true;
+            }
+            case "charger" -> {
+                ChargingStation station = repository.findChargingStationById(id)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "充电桩不存在: " + id));
+                String connector = "ONLINE".equals(status) ? "Available" : status;
+                repository.saveChargingStation(new ChargingStation(
+                        station.chargerId(), station.protocol(), station.endpoint(), connector,
+                        station.powerKw(), station.sessionKwh(), station.vehiclePlate(),
+                        station.authStatus(), now, detail));
+                changed = true;
+            }
+            default -> throw new com.parkvision.cps.common.BusinessException("INVALID_DEVICE_TYPE", "不支持的设备类型: " + type);
+        }
+
+        if (changed) {
+            repository.saveDeviceEvent(new DeviceEvent(
+                    eventId("DEV"),
+                    kind,
+                    id,
+                    "HEALTH_" + status,
+                    "OFFLINE".equals(status) ? "high" : "MAINTENANCE".equals(status) ? "medium" : "info",
+                    deviceLabel(kind) + " " + id + " 已置为 " + status,
+                    now,
+                    false
+            ));
+            if (!"ONLINE".equals(status)) {
+                repository.saveAlert(new AlertEvent(
+                        "AL" + now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+                        "设备",
+                        deviceLabel(kind) + " " + id + (status.equals("OFFLINE") ? " 离线" : " 进入维护"),
+                        "待处理",
+                        "OFFLINE".equals(status) ? "高" : "中"
+                ));
+            }
+        }
+        return overview();
+    }
+
+    private String normalizeHealth(String action) {
+        String a = action == null ? "" : action.trim().toUpperCase();
+        return switch (a) {
+            case "ONLINE", "OFFLINE", "MAINTENANCE" -> a;
+            default -> throw new com.parkvision.cps.common.BusinessException("INVALID_ACTION", "无效的设备操作: " + action);
+        };
+    }
+
+    private String healthDetail(String status) {
+        return switch (status) {
+            case "OFFLINE" -> "管理员已将设备置为离线，已停止服务";
+            case "MAINTENANCE" -> "管理员已将设备置为维护模式";
+            default -> "管理员已将设备恢复在线";
+        };
+    }
+
+    private String deviceLabel(String kind) {
+        return switch (kind) {
+            case "camera" -> "摄像头";
+            case "gate" -> "闸机";
+            case "charger" -> "充电桩";
+            default -> "设备";
+        };
+    }
+
+    /**
+     * Admin device health control: take a camera / gate / charger ONLINE, OFFLINE,
+     * or into MAINTENANCE. The new state is persisted, a device event is logged, and
+     * an alert is raised when a device leaves service.
+     */
+    public DeviceOverview setDeviceStatus(String type, String deviceId, String statusRaw) {
+        String status = normalizeStatus(statusRaw);
+        LocalDateTime now = LocalDateTime.now();
+        String kind = type == null ? "" : type.trim().toLowerCase();
+        String detail = statusDetail(status);
+        boolean found;
+
+        switch (kind) {
+            case "camera" -> {
+                CameraDevice camera = repository.findCameraDeviceById(deviceId)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "摄像头不存在: " + deviceId));
+                repository.saveCameraDevice(new CameraDevice(
+                        camera.cameraId(), camera.profile(), camera.codec(), camera.streamUrl(),
+                        camera.fps(), camera.bitrateKbps(), status, camera.lastPlate(), now,
+                        camera.tamperAlarm(), camera.intrusionState(), detail
+                ));
+                found = true;
+            }
+            case "gate" -> {
+                GateDevice gate = repository.findGateDeviceById(deviceId)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "闸机不存在: " + deviceId));
+                repository.saveGateDevice(new GateDevice(
+                        gate.gateId(), gate.protocol(), gate.endpoint(), gate.coilAddress(), gate.queueDepth(),
+                        "ONLINE".equals(status) ? nextGateState(gate.queueDepth(), false) : status,
+                        gate.loopOccupied(), gate.estopArmed(), "ADMIN_" + status, now, detail
+                ));
+                found = true;
+            }
+            case "charger" -> {
+                ChargingStation station = repository.findChargingStationById(deviceId)
+                        .orElseThrow(() -> new com.parkvision.cps.common.BusinessException("DEVICE_NOT_FOUND", "充电桩不存在: " + deviceId));
+                repository.saveChargingStation(new ChargingStation(
+                        station.chargerId(), station.protocol(), station.endpoint(),
+                        "ONLINE".equals(status) ? "Available" : status,
+                        station.powerKw(), station.sessionKwh(), station.vehiclePlate(),
+                        station.authStatus(), now, detail
+                ));
+                found = true;
+            }
+            default -> throw new com.parkvision.cps.common.BusinessException("UNKNOWN_DEVICE_TYPE", "未知设备类型: " + type);
+        }
+
+        if (found) {
+            repository.saveDeviceEvent(new DeviceEvent(
+                    eventId("DEV"),
+                    kind,
+                    deviceId,
+                    "STATUS_" + status,
+                    "ONLINE".equals(status) ? "info" : "MAINTENANCE".equals(status) ? "medium" : "high",
+                    deviceLabel(kind) + " " + deviceId + " 已" + statusLabel(status),
+                    now,
+                    false
+            ));
+            if (!"ONLINE".equals(status)) {
+                repository.saveAlert(new AlertEvent(
+                        "AL" + now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+                        "设备",
+                        deviceLabel(kind) + " " + deviceId + " 已" + statusLabel(status) + "，请关注现场",
+                        "待处理",
+                        "OFFLINE".equals(status) ? "高" : "中"
+                ));
+            }
+        }
+        return overview();
+    }
+
+    private String normalizeStatus(String raw) {
+        String s = raw == null ? "" : raw.trim().toUpperCase();
+        return switch (s) {
+            case "ONLINE", "OFFLINE", "MAINTENANCE" -> s;
+            default -> throw new com.parkvision.cps.common.BusinessException("INVALID_STATUS", "状态必须为 ONLINE/OFFLINE/MAINTENANCE");
+        };
+    }
+
+    private String statusLabel(String status) {
+        return switch (status) {
+            case "ONLINE" -> "恢复在线";
+            case "OFFLINE" -> "停用下线";
+            default -> "进入维护";
+        };
+    }
+
+    private String statusDetail(String status) {
+        return switch (status) {
+            case "ONLINE" -> "管理员已将设备恢复在线服务";
+            case "OFFLINE" -> "管理员已停用该设备，已退出自动调度";
+            default -> "管理员已置为维护模式，暂停接受新任务";
+        };
+    }
+
     public void recordVisionInference(VisionResult result) {
         LocalDateTime now = LocalDateTime.now();
         CameraDevice camera = repository.findCameraDeviceById(result.cameraId())
@@ -242,6 +431,19 @@ public class DeviceService {
         updateSystemNodes(emergencyActive());
     }
 
+    public void recordDispatchDone(DispatchTask task) {
+        repository.saveDeviceEvent(new DeviceEvent(
+                eventId("DSP"),
+                "dispatch",
+                task.getAgvId() == null ? "AGV" : task.getAgvId(),
+                "TASK_COMPLETED",
+                "info",
+                task.getType() + " 已完成，车牌 " + task.getPlateNo() + (task.getSlotId() == null ? "" : " · 车位 " + task.getSlotId()),
+                LocalDateTime.now(),
+                false
+        ));
+    }
+
     public void recordOrderClosed(ParkingOrder order) {
         LocalDateTime now = LocalDateTime.now();
         repository.findGateDevices().stream()
@@ -297,30 +499,12 @@ public class DeviceService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        List<AgvUnit> agvs = repository.findAgvUnits();
-        for (int index = 0; index < agvs.size(); index++) {
-            AgvUnit agv = agvs.get(index);
-            int dx = index % 2 == 0 ? 3 : -2;
-            int dy = index % 2 == 0 ? -2 : 3;
-            agv.setX(wrap(agv.getX() + dx, 8, 88));
-            agv.setY(wrap(agv.getY() + dy, 10, 84));
-            agv.setBatteryPct(agv.getMode().equals("CHARGING") ? Math.min(100, agv.getBatteryPct() + 1) : Math.max(12, agv.getBatteryPct() - 1));
-            agv.setVelocityMps(agv.isLoaded() ? 0.86 : agv.getMode().equals("CHARGING") ? 0.00 : 0.58);
-            if (agv.getBatteryPct() <= 20) {
-                agv.setMode("CHARGING");
-                agv.setTask("电池恢复充电");
-                agv.setLastCommand("dock");
-            } else if (agv.isLoaded()) {
-                agv.setMode("CARRYING");
-                agv.setLastCommand("deliver");
-            } else {
-                agv.setMode("TRANSIT");
-                agv.setLastCommand("navigate");
-            }
-            repository.saveAgvUnit(agv);
-        }
+        // AGV motion and battery are owned by the dispatch worker (task-driven), not random drift.
 
         repository.findGateDevices().forEach(gate -> {
+            if (isAdminDisabled(gate.gateState())) {
+                return;
+            }
             int queueDepth = clamp(gate.queueDepth() + random.nextInt(3) - 1, 0, 5);
             boolean loopOccupied = queueDepth > 0 || random.nextBoolean();
             repository.saveGateDevice(new GateDevice(
@@ -341,6 +525,9 @@ public class DeviceService {
         });
 
         repository.findChargingStations().forEach(station -> {
+            if (isAdminDisabled(station.connectorStatus())) {
+                return;
+            }
             if ("Charging".equalsIgnoreCase(station.connectorStatus()) && station.vehiclePlate() != null) {
                 BigDecimal session = station.sessionKwh().add(new BigDecimal("0.60")).setScale(2, RoundingMode.HALF_UP);
                 BigDecimal power = new BigDecimal("10.80");
@@ -373,7 +560,11 @@ public class DeviceService {
             }
         });
 
-        repository.findCameraDevices().forEach(camera -> repository.saveCameraDevice(new CameraDevice(
+        repository.findCameraDevices().forEach(camera -> {
+            if (isAdminDisabled(camera.status())) {
+                return;
+            }
+            repository.saveCameraDevice(new CameraDevice(
                 camera.cameraId(),
                 camera.profile(),
                 camera.codec(),
@@ -386,9 +577,14 @@ public class DeviceService {
                 false,
                 false,
                 camera.detail()
-        )));
+            ));
+        });
 
         updateSystemNodes(false);
+    }
+
+    private boolean isAdminDisabled(String status) {
+        return "OFFLINE".equalsIgnoreCase(status) || "MAINTENANCE".equalsIgnoreCase(status);
     }
 
     private void updateSystemNodes(boolean emergency) {

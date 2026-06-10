@@ -1,7 +1,6 @@
 <script setup>
-import { computed, reactive, ref } from "vue";
-import DataTable from "../components/DataTable.vue";
-import { getters, state } from "../stores/parkingStore";
+import { computed, onMounted, reactive, ref } from "vue";
+import { getters, loadAuditLogs, setDeviceStatus, state } from "../stores/parkingStore";
 import { zhText } from "../utils/localize";
 import {
   aiChat,
@@ -58,9 +57,9 @@ async function testAi() {
 
 const healthCards = computed(() => [
   {
-    label: "后端模式",
+    label: "服务连接",
     value: zhText(state.onlineMode),
-    detail: "前端优先调用真实 API，服务不可用时切换到本地兜底数据。",
+    detail: "优先连接后端服务，断连时使用本地数据保障可用。",
     tone: state.onlineMode.includes("Fallback") ? "warning" : "stable",
   },
   {
@@ -72,54 +71,102 @@ const healthCards = computed(() => [
   {
     label: "设备事件",
     value: state.devices.events.length,
-    detail: "摄像头、闸机、充电桩事件作为演示证据展示。",
+    detail: "摄像头、闸机、充电桩事件实时汇总。",
     tone: "stable",
   },
   {
     label: "调度队列",
     value: state.queue.length,
-    detail: "车主请求、预调度和 VIP 插队都会进入同一队列。",
+    detail: "车主请求、预调度和 VIP 插队进入同一队列。",
     tone: "stable",
   },
 ]);
 
-const linkRows = computed(() => [
-  ["车牌识别", state.visionResult.cameraId, state.visionResult.plate, zhText(state.visionResult.action)],
-  ["车主订单", state.indoorRoute.orderNo, state.indoorRoute.slotId, zhText(state.indoorRoute.status)],
-  ["计费预览", state.pricingPreview.orderNo, `￥${Number(state.pricingPreview.totalAmount || 0).toFixed(2)}`, zhText(state.pricingPreview.pricingWindow)],
-  ["室内导航", state.indoorRoute.targetGate, `${state.indoorRoute.remainingMeters}m`, zhText(state.indoorRoute.safetyMessage)],
+const nodeKeyword = ref("");
+const deviceKeyword = ref("");
+const eventKeyword = ref("");
+
+const filteredNodes = computed(() => {
+  const k = nodeKeyword.value.trim().toLowerCase();
+  return state.systemNodes.filter(
+    (n) => !k || `${n.name} ${zhText(n.detail)} ${zhText(n.latency)}`.toLowerCase().includes(k),
+  );
+});
+
+const filteredEvents = computed(() => {
+  const k = eventKeyword.value.trim().toLowerCase();
+  return state.devices.events.filter(
+    (e) => !k || `${e.eventCode} ${e.deviceId} ${zhText(e.message)} ${e.severity}`.toLowerCase().includes(k),
+  );
+});
+
+function rawStatusOf(value) {
+  return String(value || "").toUpperCase();
+}
+
+function isOnline(value) {
+  const s = rawStatusOf(value);
+  return s === "ONLINE" || s === "READY" || s === "OPEN" || s === "CLOSED" || s === "AVAILABLE" || s === "CHARGING";
+}
+
+function statusTone(value) {
+  const s = rawStatusOf(value);
+  if (s === "OFFLINE") return "danger";
+  if (s === "MAINTENANCE") return "warning";
+  return "stable";
+}
+
+const deviceControls = computed(() => [
+  ...state.devices.cameras.map((c) => ({
+    type: "camera", id: c.cameraId, kind: "摄像头", protocol: c.profile,
+    status: c.status, telemetry: `${c.fps} FPS / ${c.codec}`,
+  })),
+  ...state.devices.gates.map((g) => ({
+    type: "gate", id: g.gateId, kind: "闸机", protocol: g.protocol,
+    status: g.gateState, telemetry: `排队 ${g.queueDepth} / 急停 ${g.estopArmed ? "是" : "否"}`,
+  })),
+  ...state.devices.chargers.map((c) => ({
+    type: "charger", id: c.chargerId, kind: "充电桩", protocol: c.protocol,
+    status: c.connectorStatus, telemetry: `${c.powerKw} kW / ${c.sessionKwh} kWh`,
+  })),
 ]);
 
-const deviceRows = computed(() => [
-  ...state.devices.cameras.map((camera) => [
-    camera.cameraId,
-    "摄像头",
-    camera.profile,
-    zhText(camera.status),
-    `${camera.fps} FPS / ${camera.codec} / ${camera.lastPlate}`,
-  ]),
-  ...state.devices.gates.map((gate) => [
-    gate.gateId,
-    "闸机",
-    gate.protocol,
-    zhText(gate.gateState),
-    `${gate.endpoint} / 排队 ${gate.queueDepth} / 急停 ${gate.estopArmed ? "是" : "否"}`,
-  ]),
-  ...state.devices.chargers.map((charger) => [
-    charger.chargerId,
-    "充电桩",
-    charger.protocol,
-    zhText(charger.connectorStatus),
-    `${charger.endpoint} / ${charger.powerKw} kW / ${charger.sessionKwh} kWh`,
-  ]),
-]);
+const filteredDeviceControls = computed(() => {
+  const k = deviceKeyword.value.trim().toLowerCase();
+  return deviceControls.value.filter(
+    (d) => !k || `${d.id} ${d.kind} ${d.protocol} ${d.status}`.toLowerCase().includes(k),
+  );
+});
 
-const evidence = [
-  ["前端演示", "用户点击模拟入场、取车、临停取物、VIP 插队"],
-  ["业务服务", "订单、调度、计费、导航状态被统一刷新"],
-  ["设备网关", "摄像头/闸机/充电桩遥测转成结构化事件"],
-  ["数据库台账", "订单、支付、告警、计费明细在管理台可追溯"],
-];
+const deviceBusy = ref("");
+const deviceError = ref("");
+
+async function changeDeviceStatus(device, status) {
+  deviceBusy.value = device.id;
+  deviceError.value = "";
+  const result = await setDeviceStatus(device.type, device.id, status);
+  if (!result.ok) deviceError.value = result.error;
+  deviceBusy.value = "";
+  await loadAuditLogs();
+}
+
+const auditKeyword = ref("");
+const filteredAuditLogs = computed(() => {
+  const k = auditKeyword.value.trim().toLowerCase();
+  return state.auditLogs.filter(
+    (log) => !k || `${log.username} ${log.method} ${log.path} ${log.status}`.toLowerCase().includes(k),
+  );
+});
+
+function formatAuditTime(value) {
+  if (!value) return "--";
+  return String(value).replace("T", " ").slice(0, 19);
+}
+
+onMounted(() => {
+  loadAuditLogs();
+});
+
 </script>
 
 <template>
@@ -136,7 +183,7 @@ const evidence = [
       <div class="section-head">
         <div>
           <h2><i class="fa-solid fa-robot" style="color:var(--brand); margin-right:8px;"></i>AI 大模型接入</h2>
-          <p>填写任意 OpenAI 兼容接口（DeepSeek / 智谱 / 通义 / Kimi…）或 Anthropic Claude，即可驱动「AI 视觉中枢」车牌识别、车主智能助手与运营报表。未配置时全部走内置模拟，演示不中断。</p>
+          <p>填写任意 OpenAI 兼容接口（DeepSeek / 智谱 / 通义 / Kimi…）或 Anthropic Claude，即可驱动「AI 视觉中枢」车牌识别、车主智能助手与运营报表。未配置时由系统内置引擎提供识别与问答能力，服务不中断。</p>
         </div>
         <span class="status-pill" :class="aiLive ? 'stable' : 'warning'">{{ aiStatus }}</span>
       </div>
@@ -152,7 +199,7 @@ const evidence = [
         <label class="ai-field">
           <span>服务商</span>
           <select v-model="aiForm.provider" @change="onProviderChange">
-            <option value="mock">内置模拟 (无需联网)</option>
+            <option value="mock">系统内置引擎 (无需联网)</option>
             <option value="openai">OpenAI 兼容 (DeepSeek / 智谱 / 通义 …)</option>
             <option value="anthropic">Anthropic Claude</option>
           </select>
@@ -196,7 +243,7 @@ const evidence = [
       <div v-if="aiTestResult" class="ai-test-result" :class="aiTestResult.source === 'api' ? 'ok' : 'mock'">
         <b>
           <i class="fa-solid" :class="aiTestResult.source === 'api' ? 'fa-circle-check' : 'fa-circle-exclamation'"></i>
-          {{ aiTestResult.source === "api" ? `真实接口已连通 · ${aiTestResult.model}` : "已回退到内置模拟" }}
+          {{ aiTestResult.source === "api" ? `真实接口已连通 · ${aiTestResult.model}` : "系统内置引擎已应答" }}
         </b>
         <p>{{ aiTestResult.text }}</p>
         <small v-if="aiTestResult.error">原因：{{ aiTestResult.error }}</small>
@@ -207,44 +254,17 @@ const evidence = [
       <article class="surface">
         <div class="section-head">
           <div>
-            <h2>数据链路总览</h2>
-            <p>这个页面不再做“配置项堆叠”，而是说明前面每个演示画面背后对应哪条数据。</p>
+            <h2>服务节点</h2>
+            <p>边缘视觉、PLC 控制、缓存与数据库同步等关键节点状态。</p>
           </div>
-          <span class="status-pill stable">可追溯</span>
-        </div>
-        <div class="table-wrap">
-          <DataTable :headers="['业务链路', '来源', '当前值', '状态说明']" :rows="linkRows" />
-        </div>
-      </article>
-
-      <aside class="surface">
-        <div class="section-head compact">
-          <div>
-            <h2>演示证据链</h2>
-            <p>讲解时可以按这四步说明系统不是静态页面。</p>
-          </div>
-        </div>
-        <div class="evidence-flow">
-          <div v-for="([title, detail], index) in evidence" :key="title">
-            <span>{{ String(index + 1).padStart(2, "0") }}</span>
-            <b>{{ title }}</b>
-            <small>{{ detail }}</small>
-          </div>
-        </div>
-      </aside>
-    </section>
-
-    <section class="system-layout">
-      <article class="surface">
-        <div class="section-head">
-          <div>
-            <h2>服务节点健康</h2>
-            <p>展示边缘视觉、PLC 控制、缓存/数据库同步等关键节点是否支撑当前演示。</p>
+          <div class="search-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input v-model="nodeKeyword" placeholder="搜索节点名称或状态" />
           </div>
         </div>
         <div class="node-grid">
           <div
-            v-for="node in state.systemNodes"
+            v-for="node in filteredNodes"
             :key="node.name"
             class="node-card"
             :class="{ warning: node.level === 'warning' }"
@@ -255,18 +275,23 @@ const evidence = [
             </div>
             <strong>{{ zhText(node.latency) }}</strong>
           </div>
+          <p v-if="!filteredNodes.length" class="system-empty">没有匹配的节点。</p>
         </div>
       </article>
 
       <article class="surface">
         <div class="section-head">
           <div>
-            <h2>近期设备事件</h2>
-            <p>设备事件可以解释 AI 识别、闸机放行和充电计费从哪里来。</p>
+            <h2>设备事件</h2>
+            <p>摄像头、闸机、充电桩上报的实时事件。</p>
+          </div>
+          <div class="search-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input v-model="eventKeyword" placeholder="搜索设备、事件码或内容" />
           </div>
         </div>
         <div class="queue-list">
-          <div v-for="event in state.devices.events" :key="event.eventId" class="queue-item system-event">
+          <div v-for="event in filteredEvents" :key="event.eventId" class="queue-item system-event">
             <div>
               <b>{{ zhText(event.eventCode) }} - {{ event.deviceId }}</b>
               <span>{{ zhText(event.message) }}</span>
@@ -275,6 +300,7 @@ const evidence = [
               {{ zhText(event.severity) }}
             </span>
           </div>
+          <p v-if="!filteredEvents.length" class="system-empty">没有匹配的事件。</p>
         </div>
       </article>
     </section>
@@ -282,13 +308,74 @@ const evidence = [
     <article class="surface">
       <div class="section-head">
         <div>
-          <h2>现场设备接入</h2>
-          <p>不是让观众配置设备，而是证明摄像头、闸机、充电桩都参与了业务闭环。</p>
+          <h2>现场设备清单</h2>
+          <p>接入系统的摄像头、闸机、充电桩及其协议与遥测。</p>
+        </div>
+        <div class="search-field">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input v-model="deviceKeyword" placeholder="搜索设备、类型、协议或状态" />
         </div>
       </div>
-      <div class="table-wrap">
-        <DataTable :headers="['设备', '类型', '协议', '状态', '遥测']" :rows="deviceRows" />
+      <p v-if="deviceError" class="system-empty" style="color: var(--danger-red)">{{ deviceError }}</p>
+      <div class="device-control-list">
+        <div v-for="d in filteredDeviceControls" :key="`${d.type}-${d.id}`" class="device-control-row">
+          <div class="device-control-main">
+            <b>{{ d.id }}</b>
+            <span>{{ d.kind }} · {{ d.protocol }} · {{ d.telemetry }}</span>
+          </div>
+          <span class="status-pill" :class="statusTone(d.status)">{{ zhText(d.status) }}</span>
+          <div class="device-control-actions">
+            <button
+              class="ghost-button small"
+              :disabled="deviceBusy === d.id || isOnline(d.status)"
+              @click="changeDeviceStatus(d, 'ONLINE')"
+            >
+              <i class="fa-solid fa-play"></i> 启用
+            </button>
+            <button
+              class="ghost-button small"
+              :disabled="deviceBusy === d.id || rawStatusOf(d.status) === 'MAINTENANCE'"
+              @click="changeDeviceStatus(d, 'MAINTENANCE')"
+            >
+              <i class="fa-solid fa-screwdriver-wrench"></i> 维护
+            </button>
+            <button
+              class="ghost-button small danger"
+              :disabled="deviceBusy === d.id || rawStatusOf(d.status) === 'OFFLINE'"
+              @click="changeDeviceStatus(d, 'OFFLINE')"
+            >
+              <i class="fa-solid fa-power-off"></i> 停用
+            </button>
+          </div>
+        </div>
       </div>
+      <p v-if="!filteredDeviceControls.length" class="system-empty">没有匹配的设备。</p>
+    </article>
+
+    <article class="surface">
+      <div class="section-head">
+        <div>
+          <h2>操作审计日志</h2>
+          <p>记录每一次管理端写操作：操作账号、动作、目标接口与结果状态。</p>
+        </div>
+        <div class="search-field">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input v-model="auditKeyword" placeholder="搜索账号、方法、路径或状态" />
+        </div>
+      </div>
+      <div class="audit-list">
+        <div class="audit-row audit-head">
+          <span>时间</span><span>账号</span><span>动作</span><span>目标</span><span>结果</span>
+        </div>
+        <div v-for="log in filteredAuditLogs" :key="log.id" class="audit-row">
+          <span>{{ formatAuditTime(log.createdAt) }}</span>
+          <span><b>{{ log.username }}</b><em>{{ log.role }}</em></span>
+          <span class="audit-method" :class="log.method.toLowerCase()">{{ log.method }}</span>
+          <span class="audit-path">{{ log.path }}</span>
+          <span class="status-pill" :class="log.status < 400 ? 'stable' : 'danger'">{{ log.status }}</span>
+        </div>
+      </div>
+      <p v-if="!filteredAuditLogs.length" class="system-empty">暂无审计记录。</p>
     </article>
   </section>
 </template>
@@ -340,8 +427,41 @@ const evidence = [
 
 .system-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
   gap: 20px;
+}
+
+.search-field {
+  min-width: 220px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.search-field i {
+  color: var(--text-muted);
+}
+
+.search-field input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  outline: none;
+  font-size: 13px;
+}
+
+.system-empty {
+  margin: 6px 0 0;
+  padding: 14px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .evidence-flow {
@@ -615,6 +735,138 @@ const evidence = [
 
   .ai-form {
     grid-template-columns: 1fr;
+  }
+}
+
+.device-control-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.device-control-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+}
+
+.device-control-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.device-control-main b {
+  display: block;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.device-control-main span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.device-control-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.status-pill.danger {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.ghost-button.small.danger {
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.ghost-button.small.danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+@media (max-width: 720px) {
+  .device-control-row {
+    flex-wrap: wrap;
+  }
+}
+
+.audit-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.audit-row {
+  display: grid;
+  grid-template-columns: 160px 140px 80px minmax(0, 1fr) 70px;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.audit-row:not(.audit-head):hover {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.audit-head {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.audit-row b {
+  display: block;
+  color: var(--text-main);
+}
+
+.audit-row em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.audit-method {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.audit-method.post {
+  color: #2563eb;
+}
+
+.audit-method.delete {
+  color: #dc2626;
+}
+
+.audit-method.put,
+.audit-method.patch {
+  color: #d97706;
+}
+
+.audit-path {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .audit-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .audit-head {
+    display: none;
   }
 }
 </style>

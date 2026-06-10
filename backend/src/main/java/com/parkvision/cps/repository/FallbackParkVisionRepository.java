@@ -18,6 +18,7 @@ import com.parkvision.cps.domain.order.OrderStatus;
 import com.parkvision.cps.domain.order.ParkingOrder;
 import com.parkvision.cps.domain.parking.ParkingSlot;
 import com.parkvision.cps.domain.parking.SlotStatus;
+import com.parkvision.cps.domain.vision.RecognitionEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
@@ -33,9 +34,11 @@ import java.util.Optional;
 public class FallbackParkVisionRepository implements ParkVisionRepository {
     private final List<ParkingSlot> slots = new ArrayList<>();
     private final List<ParkingOrder> orders = new ArrayList<>();
+    private final List<com.parkvision.cps.domain.reservation.Reservation> reservations = new ArrayList<>();
     private final List<AlertEvent> alerts = new ArrayList<>();
     private final List<PricingRule> pricingRules = new ArrayList<>();
     private final List<AccessListItem> accessList = new ArrayList<>();
+    private final List<RecognitionEvent> recognitionEvents = new ArrayList<>();
     private final List<CustomerAccount> customerAccounts = new ArrayList<>();
     private final List<VehicleProfile> vehicleProfiles = new ArrayList<>();
     private final List<PaymentTransaction> paymentTransactions = new ArrayList<>();
@@ -43,6 +46,9 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     private final List<SystemNodeStatus> systemNodes = new ArrayList<>();
     private final List<AgvUnit> agvUnits = new ArrayList<>();
     private final List<DispatchTask> dispatchQueue = new ArrayList<>();
+    private final java.util.concurrent.atomic.AtomicLong dispatchTaskSeq = new java.util.concurrent.atomic.AtomicLong(0);
+    private final List<com.parkvision.cps.domain.admin.AuditLog> auditLogs = new ArrayList<>();
+    private final java.util.concurrent.atomic.AtomicLong auditSeq = new java.util.concurrent.atomic.AtomicLong(0);
     private final List<CameraDevice> cameraDevices = new ArrayList<>();
     private final List<GateDevice> gateDevices = new ArrayList<>();
     private final List<ChargingStation> chargingStations = new ArrayList<>();
@@ -105,6 +111,23 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public List<com.parkvision.cps.domain.reservation.Reservation> findReservations() {
+        return Collections.unmodifiableList(reservations);
+    }
+
+    @Override
+    public Optional<com.parkvision.cps.domain.reservation.Reservation> findReservationById(String id) {
+        return reservations.stream().filter(item -> item.id().equals(id)).findFirst();
+    }
+
+    @Override
+    public com.parkvision.cps.domain.reservation.Reservation saveReservation(com.parkvision.cps.domain.reservation.Reservation reservation) {
+        reservations.removeIf(existing -> existing.id().equals(reservation.id()));
+        reservations.add(0, reservation);
+        return reservation;
+    }
+
+    @Override
     public List<CustomerAccount> findCustomerAccounts() {
         return Collections.unmodifiableList(customerAccounts);
     }
@@ -126,6 +149,11 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         vehicleProfiles.removeIf(existing -> existing.plateNo().equals(vehicle.plateNo()));
         vehicleProfiles.add(vehicle);
         return vehicle;
+    }
+
+    @Override
+    public void deleteVehicleProfile(String plateNo) {
+        vehicleProfiles.removeIf(existing -> existing.plateNo().equalsIgnoreCase(plateNo));
     }
 
     @Override
@@ -179,8 +207,47 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public Optional<PricingRule> findPricingRuleById(String id) {
+        return pricingRules.stream().filter(rule -> rule.id().equals(id)).findFirst();
+    }
+
+    @Override
+    public PricingRule savePricingRule(PricingRule rule) {
+        pricingRules.removeIf(existing -> existing.id().equals(rule.id()));
+        pricingRules.add(rule);
+        return rule;
+    }
+
+    @Override
+    public void deletePricingRule(String id) {
+        pricingRules.removeIf(existing -> existing.id().equals(id));
+    }
+
+    @Override
     public List<AccessListItem> findAccessList() {
         return Collections.unmodifiableList(accessList);
+    }
+
+    @Override
+    public Optional<AccessListItem> findAccessListItem(String plateNo) {
+        if (plateNo == null) {
+            return Optional.empty();
+        }
+        return accessList.stream()
+                .filter(item -> item.plateNo().equalsIgnoreCase(plateNo))
+                .findFirst();
+    }
+
+    @Override
+    public List<RecognitionEvent> findRecognitionEvents() {
+        return Collections.unmodifiableList(recognitionEvents);
+    }
+
+    @Override
+    public RecognitionEvent saveRecognitionEvent(RecognitionEvent event) {
+        recognitionEvents.removeIf(existing -> existing.id().equals(event.id()));
+        recognitionEvents.add(0, event);
+        return event;
     }
 
     @Override
@@ -193,6 +260,25 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         systemNodes.removeIf(existing -> existing.name().equals(node.name()));
         systemNodes.add(node);
         return node;
+    }
+
+    @Override
+    public List<com.parkvision.cps.domain.admin.AuditLog> findAuditLogs(int limit) {
+        return auditLogs.stream()
+                .sorted((a, b) -> Long.compare(b.id(), a.id()))
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
+    public com.parkvision.cps.domain.admin.AuditLog saveAuditLog(com.parkvision.cps.domain.admin.AuditLog log) {
+        com.parkvision.cps.domain.admin.AuditLog stored = new com.parkvision.cps.domain.admin.AuditLog(
+                auditSeq.incrementAndGet(),
+                log.username(), log.role(), log.method(), log.path(), log.status(), log.ip(),
+                log.createdAt() == null ? LocalDateTime.now() : log.createdAt()
+        );
+        auditLogs.add(stored);
+        return stored;
     }
 
     @Override
@@ -219,6 +305,19 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
 
     @Override
     public DispatchTask enqueueDispatchTask(DispatchTask task) {
+        if (task.getId() == null) {
+            task.setId(dispatchTaskSeq.incrementAndGet());
+        }
+        dispatchQueue.add(0, task);
+        return task;
+    }
+
+    @Override
+    public DispatchTask saveDispatchTask(DispatchTask task) {
+        if (task.getId() == null) {
+            return enqueueDispatchTask(task);
+        }
+        dispatchQueue.removeIf(existing -> task.getId().equals(existing.getId()));
         dispatchQueue.add(0, task);
         return task;
     }
@@ -398,10 +497,15 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         alerts.add(new AlertEvent("AL20260518007", "计费", "一笔已完成订单等待结算回调确认", "处理中", "中"));
         alerts.add(new AlertEvent("AL20260518008", "调度", "A04 异常车位释放需要人工复核", "已升级", "高"));
 
-        pricingRules.add(new PricingRule("工作日阶梯计费", "07:00-22:00", "首小时 6 元，之后 4 元/小时", "封顶 48 元", "启用"));
-        pricingRules.add(new PricingRule("夜间包时", "22:00-07:00", "夜间统一 12 元", "月卡免收", "启用"));
-        pricingRules.add(new PricingRule("VIP 优先取车", "全天", "基础费 + 8 元", "队列权重 +40", "启用"));
-        pricingRules.add(new PricingRule("新能源充电", "全天", "1.2 元/千瓦时", "充满自动释放", "启用"));
+        pricingRules.add(new PricingRule("PR-STD", "标准燃油车计费", "FUEL", 15,
+                new BigDecimal("6.00"), new BigDecimal("4.00"), new BigDecimal("48.00"),
+                17, 21, new BigDecimal("1.50"), "ACTIVE"));
+        pricingRules.add(new PricingRule("PR-EV", "新能源车计费", "EV", 15,
+                new BigDecimal("5.00"), new BigDecimal("3.50"), new BigDecimal("60.00"),
+                17, 21, new BigDecimal("1.30"), "ACTIVE"));
+        pricingRules.add(new PricingRule("PR-ALL", "通用兜底计费", "ALL", 10,
+                new BigDecimal("6.00"), new BigDecimal("4.00"), new BigDecimal("50.00"),
+                17, 21, new BigDecimal("1.40"), "ACTIVE"));
 
         accessList.add(new AccessListItem("SH-A7686", "白名单", "月卡用户", "2026-12-31", "自动放行"));
         accessList.add(new AccessListItem("SH-D5218", "白名单", "新能源车主", "2026-09-01", "充电优先"));
@@ -429,16 +533,16 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         agvUnits.add(new AgvUnit("AGV-03", 72, 58, false, "前往浅层缓冲区", 68, "TRANSIT", 0.65, "relocate"));
         agvUnits.add(new AgvUnit("AGV-04", 28, 76, false, "充电待命", 19, "CHARGING", 0.00, "dock"));
 
-        dispatchQueue.add(new DispatchTask("SH-A7686", "标准取车", "先到先取", "04:12", false));
-        dispatchQueue.add(new DispatchTask("SH-D5218", "充电车位放行", "充电完成", "03:40", false));
-        dispatchQueue.add(new DispatchTask("SU-M9021", "临停取物", "临取", "02:10", false));
-        dispatchQueue.add(new DispatchTask("SH-V7780", "预约出场", "预约", "01:58", false));
-        dispatchQueue.add(new DispatchTask("SH-P3308", "高峰预调度移位", "预调度", "00:48", true));
-        dispatchQueue.add(new DispatchTask("SH-M4401", "VIP 优先取车", "VIP", "00:30", true));
-        dispatchQueue.add(new DispatchTask("SH-D9082", "充电枪释放", "新能源", "02:42", false));
-        dispatchQueue.add(new DispatchTask("SH-T6502", "支付确认等待", "支付", "01:24", false));
-        dispatchQueue.add(new DispatchTask("SH-C8871", "人工复核转运", "风控", "05:36", false));
-        dispatchQueue.add(new DispatchTask("SH-H3819", "夜间套餐出场", "夜间", "03:06", false));
+        enqueueDispatchTask(new DispatchTask("SH-A7686", "标准取车", "先到先取", "04:12", false));
+        enqueueDispatchTask(new DispatchTask("SH-D5218", "充电车位放行", "充电完成", "03:40", false));
+        enqueueDispatchTask(new DispatchTask("SU-M9021", "临停取物", "临取", "02:10", false));
+        enqueueDispatchTask(new DispatchTask("SH-V7780", "预约出场", "预约", "01:58", false));
+        enqueueDispatchTask(new DispatchTask("SH-P3308", "高峰预调度移位", "预调度", "00:48", true));
+        enqueueDispatchTask(new DispatchTask("SH-M4401", "VIP 优先取车", "VIP", "00:30", true));
+        enqueueDispatchTask(new DispatchTask("SH-D9082", "充电枪释放", "新能源", "02:42", false));
+        enqueueDispatchTask(new DispatchTask("SH-T6502", "支付确认等待", "支付", "01:24", false));
+        enqueueDispatchTask(new DispatchTask("SH-C8871", "人工复核转运", "风控", "05:36", false));
+        enqueueDispatchTask(new DispatchTask("SH-H3819", "夜间套餐出场", "夜间", "03:06", false));
     }
 
     private void seedDeviceData() {

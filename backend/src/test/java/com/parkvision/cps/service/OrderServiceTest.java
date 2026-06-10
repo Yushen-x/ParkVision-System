@@ -10,11 +10,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class OrderServiceTest {
 
+    private OrderService newOrderService(FallbackParkVisionRepository repository) {
+        DeviceService deviceService = new DeviceService(repository, true);
+        BillingService billingService = new BillingService(repository, new PricingService(repository));
+        return new OrderService(repository, deviceService, billingService);
+    }
+
     @Test
     void simulateEntryCreatesOrderAndOccupiesSlot() {
         FallbackParkVisionRepository repository = new FallbackParkVisionRepository();
-        DeviceService deviceService = new DeviceService(repository, true);
-        OrderService orderService = new OrderService(repository, deviceService);
+        OrderService orderService = newOrderService(repository);
 
         int existingOrders = repository.findOrders().size();
         ParkingOrder order = orderService.simulateEntry();
@@ -30,8 +35,7 @@ class OrderServiceTest {
     @Test
     void finishingOrderReleasesSlotAndCalculatesAmount() {
         FallbackParkVisionRepository repository = new FallbackParkVisionRepository();
-        DeviceService deviceService = new DeviceService(repository, true);
-        OrderService orderService = new OrderService(repository, deviceService);
+        OrderService orderService = newOrderService(repository);
 
         ParkingOrder updatedOrder = orderService.changeStatus("PV20260506001", OrderStatus.FINISHED);
 

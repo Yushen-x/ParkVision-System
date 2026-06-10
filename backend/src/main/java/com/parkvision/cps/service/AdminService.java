@@ -21,8 +21,15 @@ import com.parkvision.cps.dto.admin.AdminOrderDetail;
 import com.parkvision.cps.dto.admin.AdminOverviewMetrics;
 import com.parkvision.cps.dto.admin.AdminOrderRow;
 import com.parkvision.cps.dto.admin.AdminReport;
+import com.parkvision.cps.dto.admin.CustomerVehicleUpsertRequest;
+import com.parkvision.cps.dto.admin.PricingRuleRequest;
+import com.parkvision.cps.dto.vision.RecognitionRow;
+import com.parkvision.cps.dto.vision.VisionConsole;
+import com.parkvision.cps.domain.vision.RecognitionEvent;
+import com.parkvision.cps.common.BusinessException;
 import com.parkvision.cps.repository.ParkVisionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -67,6 +74,23 @@ public class AdminService {
                 .toList();
     }
 
+    public AlertEvent acknowledgeAlert(String alertNo) {
+        return updateAlertStatus(alertNo, "处理中");
+    }
+
+    public AlertEvent resolveAlert(String alertNo) {
+        return updateAlertStatus(alertNo, "已恢复");
+    }
+
+    private AlertEvent updateAlertStatus(String alertNo, String status) {
+        AlertEvent alert = repository.findAlerts().stream()
+                .filter(item -> item.alertNo().equalsIgnoreCase(alertNo))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException("ALERT_NOT_FOUND", "告警不存在: " + alertNo));
+        AlertEvent updated = new AlertEvent(alert.alertNo(), alert.type(), alert.content(), status, alert.level());
+        return repository.saveAlert(updated);
+    }
+
     public AdminAlertDetail alertDetail(String alertNo) {
         AlertEvent alert = repository.findAlerts().stream()
                 .filter(item -> item.alertNo().equalsIgnoreCase(alertNo))
@@ -102,8 +126,128 @@ public class AdminService {
         return repository.findPricingRules();
     }
 
+    @Transactional
+    public PricingRule createPricingRule(PricingRuleRequest request) {
+        String id = "PR" + Long.toString(System.currentTimeMillis(), 36).toUpperCase();
+        return repository.savePricingRule(buildRule(id, request));
+    }
+
+    @Transactional
+    public PricingRule updatePricingRule(String id, PricingRuleRequest request) {
+        repository.findPricingRuleById(id)
+                .orElseThrow(() -> new BusinessException("PRICING_RULE_NOT_FOUND", "计费规则不存在: " + id));
+        return repository.savePricingRule(buildRule(id, request));
+    }
+
+    @Transactional
+    public void deletePricingRule(String id) {
+        repository.findPricingRuleById(id)
+                .orElseThrow(() -> new BusinessException("PRICING_RULE_NOT_FOUND", "计费规则不存在: " + id));
+        repository.deletePricingRule(id);
+    }
+
+    private PricingRule buildRule(String id, PricingRuleRequest request) {
+        String vehicleType = request.vehicleType() == null ? "ALL" : request.vehicleType().trim().toUpperCase();
+        if (!Set.of("ALL", "FUEL", "EV").contains(vehicleType)) {
+            throw new BusinessException("INVALID_VEHICLE_TYPE", "车型只能是 ALL/FUEL/EV");
+        }
+        String status = request.status() == null || request.status().isBlank()
+                ? "ACTIVE" : request.status().trim().toUpperCase();
+        if (!Set.of("ACTIVE", "INACTIVE").contains(status)) {
+            throw new BusinessException("INVALID_STATUS", "状态只能是 ACTIVE/INACTIVE");
+        }
+        int freeMinutes = nonNegative(request.freeMinutes(), 0, "免费时长");
+        int peakStart = boundedHour(request.peakStartHour(), 0);
+        int peakEnd = boundedHour(request.peakEndHour(), 0);
+        BigDecimal firstHourFee = nonNegativeMoney(request.firstHourFee(), "首小时费用");
+        BigDecimal hourlyFee = nonNegativeMoney(request.hourlyFee(), "续费单价");
+        BigDecimal dailyCap = nonNegativeMoney(request.dailyCap() == null ? BigDecimal.ZERO : request.dailyCap(), "封顶金额");
+        BigDecimal peakMultiplier = request.peakMultiplier() == null ? BigDecimal.ONE : request.peakMultiplier();
+        if (peakMultiplier.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("INVALID_MULTIPLIER", "高峰倍率不能为负");
+        }
+        return new PricingRule(id, request.name().trim(), vehicleType, freeMinutes,
+                firstHourFee.setScale(2, RoundingMode.HALF_UP),
+                hourlyFee.setScale(2, RoundingMode.HALF_UP),
+                dailyCap.setScale(2, RoundingMode.HALF_UP),
+                peakStart, peakEnd,
+                peakMultiplier.setScale(2, RoundingMode.HALF_UP),
+                status);
+    }
+
+    private int nonNegative(Integer value, int fallback, String label) {
+        int v = value == null ? fallback : value;
+        if (v < 0) {
+            throw new BusinessException("INVALID_VALUE", label + "不能为负");
+        }
+        return v;
+    }
+
+    private int boundedHour(Integer value, int fallback) {
+        int v = value == null ? fallback : value;
+        if (v < 0 || v > 23) {
+            throw new BusinessException("INVALID_HOUR", "时段小时需在 0-23 之间");
+        }
+        return v;
+    }
+
+    private BigDecimal nonNegativeMoney(BigDecimal value, String label) {
+        BigDecimal v = value == null ? BigDecimal.ZERO : value;
+        if (v.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("INVALID_MONEY", label + "不能为负");
+        }
+        return v;
+    }
+
     public List<AccessListItem> accessList() {
         return repository.findAccessList();
+    }
+
+    public VisionConsole visionConsole(String decision, String keyword) {
+        LocalDate today = LocalDate.now();
+        List<RecognitionEvent> all = repository.findRecognitionEvents();
+
+        int total = all.size();
+        int todayCount = (int) all.stream().filter(e -> e.createdAt().toLocalDate().isEqual(today)).count();
+        int allow = (int) all.stream().filter(e -> "ALLOW".equals(e.decision())).count();
+        int deny = (int) all.stream().filter(e -> "DENY".equals(e.decision())).count();
+        int review = (int) all.stream().filter(e -> "REVIEW".equals(e.decision())).count();
+        double avgConfidence = all.isEmpty() ? 0.0
+                : Math.round(all.stream().mapToDouble(RecognitionEvent::confidence).average().orElse(0.0) * 1000.0) / 1000.0;
+
+        List<RecognitionRow> rows = all.stream()
+                .filter(e -> decision == null || decision.isBlank() || decision.equalsIgnoreCase(e.decision()))
+                .filter(e -> matchesKeyword(keyword, e.plateNo(), e.cameraId(), e.orderNo()))
+                .limit(200)
+                .map(e -> new RecognitionRow(
+                        e.id(),
+                        e.createdAt().format(ADMIN_TIME),
+                        e.cameraId(),
+                        e.plateNo(),
+                        e.confidence(),
+                        e.energyType(),
+                        e.listType(),
+                        e.decision(),
+                        decisionLabel(e.decision()),
+                        e.reason(),
+                        e.orderNo(),
+                        e.intrusion()
+                ))
+                .collect(Collectors.toList());
+
+        return new VisionConsole(
+                new VisionConsole.VisionStats(total, todayCount, allow, deny, review, avgConfidence),
+                rows
+        );
+    }
+
+    private String decisionLabel(String decision) {
+        return switch (decision == null ? "" : decision) {
+            case "ALLOW" -> "放行";
+            case "DENY" -> "拦截";
+            case "REVIEW" -> "复核";
+            default -> decision;
+        };
     }
 
     public List<AdminCustomerVehicleRow> customerVehicles(String energyType, String memberLevel, String keyword) {
@@ -118,6 +262,108 @@ public class AdminService {
                 .filter(row -> matchesStatus(row.memberLevel(), memberLevel))
                 .filter(row -> matchesKeyword(keyword, row.ownerId(), row.ownerName(), row.plateNo(), row.phoneMasked()))
                 .toList();
+    }
+
+    @Transactional
+    public AdminCustomerVehicleRow upsertCustomerVehicle(CustomerVehicleUpsertRequest request) {
+        String plate = request.plateNo() == null ? "" : request.plateNo().trim().toUpperCase();
+        String ownerName = request.ownerName() == null ? "" : request.ownerName().trim();
+        if (plate.isEmpty() || ownerName.isEmpty()) {
+            throw new BusinessException("INVALID_INPUT", "车牌和车主姓名不能为空");
+        }
+
+        VehicleProfile existingVehicle = repository.findVehicleProfiles().stream()
+                .filter(item -> item.plateNo().equalsIgnoreCase(plate))
+                .findFirst()
+                .orElse(null);
+        String ownerId = request.ownerId() != null && !request.ownerId().isBlank()
+                ? request.ownerId().trim()
+                : existingVehicle != null
+                        ? existingVehicle.ownerId()
+                        : "CUS" + Long.toString(System.currentTimeMillis(), 36).toUpperCase();
+
+        CustomerAccount existingAccount = repository.findCustomerAccounts().stream()
+                .filter(item -> item.ownerId().equalsIgnoreCase(ownerId))
+                .findFirst()
+                .orElse(null);
+
+        String memberLevel = blankToDefault(request.memberLevel(),
+                existingAccount == null ? "STANDARD" : existingAccount.memberLevel()).toUpperCase();
+        String accountStatus = blankToDefault(request.accountStatus(),
+                existingAccount == null ? "ACTIVE" : existingAccount.accountStatus()).toUpperCase();
+
+        CustomerAccount account = new CustomerAccount(
+                ownerId,
+                ownerName,
+                maskPhone(request.phone(), existingAccount),
+                memberLevel,
+                accountStatus,
+                existingAccount == null ? BigDecimal.ZERO : existingAccount.balance(),
+                existingAccount == null ? LocalDateTime.now() : existingAccount.createdAt()
+        );
+        repository.saveCustomerAccount(account);
+
+        VehicleProfile vehicle = new VehicleProfile(
+                plate,
+                ownerId,
+                blankToDefault(request.vehicleType(),
+                        existingVehicle == null ? "PASSENGER" : existingVehicle.vehicleType()).toUpperCase(),
+                normalizeEnergy(request.energyType(), existingVehicle),
+                blankToDefault(request.membershipType(),
+                        existingVehicle == null ? "TEMPORARY" : existingVehicle.membershipType()).toUpperCase(),
+                normalizeAuth(request.accessType(), existingVehicle),
+                existingVehicle == null ? LocalDateTime.now() : existingVehicle.createdAt()
+        );
+        repository.saveVehicleProfile(vehicle);
+
+        String accessType = repository.findAccessList().stream()
+                .filter(item -> item.plateNo().equalsIgnoreCase(plate))
+                .map(AccessListItem::listType)
+                .findFirst()
+                .orElse(null);
+        return toCustomerVehicleRow(vehicle, account, accessType);
+    }
+
+    public void deleteCustomerVehicle(String plateNo) {
+        String plate = plateNo == null ? "" : plateNo.trim().toUpperCase();
+        boolean exists = repository.findVehicleProfiles().stream()
+                .anyMatch(item -> item.plateNo().equalsIgnoreCase(plate));
+        if (!exists) {
+            throw new BusinessException("VEHICLE_NOT_FOUND", "车辆档案不存在: " + plate);
+        }
+        repository.deleteVehicleProfile(plate);
+    }
+
+    private String blankToDefault(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value.trim();
+    }
+
+    private String normalizeEnergy(String energyType, VehicleProfile existing) {
+        if (energyType == null || energyType.isBlank()) {
+            return existing == null ? "FUEL" : existing.energyType();
+        }
+        String value = energyType.trim().toUpperCase();
+        return value.contains("EV") || value.contains("ELECTRIC") || value.contains("电") ? "EV" : "FUEL";
+    }
+
+    private String normalizeAuth(String accessType, VehicleProfile existing) {
+        if (accessType == null || accessType.isBlank()) {
+            return existing == null ? "ALLOW" : existing.defaultAuthStatus();
+        }
+        String value = accessType.trim().toUpperCase();
+        return value.contains("DENY") || value.contains("BLOCK") || value.contains("黑") ? "DENY" : "ALLOW";
+    }
+
+    private String maskPhone(String phone, CustomerAccount existing) {
+        String value = phone == null ? "" : phone.trim();
+        if (value.isEmpty()) {
+            return existing == null ? "—" : existing.phoneMasked();
+        }
+        String digits = value.replaceAll("\\D", "");
+        if (digits.length() >= 11) {
+            return digits.substring(0, 3) + "****" + digits.substring(digits.length() - 4);
+        }
+        return value;
     }
 
     public AdminCustomerDetail customerDetail(String ownerId) {
@@ -228,6 +474,10 @@ public class AdminService {
 
     public List<SystemNodeStatus> systemNodes() {
         return repository.findSystemNodes();
+    }
+
+    public List<com.parkvision.cps.domain.admin.AuditLog> auditLogs(int limit) {
+        return repository.findAuditLogs(Math.max(1, Math.min(limit, 500)));
     }
 
     public AdminOverviewMetrics overviewMetrics() {

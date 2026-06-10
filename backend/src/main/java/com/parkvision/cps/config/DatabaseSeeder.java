@@ -101,9 +101,9 @@ public class DatabaseSeeder implements ApplicationRunner {
                 event.eventId()
         ));
         seed.findPricingRules().forEach(rule -> insertIfMissing(
-                "select count(*) from pricing_rule where rule_name = ?",
+                "select count(*) from pricing_rule where id = ?",
                 () -> insertPricingRule(rule),
-                rule.name()
+                rule.id()
         ));
         seed.findAccessList().forEach(item -> insertIfMissing(
                 "select count(*) from access_list_item where plate_no = ?",
@@ -114,11 +114,17 @@ public class DatabaseSeeder implements ApplicationRunner {
 
     private void insertPricingRule(PricingRule rule) {
         jdbcTemplate.update(
-                "insert into pricing_rule (rule_name, time_range, method, extra_policy, status) values (?, ?, ?, ?, ?)",
+                "insert into pricing_rule (id, rule_name, vehicle_type, free_minutes, first_hour_fee, hourly_fee, daily_cap, peak_start_hour, peak_end_hour, peak_multiplier, status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                rule.id(),
                 rule.name(),
-                rule.timeRange(),
-                rule.method(),
-                rule.extraPolicy(),
+                rule.vehicleType(),
+                rule.freeMinutes(),
+                rule.firstHourFee(),
+                rule.hourlyFee(),
+                rule.dailyCap(),
+                rule.peakStartHour(),
+                rule.peakEndHour(),
+                rule.peakMultiplier(),
                 rule.status()
         );
     }

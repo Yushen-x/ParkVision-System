@@ -8,18 +8,33 @@ import {
   fulfillReservation,
   getters,
   logout,
+  ownerEntry,
+  rechargeWallet,
   runOwnerAction,
   state,
 } from "../stores/parkingStore";
 import { zhMoney, zhText } from "../utils/localize";
 import { aiChat, aiStatusLabel } from "../services/aiClient";
 
-const currentOrder = getters.currentOrder;
+// Strictly the signed-in owner's own active order (pulled from /api/owner).
+const currentOrder = computed(
+  () => getters.ownerActiveOrder.value || state.owner.orders[0] || null,
+);
+const myVehicles = computed(() => state.owner.vehicles);
+const history = computed(() => getters.ownerHistory.value);
+const hasActiveOrder = computed(() => Boolean(getters.ownerActiveOrder.value));
+const checkInError = ref("");
+
+async function doCheckIn(plate) {
+  checkInError.value = "";
+  const result = await ownerEntry(plate);
+  if (!result.ok) checkInError.value = result.error || "入场失败";
+}
 const pageRoute = useVueRoute();
 const router = useRouter();
-const validTabs = ["vehicle", "navigation", "reserve", "assistant"];
+const validTabs = ["vehicle", "wallet", "navigation", "reserve", "assistant"];
 const activeTab = ref(validTabs.includes(pageRoute.query.tab) ? pageRoute.query.tab : "vehicle");
-const ownerName = computed(() => state.auth.user?.username || "车主");
+const ownerName = computed(() => state.auth.user?.displayName || state.auth.user?.username || "车主");
 
 function doLogout() {
   logout();
@@ -28,6 +43,8 @@ function doLogout() {
 
 const tabTitle = computed(() => {
   switch (activeTab.value) {
+    case "wallet":
+      return "我的钱包";
     case "navigation":
       return "室内导航";
     case "reserve":
@@ -38,6 +55,36 @@ const tabTitle = computed(() => {
       return "我的车辆";
   }
 });
+
+const wallet = computed(() => state.owner.wallet);
+const walletBalance = computed(() => Number(state.owner.wallet?.balance ?? state.owner.profile?.balance ?? 0));
+const discountPercent = computed(() => {
+  const rate = Number(state.owner.wallet?.discountRate ?? 1);
+  return rate < 1 ? Math.round((1 - rate) * 100) : 0;
+});
+const walletTransactions = computed(() => state.owner.wallet?.transactions || []);
+const rechargeAmount = ref(50);
+const rechargeBusy = ref(false);
+const walletNotice = ref("");
+const walletError = ref("");
+const actionError = ref("");
+
+const txLabels = { WALLET: "停车扣款", CASH: "现金结算", RECHARGE: "钱包充值", AUTO_SETTLEMENT: "自动结算" };
+
+async function doRecharge() {
+  walletError.value = "";
+  walletNotice.value = "";
+  const amount = Number(rechargeAmount.value);
+  if (!amount || amount <= 0) {
+    walletError.value = "请输入有效的充值金额";
+    return;
+  }
+  rechargeBusy.value = true;
+  const result = await rechargeWallet(amount);
+  rechargeBusy.value = false;
+  if (result.ok) walletNotice.value = `充值 ${amount.toFixed(2)} 元成功`;
+  else walletError.value = result.error || "充值失败";
+}
 const showOverlay = ref(false);
 const timer = ref(180);
 let timerId = null;
@@ -64,6 +111,13 @@ const ownerStatus = computed(() => {
       return "待命";
   }
 });
+
+const isRetrieving = computed(() => ["RETRIEVING", "TOUCHING"].includes(currentOrder.value?.status));
+
+async function retrieveFromNav() {
+  if (!currentOrder.value || isRetrieving.value) return;
+  await doAction("retrieve");
+}
 
 const duration = computed(() => {
   if (!currentOrder.value?.entryTime) return "00:00";
@@ -97,7 +151,15 @@ async function doAction(action) {
     }, 1000);
   }
 
-  await runOwnerAction(action, currentOrder.value.orderNo);
+  actionError.value = "";
+  const result = await runOwnerAction(action, currentOrder.value.orderNo);
+  if (result && !result.ok) {
+    actionError.value = result.error || "操作失败";
+    if (action === "touch") {
+      showOverlay.value = false;
+      clearInterval(timerId);
+    }
+  }
 }
 
 async function doVip() {
@@ -170,7 +232,7 @@ async function sendChat(text) {
   chatBusy.value = false;
   await scrollChatToEnd();
 
-  // 让助手具备“动手”能力：识别明确意图后联动真实业务动作（演示闭环）。
+  // 助手识别到明确意图后，联动对应的真实业务动作，形成闭环。
   maybeRunIntent(content);
 }
 
@@ -188,12 +250,16 @@ function maybeRunIntent(text) {
 // --- 车位预约闭环 ---------------------------------------------------------
 const resForm = reactive({ plateNo: "", phone: "", energyType: "Fuel" });
 const reservations = computed(() => state.reservations.slice(0, 5));
+const resError = ref("");
 
-function submitReservation() {
-  const created = createReservation({ ...resForm });
-  if (created) {
+async function submitReservation() {
+  resError.value = "";
+  const result = await createReservation({ ...resForm });
+  if (result.ok) {
     resForm.plateNo = "";
     resForm.phone = "";
+  } else {
+    resError.value = result.error || "预约失败";
   }
 }
 
@@ -235,10 +301,14 @@ function resHint(reservation) {
               <i class="fa-regular fa-bell"></i>
             </div>
             <h2>{{ tabTitle }}</h2>
-            <div class="phone-tabs four">
+            <div class="phone-tabs five">
               <button :class="{ active: activeTab === 'vehicle' }" @click="activeTab = 'vehicle'">
                 <i class="fa-solid fa-car"></i>
                 车辆
+              </button>
+              <button :class="{ active: activeTab === 'wallet' }" @click="activeTab = 'wallet'">
+                <i class="fa-solid fa-wallet"></i>
+                钱包
               </button>
               <button :class="{ active: activeTab === 'navigation' }" @click="activeTab = 'navigation'">
                 <i class="fa-solid fa-location-arrow"></i>
@@ -256,51 +326,148 @@ function resHint(reservation) {
           </div>
 
         <template v-if="activeTab === 'vehicle'">
-          <div class="c-status-card">
-            <div class="c-status-indicator">
-              <div class="c-pulse-ring"></div>
-              <div class="c-inner-circle">{{ ownerStatus }}</div>
+          <template v-if="hasActiveOrder">
+            <div class="c-status-card">
+              <div class="c-status-indicator">
+                <div class="c-pulse-ring"></div>
+                <div class="c-inner-circle">{{ ownerStatus }}</div>
+              </div>
+              <div class="c-location"><i class="fa-solid fa-location-dot"></i> 车位 {{ slotLabel }} | {{ zhText(route.handoffZone) }}</div>
+              <div class="c-info-grid">
+                <div class="c-info-item"><span>停车时长</span><strong>{{ duration }}</strong></div>
+                <div class="c-info-item"><span>当前费用</span><strong>{{ fee }}</strong></div>
+              </div>
             </div>
-            <div class="c-location"><i class="fa-solid fa-location-dot"></i> 车位 {{ slotLabel }} | {{ zhText(route.handoffZone) }}</div>
-            <div class="c-info-grid">
-              <div class="c-info-item"><span>停车时长</span><strong>{{ duration }}</strong></div>
-              <div class="c-info-item"><span>当前费用</span><strong>{{ fee }}</strong></div>
+
+            <div class="c-actions">
+              <button class="c-btn c-btn-primary" :disabled="state.busy.ownerAction" @click="doAction('retrieve')">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                取车
+              </button>
+              <button class="c-btn c-btn-secondary" :disabled="state.busy.ownerAction" @click="doAction('touch')">
+                <i class="fa-solid fa-box-open"></i>
+                临停取物
+                <span class="c-badge">不结单</span>
+              </button>
             </div>
-          </div>
 
-          <div class="c-actions">
-            <button class="c-btn c-btn-primary" :disabled="state.busy.ownerAction" @click="doAction('retrieve')">
-              <i class="fa-solid fa-truck-ramp-box"></i>
-              取车
-            </button>
-            <button class="c-btn c-btn-secondary" :disabled="state.busy.ownerAction" @click="doAction('touch')">
-              <i class="fa-solid fa-box-open"></i>
-              临停取物
-              <span class="c-badge">不结单</span>
-            </button>
-          </div>
-
-          <div class="c-vip-card" @click="doVip">
-            <div class="c-vip-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
-            <div class="c-vip-text">
-              <h4>VIP 优先取车</h4>
-              <p>插入 AGV 队首，预计 {{ agvLabel }} 到交接区。</p>
+            <div class="c-vip-card" @click="doVip">
+              <div class="c-vip-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+              <div class="c-vip-text">
+                <h4>VIP 优先取车</h4>
+                <p>插入 AGV 队首，预计 {{ agvLabel }} 到交接区。</p>
+              </div>
+              <div class="c-vip-price">+￥5</div>
             </div>
-            <div class="c-vip-price">+￥5</div>
-          </div>
 
-          <div class="phone-secondary-action">
-            <button class="ghost-button" :disabled="state.busy.ownerAction" @click="doAction('pay')">
-              标记已支付并关闭订单
-            </button>
+            <div class="phone-secondary-action">
+              <button class="ghost-button" :disabled="state.busy.ownerAction" @click="doAction('pay')">
+                立即支付并关闭订单
+              </button>
+              <small class="pay-hint">钱包余额 ￥{{ walletBalance.toFixed(2) }}<span v-if="discountPercent">（会员 {{ discountPercent }}% 折扣）</span></small>
+            </div>
+            <p v-if="actionError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ actionError }}</p>
+          </template>
+
+          <template v-else>
+            <div class="checkin-pane">
+              <div class="checkin-intro">
+                <h3>我的车辆</h3>
+                <p>当前没有在场车辆。到达车库后选择车辆“我已到场”，系统会分配车位并开始计费。</p>
+              </div>
+              <p v-if="checkInError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ checkInError }}</p>
+              <div v-if="myVehicles.length" class="checkin-list">
+                <div v-for="v in myVehicles" :key="v.plateNo" class="checkin-item">
+                  <div class="checkin-meta">
+                    <b>{{ v.plateNo }}</b>
+                    <span>{{ v.energyType === 'EV' ? '新能源' : '燃油' }} · {{ v.membershipType || '临时' }}</span>
+                  </div>
+                  <button class="c-btn c-btn-primary checkin-btn" :disabled="state.busy.entry" @click="doCheckIn(v.plateNo)">
+                    <i class="fa-solid fa-right-to-bracket"></i> 我已到场
+                  </button>
+                </div>
+              </div>
+              <p v-else class="checkin-empty">未绑定车辆，请联系管理员添加车辆档案。</p>
+
+              <div v-if="history.length" class="checkin-history">
+                <h4>历史订单</h4>
+                <div v-for="o in history.slice(0, 6)" :key="o.orderNo" class="history-row">
+                  <span>{{ o.plateNo }} · {{ o.slotId }}</span>
+                  <b>{{ zhMoney(o.amount || 0) }}</b>
+                </div>
+              </div>
+            </div>
+          </template>
+        </template>
+
+        <template v-else-if="activeTab === 'wallet'">
+          <div class="wallet-pane">
+            <div class="wallet-card">
+              <span class="wallet-label">钱包余额</span>
+              <strong class="wallet-balance">￥{{ walletBalance.toFixed(2) }}</strong>
+              <div class="wallet-meta">
+                <span>{{ wallet?.memberLevel || state.owner.profile?.memberLevel || "标准会员" }}</span>
+                <span v-if="discountPercent" class="wallet-discount">会员 {{ discountPercent }}% 折扣</span>
+              </div>
+            </div>
+
+            <div class="wallet-recharge">
+              <h4>充值</h4>
+              <div class="recharge-presets">
+                <button v-for="amt in [20, 50, 100, 200]" :key="amt"
+                  :class="{ active: Number(rechargeAmount) === amt }" @click="rechargeAmount = amt">
+                  ￥{{ amt }}
+                </button>
+              </div>
+              <div class="recharge-row">
+                <input v-model.number="rechargeAmount" type="number" min="1" step="1" placeholder="自定义金额" />
+                <button class="c-btn c-btn-primary" :disabled="rechargeBusy" @click="doRecharge">
+                  {{ rechargeBusy ? "充值中…" : "确认充值" }}
+                </button>
+              </div>
+              <p v-if="walletNotice" class="wallet-ok"><i class="fa-solid fa-circle-check"></i> {{ walletNotice }}</p>
+              <p v-if="walletError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ walletError }}</p>
+            </div>
+
+            <div class="wallet-tx">
+              <h4>交易明细</h4>
+              <div v-if="walletTransactions.length" class="tx-list">
+                <div v-for="tx in walletTransactions" :key="tx.paymentNo" class="tx-row">
+                  <div class="tx-meta">
+                    <b>{{ txLabels[tx.method] || tx.method }}</b>
+                    <small>{{ tx.orderNo }} · {{ new Date(tx.paidAt).toLocaleString("zh-CN") }}</small>
+                  </div>
+                  <strong :class="tx.method === 'RECHARGE' ? 'tx-in' : 'tx-out'">
+                    {{ tx.method === 'RECHARGE' ? '+' : '-' }}￥{{ Number(tx.amount).toFixed(2) }}
+                  </strong>
+                </div>
+              </div>
+              <p v-else class="checkin-empty">暂无交易记录。</p>
+            </div>
           </div>
         </template>
 
         <template v-else-if="activeTab === 'navigation'">
+          <div class="nav-order-banner">
+            <div>
+              <span>当前订单 {{ currentOrder?.orderNo || "—" }}</span>
+              <b>{{ ownerStatus }} · 车位 {{ slotLabel }}</b>
+            </div>
+            <button
+              v-if="!isRetrieving"
+              class="nav-cta"
+              :disabled="state.busy.ownerAction || !currentOrder"
+              @click="retrieveFromNav"
+            >
+              <i class="fa-solid fa-truck-ramp-box"></i> 发起取车
+            </button>
+            <span v-else class="nav-live"><i class="fa-solid fa-circle"></i> 接车中</span>
+          </div>
+
           <div class="nav-summary">
-            <span>距离 {{ zhText(route.handoffZone) }}</span>
+            <span>{{ isRetrieving ? "距" : "" }}{{ zhText(route.handoffZone) }}{{ isRetrieving ? "还剩" : "全程" }}</span>
             <strong>{{ route.remainingMeters }}m</strong>
-            <small>车主 {{ etaLabel }}到达，AGV {{ agvLabel }}到达</small>
+            <small>{{ isRetrieving ? `车主 ${etaLabel}到达，AGV ${agvLabel}到达` : "发起取车后将为你规划接车路线" }}</small>
           </div>
 
           <div class="phone-map">
@@ -344,6 +511,7 @@ function resHint(reservation) {
               </select>
               <button class="c-btn c-btn-primary" type="submit"><i class="fa-solid fa-lock"></i> 预约锁位</button>
             </form>
+            <p v-if="resError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ resError }}</p>
             <div v-if="reservations.length" class="res-list-m">
               <div v-for="r in reservations" :key="r.id" class="res-item-m">
                 <div class="res-meta">
@@ -608,16 +776,249 @@ function resHint(reservation) {
   padding: 24px 0;
 }
 
+.checkin-pane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.checkin-intro h3 {
+  margin: 0 0 4px;
+  color: var(--text-main);
+  font-size: 17px;
+}
+
+.checkin-intro p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.checkin-error {
+  margin: 0;
+  color: var(--danger-red);
+  font-size: 13px;
+}
+
+.checkin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.checkin-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+}
+
+.checkin-meta b {
+  display: block;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.checkin-meta span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.checkin-btn {
+  width: auto;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+.checkin-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 18px 0;
+}
+
+.checkin-history h4 {
+  margin: 8px 0 8px;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-color);
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.history-row b {
+  color: var(--text-main);
+}
+
 .phone-tabs.four {
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 }
 
-.phone-tabs.four button {
+.phone-tabs.five {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+}
+
+.phone-tabs.four button,
+.phone-tabs.five button {
   flex-direction: column;
   gap: 3px;
   font-size: 11px;
   min-height: 44px;
+}
+
+.phone-tabs.five button {
+  font-size: 10px;
+}
+
+.pay-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.wallet-pane {
+  padding: 1.2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wallet-card {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wallet-label {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.wallet-balance {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.wallet-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.wallet-discount {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.wallet-recharge h4,
+.wallet-tx h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.recharge-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.recharge-presets button {
+  padding: 8px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.recharge-presets button.active {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.recharge-row {
+  display: flex;
+  gap: 8px;
+}
+
+.recharge-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.wallet-ok {
+  margin: 8px 0 0;
+  color: #16a34a;
+  font-size: 13px;
+}
+
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.tx-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tx-meta small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.tx-in {
+  color: #16a34a;
+}
+
+.tx-out {
+  color: #dc2626;
 }
 
 .phone-tabs {
@@ -657,8 +1058,71 @@ function resHint(reservation) {
   width: 100%;
 }
 
+.nav-order-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 1.5rem 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  box-shadow: 0 16px 32px -24px rgba(79, 70, 229, 0.9);
+}
+
+.nav-order-banner span {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.nav-order-banner b {
+  display: block;
+  margin-top: 3px;
+  font-size: 15px;
+}
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nav-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-live i {
+  font-size: 8px;
+  animation: navPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes navPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
 .nav-summary {
-  margin: -2.4rem 1.5rem 1rem;
+  margin: 1rem 1.5rem 1rem;
   padding: 18px;
   border-radius: 18px;
   background: #fff;

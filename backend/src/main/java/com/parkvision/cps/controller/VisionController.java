@@ -22,4 +22,9 @@ public class VisionController {
     public ApiResponse<VisionResult> infer(@RequestBody(required = false) VisionRequest request) {
         return ApiResponse.ok(visionService.infer(request));
     }
+
+    @PostMapping("/gate-entry")
+    public ApiResponse<VisionResult> gateEntry(@RequestBody(required = false) VisionRequest request) {
+        return ApiResponse.ok(visionService.gateEntry(request));
+    }
 }

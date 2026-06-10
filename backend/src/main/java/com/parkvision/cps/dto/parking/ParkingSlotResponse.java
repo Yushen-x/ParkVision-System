@@ -26,6 +26,7 @@ public record ParkingSlotResponse(
             case OCCUPIED -> "blue";
             case CHARGING -> "green";
             case BUFFER -> "amber";
+            case RESERVED -> "violet";
             case MAINTENANCE -> "red";
         };
     }

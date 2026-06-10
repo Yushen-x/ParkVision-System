@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,8 +28,11 @@ public class OrderController {
     }
 
     @PostMapping("/entry")
-    public ApiResponse<ParkingOrder> simulateEntry() {
-        return ApiResponse.created(orderService.simulateEntry());
+    public ApiResponse<ParkingOrder> entry(@RequestParam(required = false) String plateNo) {
+        ParkingOrder order = (plateNo == null || plateNo.isBlank())
+                ? orderService.simulateEntry()
+                : orderService.entryForPlate(plateNo);
+        return ApiResponse.created(order);
     }
 
     @PostMapping("/{orderNo}/retrieve")

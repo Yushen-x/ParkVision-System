@@ -1,8 +1,8 @@
 const dictionary = {
-  "Checking backend": "检查后端连接",
+  "Checking backend": "检查服务连接",
   Connecting: "正在连接",
-  "Backend connected": "后端已连接",
-  "Fallback mode": "本地兜底模式",
+  "Backend connected": "服务已连接",
+  "Fallback mode": "本地数据模式",
 
   empty: "空闲",
   occupied: "已停放",
@@ -241,7 +241,7 @@ const dictionary = {
   "Barrier controller and AGV fleet gateway heartbeats are stable": "道闸控制器与 AGV 网关心跳稳定",
   "Operational cache and report fan-out are synchronized": "运营缓存与报表分发数据已同步",
   "Invoice and settlement projection jobs are completing on schedule": "发票与结算投影任务按计划完成",
-  "Camera, gate, charger, and AGV telemetry simulation loops are healthy": "摄像头、闸机、充电桩与 AGV 遥测模拟循环正常",
+  "Camera, gate, charger, and AGV telemetry simulation loops are healthy": "摄像头、闸机、充电桩与 AGV 遥测采集循环正常",
   "South gate edge camera with OCR and handoff-zone intrusion ROI": "南门边缘摄像头，支持车牌 OCR 和交接区入侵检测",
   "Transfer-bay safety camera with person intrusion alarm": "交接区安全摄像头，支持人员入侵告警",
   "North ramp camera used for outbound queue observation and secondary plate read": "北侧坡道摄像头，用于出场队列观察和二次车牌识别",
@@ -290,7 +290,7 @@ const phrasePatterns = [
   [/^AGV-(.+) entered charging standby below the configured battery threshold$/, (id) => `AGV-${id} 电量低于阈值，已进入充电待命`],
   [/^AGV-(.+) started pre-dispatch relocation from a deep-slot aisle$/, (id) => `AGV-${id} 已从深层车道启动预调度移位`],
   [/^AGV-(.+) completed a perimeter patrol cycle near Zone A$/, (id) => `AGV-${id} 已完成 A 区周界巡检`],
-  [/^Fallback state synced for (.+)$/, (plate) => `本地兜底状态已同步：${plate}`],
+  [/^Fallback state synced for (.+)$/, (plate) => `运行状态已同步：${plate}`],
 ];
 
 export function zhText(value, fallback = "暂无") {

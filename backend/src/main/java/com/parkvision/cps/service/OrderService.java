@@ -1,8 +1,6 @@
 package com.parkvision.cps.service;
 
 import com.parkvision.cps.common.BusinessException;
-import com.parkvision.cps.domain.billing.OrderBillingComponent;
-import com.parkvision.cps.domain.billing.PaymentTransaction;
 import com.parkvision.cps.domain.order.OrderStatus;
 import com.parkvision.cps.domain.dispatch.DispatchTask;
 import com.parkvision.cps.domain.order.ParkingOrder;
@@ -12,8 +10,6 @@ import com.parkvision.cps.repository.ParkVisionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -24,11 +20,13 @@ public class OrderService {
 
     private final ParkVisionRepository repository;
     private final DeviceService deviceService;
+    private final BillingService billingService;
     private final Random random = new Random();
 
-    public OrderService(ParkVisionRepository repository, DeviceService deviceService) {
+    public OrderService(ParkVisionRepository repository, DeviceService deviceService, BillingService billingService) {
         this.repository = repository;
         this.deviceService = deviceService;
+        this.billingService = billingService;
     }
 
     public List<ParkingOrder> listOrders() {
@@ -36,9 +34,55 @@ public class OrderService {
     }
 
     public ParkingOrder simulateEntry() {
+        return createEntry(PLATES.get(random.nextInt(PLATES.size())));
+    }
+
+    /**
+     * Register an entry for a specific plate (owner self check-in or admin
+     * gate registration). Rejects a plate that already has a live order so the
+     * same car cannot be parked twice.
+     */
+    public ParkingOrder entryForPlate(String plateRaw) {
+        String plate = plateRaw == null ? "" : plateRaw.trim().toUpperCase();
+        if (plate.isEmpty()) {
+            throw new BusinessException("INVALID_PLATE", "车牌不能为空");
+        }
+        boolean alreadyInside = repository.findOrders().stream()
+                .anyMatch(order -> order.getPlateNo().equalsIgnoreCase(plate)
+                        && order.getStatus() != OrderStatus.FINISHED);
+        if (alreadyInside) {
+            throw new BusinessException("ALREADY_PARKED", plate + " 已在场内，请勿重复入场");
+        }
+        return createEntry(plate);
+    }
+
+    private ParkingOrder createEntry(String plate) {
         ParkingSlot slot = repository.findFirstAvailableSlot()
                 .orElseThrow(() -> new BusinessException("NO_AVAILABLE_SLOT", "No slot is currently available"));
-        String plate = PLATES.get(random.nextInt(PLATES.size()));
+        return admit(plate, slot);
+    }
+
+    /**
+     * Admit a plate onto a specific slot (used when fulfilling a reservation that
+     * already holds the slot).
+     */
+    public ParkingOrder admitToSlot(String plateRaw, String slotId) {
+        String plate = plateRaw == null ? "" : plateRaw.trim().toUpperCase();
+        if (plate.isEmpty()) {
+            throw new BusinessException("INVALID_PLATE", "车牌不能为空");
+        }
+        boolean alreadyInside = repository.findOrders().stream()
+                .anyMatch(order -> order.getPlateNo().equalsIgnoreCase(plate)
+                        && order.getStatus() != OrderStatus.FINISHED);
+        if (alreadyInside) {
+            throw new BusinessException("ALREADY_PARKED", plate + " 已在场内，请勿重复入场");
+        }
+        ParkingSlot slot = repository.findSlotById(slotId)
+                .orElseThrow(() -> new BusinessException("SLOT_NOT_FOUND", "车位不存在: " + slotId));
+        return admit(plate, slot);
+    }
+
+    private ParkingOrder admit(String plate, ParkingSlot slot) {
         slot.setStatus(isChargingPlate(plate) ? SlotStatus.CHARGING : SlotStatus.OCCUPIED);
         repository.saveSlot(slot);
 
@@ -52,9 +96,8 @@ public class OrderService {
         );
         ParkingOrder saved = repository.saveOrder(order);
         DispatchTask inboundTask = repository.enqueueDispatchTask(
-                new DispatchTask(saved.getPlateNo(), "入场存车", "入场", "00:36", false)
+                new DispatchTask(saved.getPlateNo(), "入场存车", "入场", "00:36", false, saved.getSlotId())
         );
-        updateLeadAgv("将 " + saved.getPlateNo() + " 存入 " + saved.getSlotId(), true, "TRANSIT", 0.72, "store");
         deviceService.recordEntry(saved);
         deviceService.recordDispatchTask(inboundTask);
         return saved;
@@ -70,66 +113,19 @@ public class OrderService {
         }
         ParkingOrder saved = repository.saveOrder(order);
         if (status == OrderStatus.RETRIEVING) {
-            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "标准取车", "先到先取", "04:12", false));
-            updateLeadAgv("取车 " + saved.getPlateNo(), true, "CARRYING", 0.84, "retrieve");
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "标准取车", "先到先取", "04:12", false, saved.getSlotId()));
             deviceService.recordDispatchTask(task);
         } else if (status == OrderStatus.TOUCHING) {
-            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "临停取物", "临取", "02:10", false));
-            updateLeadAgv("交接区送车 " + saved.getPlateNo(), true, "CARRYING", 0.68, "handoff");
+            DispatchTask task = repository.enqueueDispatchTask(new DispatchTask(saved.getPlateNo(), "临停取物", "临取", "02:10", false, saved.getSlotId()));
             deviceService.recordDispatchTask(task);
         } else if (status == OrderStatus.FINISHED) {
-            updateLeadAgv("放行走廊已清空", false, "IDLE", 0.00, "hold");
             deviceService.recordOrderClosed(saved);
         }
         return saved;
     }
 
     private void closeAndSettleOrder(ParkingOrder order) {
-        LocalDateTime settledAt = LocalDateTime.now();
-        int durationMinutes = (int) Math.max(30, Duration.between(order.getEntryTime(), settledAt).toMinutes());
-        BigDecimal amount = calculateAmount(order, durationMinutes);
-
-        order.setExitTime(settledAt);
-        order.setPaidAt(settledAt);
-        order.setPaymentStatus("PAID");
-        order.setPaymentMethod("AUTO_SETTLEMENT");
-        order.setDurationMinutes(durationMinutes);
-        order.setDiscountAmount(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
-        order.setAmount(amount);
-
-        repository.savePaymentTransaction(new PaymentTransaction(
-                "PAY-" + order.getOrderNo(),
-                order.getOrderNo(),
-                order.getPlateNo(),
-                amount,
-                "AUTO_SETTLEMENT",
-                "SUCCESS",
-                settledAt
-        ));
-
-        long billedHours = (long) Math.ceil(durationMinutes / 60.0);
-        BigDecimal parkingAmount = new BigDecimal("6.00");
-        if (billedHours > 1) {
-            parkingAmount = parkingAmount.add(new BigDecimal("4.00").multiply(BigDecimal.valueOf(billedHours - 1)));
-        }
-        repository.saveBillingComponent(new OrderBillingComponent(
-                "BILL-" + order.getOrderNo() + "-PARKING",
-                order.getOrderNo(),
-                "PARKING",
-                billedHours + " billed parking hour(s)",
-                parkingAmount.setScale(2, RoundingMode.HALF_UP),
-                settledAt
-        ));
-        if (isChargingPlate(order.getPlateNo())) {
-            repository.saveBillingComponent(new OrderBillingComponent(
-                    "BILL-" + order.getOrderNo() + "-CHARGING",
-                    order.getOrderNo(),
-                    "CHARGING",
-                    "EV charging service package",
-                    new BigDecimal("12.50"),
-                    settledAt
-            ));
-        }
+        billingService.settle(order);
     }
 
     private void syncSlotState(ParkingOrder order, OrderStatus status) {
@@ -147,33 +143,5 @@ public class OrderService {
 
     private boolean isChargingPlate(String plate) {
         return plate.startsWith("SH-D");
-    }
-
-    private BigDecimal calculateAmount(ParkingOrder order) {
-        int minutes = (int) Math.max(30, Duration.between(order.getEntryTime(), LocalDateTime.now()).toMinutes());
-        return calculateAmount(order, minutes);
-    }
-
-    private BigDecimal calculateAmount(ParkingOrder order, int durationMinutes) {
-        long billedHours = (long) Math.ceil(durationMinutes / 60.0);
-        BigDecimal amount = new BigDecimal("6.00");
-        if (billedHours > 1) {
-            amount = amount.add(new BigDecimal("4.00").multiply(BigDecimal.valueOf(billedHours - 1)));
-        }
-        if (isChargingPlate(order.getPlateNo())) {
-            amount = amount.add(new BigDecimal("12.50"));
-        }
-        return amount.setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private void updateLeadAgv(String task, boolean loaded, String mode, double velocityMps, String command) {
-        repository.findAgvUnits().stream().findFirst().ifPresent(agv -> {
-            agv.setTask(task);
-            agv.setLoaded(loaded);
-            agv.setMode(mode);
-            agv.setVelocityMps(velocityMps);
-            agv.setLastCommand(command);
-            repository.saveAgvUnit(agv);
-        });
     }
 }

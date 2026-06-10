@@ -18,12 +18,16 @@ import com.parkvision.cps.domain.order.OrderStatus;
 import com.parkvision.cps.domain.order.ParkingOrder;
 import com.parkvision.cps.domain.parking.ParkingSlot;
 import com.parkvision.cps.domain.parking.SlotStatus;
+import com.parkvision.cps.domain.reservation.Reservation;
+import com.parkvision.cps.domain.vision.RecognitionEvent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -146,6 +150,71 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     }
 
     @Override
+    public List<Reservation> findReservations() {
+        return jdbcTemplate.query(
+                "select id, plate_no, phone, energy_type, slot_id, status, owner_id, order_no, created_at, expires_at from reservation order by created_at desc",
+                this::mapReservation
+        );
+    }
+
+    @Override
+    public Optional<Reservation> findReservationById(String id) {
+        return queryOne(
+                "select id, plate_no, phone, energy_type, slot_id, status, owner_id, order_no, created_at, expires_at from reservation where id = ?",
+                this::mapReservation,
+                id
+        );
+    }
+
+    @Override
+    public Reservation saveReservation(Reservation reservation) {
+        upsert(
+                "update reservation set plate_no = ?, phone = ?, energy_type = ?, slot_id = ?, status = ?, owner_id = ?, order_no = ?, created_at = ?, expires_at = ? where id = ?",
+                "insert into reservation (id, plate_no, phone, energy_type, slot_id, status, owner_id, order_no, created_at, expires_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        reservation.plateNo(),
+                        reservation.phone(),
+                        reservation.energyType(),
+                        reservation.slotId(),
+                        reservation.status(),
+                        reservation.ownerId(),
+                        reservation.orderNo(),
+                        Timestamp.valueOf(reservation.createdAt()),
+                        Timestamp.valueOf(reservation.expiresAt()),
+                        reservation.id()
+                },
+                new Object[]{
+                        reservation.id(),
+                        reservation.plateNo(),
+                        reservation.phone(),
+                        reservation.energyType(),
+                        reservation.slotId(),
+                        reservation.status(),
+                        reservation.ownerId(),
+                        reservation.orderNo(),
+                        Timestamp.valueOf(reservation.createdAt()),
+                        Timestamp.valueOf(reservation.expiresAt())
+                }
+        );
+        return reservation;
+    }
+
+    private Reservation mapReservation(ResultSet rs, int rowNum) throws SQLException {
+        return new Reservation(
+                rs.getString("id"),
+                rs.getString("plate_no"),
+                rs.getString("phone"),
+                rs.getString("energy_type"),
+                rs.getString("slot_id"),
+                rs.getString("status"),
+                rs.getString("owner_id"),
+                rs.getString("order_no"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getTimestamp("expires_at").toLocalDateTime()
+        );
+    }
+
+    @Override
     public List<CustomerAccount> findCustomerAccounts() {
         return jdbcTemplate.query(
                 "select owner_id, owner_name, phone_masked, member_level, account_status, balance, created_at from customer_account order by owner_id",
@@ -213,6 +282,11 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
                 }
         );
         return vehicle;
+    }
+
+    @Override
+    public void deleteVehicleProfile(String plateNo) {
+        jdbcTemplate.update("delete from vehicle_profile where plate_no = ?", plateNo);
     }
 
     @Override
@@ -318,18 +392,62 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
         return alert;
     }
 
+    private static final String PRICING_COLUMNS =
+            "id, rule_name, vehicle_type, free_minutes, first_hour_fee, hourly_fee, daily_cap, peak_start_hour, peak_end_hour, peak_multiplier, status";
+
+    private PricingRule mapPricingRule(ResultSet rs, int rowNum) throws SQLException {
+        return new PricingRule(
+                rs.getString("id"),
+                rs.getString("rule_name"),
+                rs.getString("vehicle_type"),
+                rs.getInt("free_minutes"),
+                rs.getBigDecimal("first_hour_fee"),
+                rs.getBigDecimal("hourly_fee"),
+                rs.getBigDecimal("daily_cap"),
+                rs.getInt("peak_start_hour"),
+                rs.getInt("peak_end_hour"),
+                rs.getBigDecimal("peak_multiplier"),
+                rs.getString("status")
+        );
+    }
+
     @Override
     public List<PricingRule> findPricingRules() {
         return jdbcTemplate.query(
-                "select rule_name, time_range, method, extra_policy, status from pricing_rule order by rule_name",
-                (rs, rowNum) -> new PricingRule(
-                        rs.getString("rule_name"),
-                        rs.getString("time_range"),
-                        rs.getString("method"),
-                        rs.getString("extra_policy"),
-                        rs.getString("status")
-                )
+                "select " + PRICING_COLUMNS + " from pricing_rule order by rule_name",
+                this::mapPricingRule
         );
+    }
+
+    @Override
+    public Optional<PricingRule> findPricingRuleById(String id) {
+        return queryOne(
+                "select " + PRICING_COLUMNS + " from pricing_rule where id = ?",
+                this::mapPricingRule,
+                id
+        );
+    }
+
+    @Override
+    public PricingRule savePricingRule(PricingRule rule) {
+        upsert(
+                "update pricing_rule set rule_name = ?, vehicle_type = ?, free_minutes = ?, first_hour_fee = ?, hourly_fee = ?, daily_cap = ?, peak_start_hour = ?, peak_end_hour = ?, peak_multiplier = ?, status = ? where id = ?",
+                "insert into pricing_rule (rule_name, vehicle_type, free_minutes, first_hour_fee, hourly_fee, daily_cap, peak_start_hour, peak_end_hour, peak_multiplier, status, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        rule.name(), rule.vehicleType(), rule.freeMinutes(), rule.firstHourFee(), rule.hourlyFee(),
+                        rule.dailyCap(), rule.peakStartHour(), rule.peakEndHour(), rule.peakMultiplier(), rule.status(), rule.id()
+                },
+                new Object[]{
+                        rule.name(), rule.vehicleType(), rule.freeMinutes(), rule.firstHourFee(), rule.hourlyFee(),
+                        rule.dailyCap(), rule.peakStartHour(), rule.peakEndHour(), rule.peakMultiplier(), rule.status(), rule.id()
+                }
+        );
+        return rule;
+    }
+
+    @Override
+    public void deletePricingRule(String id) {
+        jdbcTemplate.update("delete from pricing_rule where id = ?", id);
     }
 
     @Override
@@ -343,6 +461,84 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
                         rs.getString("valid_until"),
                         rs.getString("remark")
                 )
+        );
+    }
+
+    @Override
+    public Optional<AccessListItem> findAccessListItem(String plateNo) {
+        if (plateNo == null) {
+            return Optional.empty();
+        }
+        return queryOne(
+                "select plate_no, list_type, user_type, valid_until, remark from access_list_item where upper(plate_no) = upper(?)",
+                (rs, rowNum) -> new AccessListItem(
+                        rs.getString("plate_no"),
+                        rs.getString("list_type"),
+                        rs.getString("user_type"),
+                        rs.getString("valid_until"),
+                        rs.getString("remark")
+                ),
+                plateNo
+        );
+    }
+
+    @Override
+    public List<RecognitionEvent> findRecognitionEvents() {
+        return jdbcTemplate.query(
+                "select id, camera_id, plate_no, confidence, energy_type, list_type, decision, reason, order_no, intrusion, created_at "
+                        + "from recognition_event order by created_at desc",
+                this::mapRecognitionEvent
+        );
+    }
+
+    @Override
+    public RecognitionEvent saveRecognitionEvent(RecognitionEvent event) {
+        upsert(
+                "update recognition_event set camera_id = ?, plate_no = ?, confidence = ?, energy_type = ?, list_type = ?, decision = ?, reason = ?, order_no = ?, intrusion = ?, created_at = ? where id = ?",
+                "insert into recognition_event (id, camera_id, plate_no, confidence, energy_type, list_type, decision, reason, order_no, intrusion, created_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                new Object[]{
+                        event.cameraId(),
+                        event.plateNo(),
+                        event.confidence(),
+                        event.energyType(),
+                        event.listType(),
+                        event.decision(),
+                        event.reason(),
+                        event.orderNo(),
+                        event.intrusion(),
+                        Timestamp.valueOf(event.createdAt()),
+                        event.id()
+                },
+                new Object[]{
+                        event.id(),
+                        event.cameraId(),
+                        event.plateNo(),
+                        event.confidence(),
+                        event.energyType(),
+                        event.listType(),
+                        event.decision(),
+                        event.reason(),
+                        event.orderNo(),
+                        event.intrusion(),
+                        Timestamp.valueOf(event.createdAt())
+                }
+        );
+        return event;
+    }
+
+    private RecognitionEvent mapRecognitionEvent(ResultSet rs, int rowNum) throws SQLException {
+        return new RecognitionEvent(
+                rs.getString("id"),
+                rs.getString("camera_id"),
+                rs.getString("plate_no"),
+                rs.getDouble("confidence"),
+                rs.getString("energy_type"),
+                rs.getString("list_type"),
+                rs.getString("decision"),
+                rs.getString("reason"),
+                rs.getString("order_no"),
+                rs.getBoolean("intrusion"),
+                rs.getTimestamp("created_at").toLocalDateTime()
         );
     }
 
@@ -368,6 +564,39 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
                 new Object[]{node.name(), node.latency(), node.detail(), node.level()}
         );
         return node;
+    }
+
+    @Override
+    public List<com.parkvision.cps.domain.admin.AuditLog> findAuditLogs(int limit) {
+        return jdbcTemplate.query(
+                "select id, username, role, method, path, status, ip, created_at from audit_log order by id desc limit ?",
+                (rs, rowNum) -> new com.parkvision.cps.domain.admin.AuditLog(
+                        rs.getLong("id"),
+                        rs.getString("username"),
+                        rs.getString("role"),
+                        rs.getString("method"),
+                        rs.getString("path"),
+                        rs.getInt("status"),
+                        rs.getString("ip"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
+                ),
+                limit
+        );
+    }
+
+    @Override
+    public com.parkvision.cps.domain.admin.AuditLog saveAuditLog(com.parkvision.cps.domain.admin.AuditLog log) {
+        jdbcTemplate.update(
+                "insert into audit_log (username, role, method, path, status, ip, created_at) values (?, ?, ?, ?, ?, ?, ?)",
+                log.username(),
+                log.role(),
+                log.method(),
+                log.path(),
+                log.status(),
+                log.ip(),
+                Timestamp.valueOf(log.createdAt() == null ? LocalDateTime.now() : log.createdAt())
+        );
+        return log;
     }
 
     @Override
@@ -421,27 +650,77 @@ public class JdbcParkVisionRepository implements ParkVisionRepository {
     @Override
     public List<DispatchTask> findDispatchQueue() {
         return jdbcTemplate.query(
-                "select plate_no, task_type, tag_name, wait_time, vip from dispatch_task order by created_at desc, task_id desc",
-                (rs, rowNum) -> new DispatchTask(
-                        rs.getString("plate_no"),
-                        rs.getString("task_type"),
-                        rs.getString("tag_name"),
-                        rs.getString("wait_time"),
-                        rs.getBoolean("vip")
-                )
+                "select task_id, plate_no, task_type, tag_name, wait_time, vip, status, progress, slot_id, agv_id, created_at, updated_at "
+                        + "from dispatch_task order by case status when 'IN_PROGRESS' then 0 when 'QUEUED' then 1 else 2 end, vip desc, created_at desc, task_id desc",
+                this::mapDispatchTask
+        );
+    }
+
+    private DispatchTask mapDispatchTask(ResultSet rs, int rowNum) throws SQLException {
+        return new DispatchTask(
+                rs.getLong("task_id"),
+                rs.getString("plate_no"),
+                rs.getString("task_type"),
+                rs.getString("tag_name"),
+                rs.getString("wait_time"),
+                rs.getBoolean("vip"),
+                rs.getString("status"),
+                rs.getInt("progress"),
+                rs.getString("slot_id"),
+                rs.getString("agv_id"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getTimestamp("updated_at").toLocalDateTime()
         );
     }
 
     @Override
     public DispatchTask enqueueDispatchTask(DispatchTask task) {
+        LocalDateTime now = LocalDateTime.now();
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "insert into dispatch_task (plate_no, task_type, tag_name, wait_time, vip, status, progress, slot_id, agv_id, created_at, updated_at) "
+                            + "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    new String[]{"task_id"});
+            ps.setString(1, task.getPlateNo());
+            ps.setString(2, task.getType());
+            ps.setString(3, task.getTag());
+            ps.setString(4, task.getWait());
+            ps.setBoolean(5, task.isVip());
+            ps.setString(6, task.getStatus());
+            ps.setInt(7, task.getProgress());
+            ps.setString(8, task.getSlotId());
+            ps.setString(9, task.getAgvId());
+            ps.setTimestamp(10, Timestamp.valueOf(now));
+            ps.setTimestamp(11, Timestamp.valueOf(now));
+            return ps;
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            task.setId(key.longValue());
+        }
+        return task;
+    }
+
+    @Override
+    public DispatchTask saveDispatchTask(DispatchTask task) {
+        if (task.getId() == null) {
+            return enqueueDispatchTask(task);
+        }
+        task.setUpdatedAt(LocalDateTime.now());
         jdbcTemplate.update(
-                "insert into dispatch_task (plate_no, task_type, tag_name, wait_time, vip, created_at) values (?, ?, ?, ?, ?, ?)",
+                "update dispatch_task set plate_no = ?, task_type = ?, tag_name = ?, wait_time = ?, vip = ?, status = ?, progress = ?, slot_id = ?, agv_id = ?, updated_at = ? where task_id = ?",
                 task.getPlateNo(),
                 task.getType(),
                 task.getTag(),
                 task.getWait(),
                 task.isVip(),
-                Timestamp.valueOf(LocalDateTime.now())
+                task.getStatus(),
+                task.getProgress(),
+                task.getSlotId(),
+                task.getAgvId(),
+                Timestamp.valueOf(task.getUpdatedAt()),
+                task.getId()
         );
         return task;
     }

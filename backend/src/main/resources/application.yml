@@ -15,6 +15,8 @@ spring:
   sql:
     init:
       mode: always
+      platform: ${PARKVISION_SQL_PLATFORM:h2}
+      schema-locations: optional:classpath:schema-${PARKVISION_SQL_PLATFORM:h2}.sql
   h2:
     console:
       enabled: true
@@ -29,8 +31,14 @@ management:
 parkvision:
   persistence:
     mode: ${PARKVISION_PERSISTENCE_MODE:jdbc}
+  security:
+    jwt:
+      secret: ${PARKVISION_JWT_SECRET:parkvision-cps-demo-secret-key-please-override-in-production-0123456789}
+      expiration-minutes: ${PARKVISION_JWT_EXPIRATION_MINUTES:720}
   ai:
     inference-mode: ${PARKVISION_AI_INFERENCE_MODE:device-simulated}
   devices:
     simulation-enabled: ${PARKVISION_DEVICE_SIMULATION_ENABLED:true}
     simulation-interval-ms: ${PARKVISION_DEVICE_SIMULATION_INTERVAL_MS:4000}
+  twin:
+    broadcast-interval-ms: ${PARKVISION_TWIN_BROADCAST_INTERVAL_MS:1000}

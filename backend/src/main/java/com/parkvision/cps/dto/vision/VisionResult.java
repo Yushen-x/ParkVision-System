@@ -6,6 +6,11 @@ public record VisionResult(
         String plate,
         double confidence,
         boolean intrusion,
-        String action
+        String action,
+        String energyType,
+        String listType,
+        String decision,
+        String reason,
+        String orderNo
 ) {
 }

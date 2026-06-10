@@ -1059,7 +1059,7 @@ function selectPick(pick, point) {
       actions: occupied
         ? [{ label: "取车出库", icon: "fa-car-side", fn: () => playScenario("retrieve", pick.index) },
            { label: "临停取物", icon: "fa-box-open", fn: () => playScenario("touch", pick.index) }]
-        : [{ label: "模拟存车", icon: "fa-arrow-right-to-bracket", fn: () => playScenario("storage", pick.index) }],
+        : [{ label: "存车入库", icon: "fa-arrow-right-to-bracket", fn: () => playScenario("storage", pick.index) }],
       anchor: point.clone(),
     };
   } else if (pick.kind === "charger") {
@@ -1450,10 +1450,10 @@ onBeforeUnmount(() => {
     <aside class="twin-side-panel">
       <article class="surface twin-demo-card">
         <div class="section-head compact">
-          <h2>立体调度演示</h2>
+          <h2>立体调度联动</h2>
           <span class="demo-state" :class="{ live: demoPlaying }">
             <i class="fa-solid" :class="demoPlaying ? 'fa-circle-play' : 'fa-circle-pause'"></i>
-            {{ demoPlaying ? "演示中" : "待触发" }}
+            {{ demoPlaying ? "运行中" : "待触发" }}
           </span>
         </div>
         <div class="demo-switcher">
@@ -1483,7 +1483,7 @@ onBeforeUnmount(() => {
           <i class="fa-solid" :class="demoPlaying ? demoScenario.icon : 'fa-hand-pointer'"></i>
           <div>
             <strong>{{ demoPlaying ? demoStep.label : "点击场景或场景中的车位播放" }}</strong>
-            <span>{{ demoPlaying ? demoStep.note : "也会随车主端取车 / 临停取物、模拟入场等真实操作自动播放一次。" }}</span>
+            <span>{{ demoPlaying ? demoStep.note : "也会随车主端取车 / 临停取物、登记入场等真实操作自动播放一次。" }}</span>
           </div>
         </div>
       </article>

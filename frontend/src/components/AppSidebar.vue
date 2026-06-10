@@ -29,7 +29,7 @@ const navItems = [
       <div class="brand-mark">PV</div>
       <div>
         <strong>ParkVision</strong>
-        <span>智能停车履约演示系统</span>
+        <span>智能停车履约管理系统</span>
       </div>
     </div>
     <nav class="nav-list" aria-label="主导航">
@@ -43,7 +43,7 @@ const navItems = [
         <div class="sidebar-user-info">
           <span class="sidebar-user-avatar"><i class="fa-solid" :class="currentUser.role === 'admin' ? 'fa-user-shield' : 'fa-user'"></i></span>
           <div>
-            <strong>{{ currentUser.username }}</strong>
+            <strong>{{ currentUser.displayName || currentUser.username }}</strong>
             <span>{{ currentUser.role === "admin" ? "管理端" : "车主端" }}</span>
           </div>
         </div>
