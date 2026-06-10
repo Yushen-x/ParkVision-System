@@ -519,6 +519,10 @@ public class FallbackParkVisionRepository implements ParkVisionRepository {
         accessList.add(new AccessListItem("SH-H3819", "白名单", "夜间套餐用户", "2026-12-01", "自动应用夜间封顶"));
         accessList.add(new AccessListItem("SU-A7005", "普通名单", "临时访客", "单次订单", "已申请发票"));
         accessList.add(new AccessListItem("SH-X2204", "黑名单", "多次超时离场", "人工复核", "出场需确认"));
+        // Real plates the local HyperLPR model can actually read from a photo, so the
+        // gate decision (white-list auto-allow vs black-list deny) is demoable end-to-end.
+        accessList.add(new AccessListItem("沪AD07979", "白名单", "月卡用户", "2026-12-31", "自动放行"));
+        accessList.add(new AccessListItem("京AF0236", "黑名单", "欠费未结清", "人工复核", "禁止入场"));
 
         systemNodes.add(new SystemNodeStatus("Edge-Cam-01", "98ms", "南门视觉预处理节点运行正常，正在转发 OCR 元数据", "stable"));
         systemNodes.add(new SystemNodeStatus("PLC-Master-Controller", "12ms", "道闸控制器与 AGV 网关心跳稳定", "stable"));

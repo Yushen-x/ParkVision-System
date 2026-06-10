@@ -70,10 +70,11 @@ export const mockVisionResult = {
 
 export function createMockSlots() {
   const statusCycle = ["empty", "occupied", "occupied", "empty", "charging", "buffer", "occupied", "empty"];
-  const slots = Array.from({ length: 90 }, (_, index) => ({
+  // Mirror the backend seed exactly: 72 bays (A01–F12), 24 per layer.
+  const slots = Array.from({ length: 72 }, (_, index) => ({
     id: `${String.fromCharCode(65 + Math.floor(index / 12))}${String(index % 12 + 1).padStart(2, "0")}`,
     status: index === 64 ? "maintenance" : statusCycle[index % statusCycle.length],
-    layer: index < 30 ? "Shallow" : index < 60 ? "Mid" : "Deep",
+    layer: index < 24 ? "Shallow" : index < 48 ? "Mid" : "Deep",
     available: statusCycle[index % statusCycle.length] === "empty",
     renderColor: "cyan",
   }));

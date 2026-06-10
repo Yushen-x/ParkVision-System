@@ -46,7 +46,7 @@ import { state } from "../stores/parkingStore";
           <h2>车位概览</h2>
           <RouterLink class="text-button" to="/twin">打开数字孪生 ></RouterLink>
         </div>
-        <SlotGrid :slots="state.slots" />
+        <SlotGrid :slots="state.slots" :limit="state.slots.length" />
       </article>
       <article class="surface">
         <div class="section-head compact">

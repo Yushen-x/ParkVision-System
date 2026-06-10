@@ -37,6 +37,13 @@ parkvision:
       expiration-minutes: ${PARKVISION_JWT_EXPIRATION_MINUTES:720}
   ai:
     inference-mode: ${PARKVISION_AI_INFERENCE_MODE:device-simulated}
+    chat:
+      # 车主助手对话大模型：none=本地内置引擎；deepseek/openai=OpenAI 兼容接口
+      provider: ${PARKVISION_CHAT_PROVIDER:none}
+      base-url: ${PARKVISION_CHAT_BASE_URL:https://api.deepseek.com}
+      api-key: ${PARKVISION_CHAT_API_KEY:}
+      model: ${PARKVISION_CHAT_MODEL:deepseek-chat}
+      temperature: ${PARKVISION_CHAT_TEMPERATURE:0.4}
   vision:
     lpr:
       # 车牌识别引擎：none=内置引擎；hyperlpr=本地 HyperLPR 服务；baidu=百度车牌识别 OCR

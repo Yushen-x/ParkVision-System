@@ -54,11 +54,17 @@ public class DashboardService {
 
         long chargingActive = slots.stream().filter(slot -> slot.getStatus() == SlotStatus.CHARGING).count();
 
+        // Only count alerts that still need attention; resolved ("已恢复") ones drop off
+        // the KPI so the number reflects the live workload, not the all-time total.
+        long activeAlerts = repository.findAlerts().stream()
+                .filter(alert -> !"已恢复".equalsIgnoreCase(alert.status()))
+                .count();
+
         return new DashboardSummary(
                 occupancyRate,
                 (int) todayTraffic,
                 "%d/%d".formatted(agvOnline, agvs.size()),
-                repository.findAlerts().size(),
+                (int) activeAlerts,
                 totalRevenue,
                 avgWait,
                 chargingActive + " active"

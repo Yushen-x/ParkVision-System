@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { state } from "../stores/parkingStore";
@@ -20,15 +20,42 @@ const LEVELS = [
   { key: "Deep", label: "L3 深层", y: 12 },
 ];
 const LEVEL_H = 6;
-const BAYS_PER_LEVEL = 30;
-// 3 full rings; counts sum to 30, outer ring holds the most, rings clearly separated
+// Upper bound of bays drawn per level. Real placement comes from each slot's
+// `layer` field (see computePlacement), so a level renders exactly as many bays
+// as the backend reports for that layer (24 each in the seeded dataset).
+const BAYS_PER_LEVEL = 24;
+// 3 full rings; counts sum to 24 to match each level's real slot count
 const RINGS = [
-  { count: 8, R: 9 }, // 内环
-  { count: 10, R: 13.5 }, // 中环
-  { count: 12, R: 18 }, // 外环
+  { count: 6, R: 9 }, // 内环
+  { count: 8, R: 13.5 }, // 中环
+  { count: 10, R: 18 }, // 外环
 ];
 const CORRIDOR_HALF = 0.42; // front exit-corridor half-angle (~24°) kept clear of cars
 const RING_LABEL = ["内环", "中环", "外环"];
+const LAYER_INDEX = { Shallow: 0, Mid: 1, Deep: 2 };
+
+// Map every backend slot to a (level, within-level) position using its real
+// `layer` field, so the 3D tower matches the authoritative slot list one-to-one.
+let slotPlacement = []; // [globalIdx] -> { level, within }
+let placementToSlot = []; // [level][within] -> globalIdx
+function computePlacement() {
+  slotPlacement = [];
+  placementToSlot = LEVELS.map(() => []);
+  const counters = LEVELS.map(() => 0);
+  state.slots.forEach((slot, idx) => {
+    let lvl = LAYER_INDEX[slot.layer];
+    if (lvl == null) lvl = Math.min(LEVELS.length - 1, Math.floor(idx / BAYS_PER_LEVEL));
+    const within = counters[lvl]++;
+    slotPlacement[idx] = { level: lvl, within };
+    placementToSlot[lvl][within] = idx;
+  });
+}
+function levelOf(idx) {
+  return slotPlacement[idx] ? slotPlacement[idx].level : 0;
+}
+function withinOf(idx) {
+  return slotPlacement[idx] ? slotPlacement[idx].within : 0;
+}
 const RIDE = 0.45;
 const EXIT_Z = RINGS[2].R + 8;
 const HANDOFF_Z = RINGS[2].R + 4;
@@ -107,9 +134,10 @@ const gateManual = ref(false);
 const activeSlotOverride = ref(null);
 const selected = ref(null);
 const selectedScreen = ref({ x: 0, y: 0, visible: false });
-const chargeOverride = reactive({}); // idx -> boolean; persists across the 5s data refresh
+// Charging is read straight from the authoritative slot list so the twin, the
+// dashboard overview and the backend always agree.
 function isCharging(idx) {
-  return idx in chargeOverride ? chargeOverride[idx] : state.slots[idx]?.status === "charging";
+  return state.slots[idx]?.status === "charging";
 }
 
 const freeSlots = computed(() => state.slots.filter((s) => s.status === "empty").length);
@@ -546,16 +574,86 @@ function setChargerState(idx) {
   ch.screenMat.color.setHex(charging ? 0x10b981 : 0x64748b);
   ch.label.visible = charging;
 }
-function toggleCharging(idx) {
-  const slot = state.slots[idx];
-  if (!slot || slot.status === "empty" || slot.status === "maintenance") return;
-  chargeOverride[idx] = !isCharging(idx);
-  setChargerState(idx);
-}
-
 /* ------------------------------------------------------------------ *
  * Scene                                                               *
  * ------------------------------------------------------------------ */
+// Build (or rebuild) the ring turntables and their bays from the authoritative
+// slot list. Called on init and whenever the slot set changes structurally
+// (count / id / layer), so the tower stays in lock-step with the backend.
+function buildLevels() {
+  for (let L = 0; L < ringCar.length; L++) {
+    const ringsAtLevel = ringCar[L] || [];
+    for (let ri = 0; ri < ringsAtLevel.length; ri++) {
+      const grp = ringsAtLevel[ri];
+      if (grp) {
+        scene.remove(grp);
+        disposeGroup(grp);
+      }
+    }
+  }
+  ringCar.length = 0;
+  ringRot.length = 0;
+  slotPads.clear();
+  slotChargers.clear();
+  slotContent.clear();
+  lastStatusKey = "";
+  computePlacement();
+
+  for (let level = 0; level < LEVELS.length; level++) {
+    const ly = LEVELS[level].y;
+    ringCar[level] = [];
+    ringRot[level] = [];
+    for (let ri = 0; ri < RINGS.length; ri++) {
+      const grp = new THREE.Group();
+      scene.add(grp);
+      ringCar[level][ri] = grp;
+      ringRot[level][ri] = { rot: 0, tRot: 0 };
+    }
+
+    const idsForLevel = placementToSlot[level] || [];
+    idsForLevel.forEach((globalIdx, within) => {
+      const b = bayLayout(within);
+      const grp = ringCar[level][b.ring];
+      const x = Math.sin(b.angle) * b.R;
+      const z = Math.cos(b.angle) * b.R;
+
+      const pad = new THREE.Mesh(
+        new THREE.BoxGeometry(2.9, 0.1, 3.9),
+        new THREE.MeshStandardMaterial({ color: 0xf1f5fb, metalness: 0.05, roughness: 0.9 }),
+      );
+      pad.position.set(x, ly - 0.02, z);
+      pad.rotation.y = b.angle;
+      pad.receiveShadow = true;
+      pad.userData.pick = { kind: "slot", index: globalIdx };
+      grp.add(pad);
+
+      const borderMat = new THREE.LineBasicMaterial({ color: STATUS_COLOR.empty, transparent: true, opacity: 0.9 });
+      const border = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.9, 3.9)), borderMat);
+      border.rotation.x = -Math.PI / 2;
+      border.rotation.z = b.angle;
+      border.position.set(x, ly + 0.05, z);
+      grp.add(border);
+      slotPads.set(globalIdx, borderMat);
+
+      // bay-number tag floating above the spot
+      const id = state.slots[globalIdx]?.id || "--";
+      const tag = makeLabel(id, { color: "#1e293b", px: 44, bg: "rgba(255,255,255,0.9)" });
+      tag.position.set(x, ly + 2.6, z);
+      tag.scale.set(2.0, 1.0, 1);
+      tag.userData.pick = { kind: "slot", index: globalIdx };
+      grp.add(tag);
+
+      // every bay has a charging post (state shown read-only from the slot list)
+      const ch = makeCharger();
+      ch.group.position.set(x, ly, z);
+      ch.group.rotation.y = b.angle;
+      ch.group.userData.pick = { kind: "charger", index: globalIdx };
+      grp.add(ch.group);
+      slotChargers.set(globalIdx, ch);
+    });
+  }
+}
+
 function buildStaticScene() {
   const ground = new THREE.Mesh(
     new THREE.CircleGeometry(RINGS[2].R + 14, 64),
@@ -592,59 +690,9 @@ function buildStaticScene() {
     lvlLabel.position.set(0, ly + 1.2, -(RINGS[2].R + 4));
     lvlLabel.scale.set(4.4, 2.2, 1);
     scene.add(lvlLabel);
-
-    // 3 independent ring turntables per level
-    ringCar[level] = [];
-    ringRot[level] = [];
-    for (let ri = 0; ri < RINGS.length; ri++) {
-      const grp = new THREE.Group();
-      scene.add(grp);
-      ringCar[level][ri] = grp;
-      ringRot[level][ri] = { rot: 0, tRot: 0 };
-    }
-
-    for (let within = 0; within < BAYS_PER_LEVEL; within++) {
-      const globalIdx = level * BAYS_PER_LEVEL + within;
-      const b = bayLayout(within);
-      const grp = ringCar[level][b.ring];
-      const x = Math.sin(b.angle) * b.R;
-      const z = Math.cos(b.angle) * b.R;
-
-      const pad = new THREE.Mesh(
-        new THREE.BoxGeometry(2.9, 0.1, 3.9),
-        new THREE.MeshStandardMaterial({ color: 0xf1f5fb, metalness: 0.05, roughness: 0.9 }),
-      );
-      pad.position.set(x, ly - 0.02, z);
-      pad.rotation.y = b.angle;
-      pad.receiveShadow = true;
-      pad.userData.pick = { kind: "slot", index: globalIdx };
-      grp.add(pad);
-
-      const borderMat = new THREE.LineBasicMaterial({ color: STATUS_COLOR.empty, transparent: true, opacity: 0.9 });
-      const border = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.9, 3.9)), borderMat);
-      border.rotation.x = -Math.PI / 2;
-      border.rotation.z = b.angle;
-      border.position.set(x, ly + 0.05, z);
-      grp.add(border);
-      slotPads.set(globalIdx, borderMat);
-
-      // bay-number tag floating above the spot
-      const id = state.slots[globalIdx]?.id || "--";
-      const tag = makeLabel(id, { color: "#1e293b", px: 44, bg: "rgba(255,255,255,0.9)" });
-      tag.position.set(x, ly + 2.6, z);
-      tag.scale.set(2.0, 1.0, 1);
-      tag.userData.pick = { kind: "slot", index: globalIdx };
-      grp.add(tag);
-
-      // every bay has a charging post (clickable, controllable)
-      const ch = makeCharger();
-      ch.group.position.set(x, ly, z);
-      ch.group.rotation.y = b.angle;
-      ch.group.userData.pick = { kind: "charger", index: globalIdx };
-      grp.add(ch.group);
-      slotChargers.set(globalIdx, ch);
-    }
   }
+
+  buildLevels();
 
   const camList = state.devices.cameras || [];
   for (let k = 0; k < 3; k++) {
@@ -718,8 +766,8 @@ function setupLights() {
  * Carousel control — target ring to front, other rings present a gap  *
  * ------------------------------------------------------------------ */
 function setCarouselTargets(slotIdx) {
-  const L = Math.floor(slotIdx / BAYS_PER_LEVEL);
-  const b = bayLayout(slotIdx % BAYS_PER_LEVEL);
+  const L = levelOf(slotIdx);
+  const b = bayLayout(withinOf(slotIdx));
   const rr = ringRot[L];
   if (!rr) return;
   for (let ri = 0; ri < RINGS.length; ri++) {
@@ -744,8 +792,8 @@ function applyCarousels(dt) {
  * ------------------------------------------------------------------ */
 function buildCtx() {
   const idx = activeSlotOverride.value ?? demoScenario.value.slotIndex;
-  const L = Math.floor(idx / BAYS_PER_LEVEL);
-  const b = bayLayout(idx % BAYS_PER_LEVEL);
+  const L = levelOf(idx);
+  const b = bayLayout(withinOf(idx));
   const ly = LEVELS[L].y;
   return {
     idx,
@@ -933,6 +981,18 @@ watch(
   },
 );
 
+// Rebuild the tower bays when the slot set changes structurally (count / id /
+// layer) — e.g. when the live backend list replaces the initial fallback data.
+// Pure status changes don't alter this key, so they stay on the lightweight path.
+watch(
+  () => state.slots.map((s) => `${s.id}:${s.layer}`).join("|"),
+  () => {
+    if (!scene) return;
+    buildLevels();
+    syncSlots();
+  },
+);
+
 function runTower(dt, t) {
   if (!demoPlaying.value) {
     if (payloadCar) payloadCar.visible = false;
@@ -1031,8 +1091,8 @@ function onCanvasPick(ev) {
 
 function slotMeta(index) {
   const slot = state.slots[index];
-  const level = LEVELS[Math.floor(index / BAYS_PER_LEVEL)]?.label || "L1";
-  const ring = RING_LABEL[bayLayout(index % BAYS_PER_LEVEL).ring];
+  const level = LEVELS[levelOf(index)]?.label || "L1";
+  const ring = RING_LABEL[bayLayout(withinOf(index)).ring];
   const order = state.orders.find((o) => o.slotId === slot?.id);
   return { slot, level, ring, order };
 }
@@ -1076,10 +1136,7 @@ function selectPick(pick, point) {
         ["功率", "7 kW 交流"],
         ["本次电量", charging ? "12.4 kWh" : "—"],
       ],
-      actions:
-        slot && slot.status !== "empty" && slot.status !== "maintenance"
-          ? [{ label: charging ? "停止充电" : "开始充电", icon: charging ? "fa-stop" : "fa-bolt", fn: () => toggleCharging(pick.index) }]
-          : [],
+      actions: [],
       anchor: point.clone(),
     };
   } else if (pick.kind === "camera") {
@@ -1140,10 +1197,10 @@ function syncSlots() {
   lastStatusKey = key;
 
   state.slots.forEach((slot, idx) => {
-    if (idx >= LEVELS.length * BAYS_PER_LEVEL) return;
+    if (!slotPlacement[idx]) return;
     const status = slot.status || "empty";
-    const level = Math.floor(idx / BAYS_PER_LEVEL);
-    const within = idx % BAYS_PER_LEVEL;
+    const level = levelOf(idx);
+    const within = withinOf(idx);
     const b = bayLayout(within);
 
     const mat = slotPads.get(idx);

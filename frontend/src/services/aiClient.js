@@ -1,4 +1,5 @@
 import { reactive } from "vue";
+import { parkvisionApi } from "../api/parkvisionApi";
 
 /**
  * Unified, provider-agnostic AI client for ParkVision.
@@ -80,14 +81,46 @@ export function resetAiConfig() {
   return saveAiConfig({ ...DEFAULT_CONFIG });
 }
 
-/** True when a real provider is configured and the master switch is on. */
-export function isAiLive() {
+/**
+ * Server-side LLM proxy status. The backend keeps the API key (e.g. DeepSeek)
+ * and forwards chat calls, so the browser never holds the key and CORS is a
+ * non-issue. Populated by {@link probeBackendAi}.
+ */
+export const backendAi = reactive({ live: false, model: "" });
+
+/** Ask the backend whether a server-side chat model is configured. */
+export async function probeBackendAi() {
+  try {
+    const status = await parkvisionApi.aiStatus();
+    backendAi.live = Boolean(status?.live);
+    backendAi.model = status?.model || "";
+  } catch {
+    backendAi.live = false;
+  }
+  return backendAi.live;
+}
+
+/** True when the user explicitly configured a browser-side provider + key. */
+function manualLive() {
   return Boolean(aiConfig.enabled && aiConfig.provider !== "mock" && aiConfig.apiKey && aiConfig.baseURL);
 }
 
+/** True when any real model is reachable (browser config or backend proxy). */
+export function isAiLive() {
+  return manualLive() || backendAi.live;
+}
+
 export function aiStatusLabel() {
-  if (isAiLive()) return `已接入 · ${aiConfig.model || PROVIDER_PRESETS[aiConfig.provider]?.model || aiConfig.provider}`;
+  if (manualLive()) return `已接入 · ${aiConfig.model || PROVIDER_PRESETS[aiConfig.provider]?.model || aiConfig.provider}`;
+  if (backendAi.live) return `已接入 · ${backendAi.model || "大模型"}`;
   return "AI 引擎就绪";
+}
+
+async function callBackendProxy({ system, messages, temperature }) {
+  const data = await parkvisionApi.aiChat({ system, messages, temperature });
+  const text = data?.text;
+  if (typeof text !== "string" || !text) throw new Error("服务端代理无有效回复");
+  return text.trim();
 }
 
 function effectiveModel() {
@@ -234,11 +267,16 @@ export async function aiChat({ system, messages, context, signal, temperature, m
     return { text: mockAssistantReply(msgs, context), source: "mock", model: "parkvision-engine" };
   }
   try {
-    const text =
-      aiConfig.provider === "anthropic"
-        ? await callAnthropicChat({ system, messages: msgs, signal, temperature, maxTokens })
-        : await callOpenAiChat({ system, messages: msgs, signal, temperature, maxTokens });
-    return { text, source: "api", model: effectiveModel() };
+    if (manualLive()) {
+      const text =
+        aiConfig.provider === "anthropic"
+          ? await callAnthropicChat({ system, messages: msgs, signal, temperature, maxTokens })
+          : await callOpenAiChat({ system, messages: msgs, signal, temperature, maxTokens });
+      return { text, source: "api", model: effectiveModel() };
+    }
+    // Backend proxy path (server holds the key, e.g. DeepSeek).
+    const text = await callBackendProxy({ system, messages: msgs, temperature });
+    return { text, source: "api", model: backendAi.model || "大模型" };
   } catch (error) {
     return {
       text: mockAssistantReply(msgs, context),

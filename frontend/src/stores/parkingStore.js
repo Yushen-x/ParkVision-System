@@ -1,5 +1,6 @@
 import { computed, reactive } from "vue";
 import { parkvisionApi, setToken, clearToken } from "../api/parkvisionApi";
+import { probeBackendAi } from "../services/aiClient";
 import {
   mockAdminOverview,
   buildMockBillingComponents,
@@ -262,6 +263,8 @@ export async function hydrate() {
   } catch {
     state.onlineMode = "Fallback mode";
   }
+
+  void probeBackendAi();
 
   const [forecast, operational, admin] = await Promise.all([
     parkvisionApi.getForecast(),

@@ -189,6 +189,13 @@ export const parkvisionApi = {
   probeBackend() {
     return request("/dashboard/summary");
   },
+  // --- AI assistant (server-side LLM proxy) --------------------------------
+  aiStatus() {
+    return request("/ai/status");
+  },
+  aiChat(body = {}) {
+    return request("/ai/chat", { method: "POST", body: JSON.stringify(body) });
+  },
   // --- Owner self-service (scoped to the signed-in owner) -------------------
   getOwnerProfile() {
     return request("/owner/me");
