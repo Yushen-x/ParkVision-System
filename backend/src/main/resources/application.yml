@@ -47,7 +47,8 @@ parkvision:
   vision:
     lpr:
       # 车牌识别引擎：none=内置引擎；hyperlpr=本地 HyperLPR 服务；baidu=百度车牌识别 OCR
-      provider: ${PARKVISION_LPR_PROVIDER:none}
+      # 演示默认走本地 HyperLPR 真实识别（需先启动 tools/hyperlpr/server.py，start.ps1 会自动拉起）
+      provider: ${PARKVISION_LPR_PROVIDER:hyperlpr}
       hyperlpr:
         url: ${PARKVISION_HYPERLPR_URL:http://localhost:8715/recognize}
       baidu:

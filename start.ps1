@@ -2,6 +2,7 @@ param(
     [ValidateSet("dev", "preview")]
     [string]$Mode = "dev",
     [switch]$SkipBackend,
+    [switch]$SkipVision,
     [switch]$NoInstall,
     [switch]$Detached,
     [int]$FrontendPort = 5173,
@@ -14,6 +15,7 @@ $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $FrontendDir = Join-Path $ProjectRoot "frontend"
 $BackendDir = Join-Path $ProjectRoot "backend"
 $ScriptsDir = Join-Path $ProjectRoot "scripts"
+$HyperLprDir = Join-Path $ProjectRoot "tools\hyperlpr"
 $LogsDir = Join-Path $ProjectRoot "logs"
 
 New-Item -ItemType Directory -Force -Path $LogsDir | Out-Null
@@ -90,6 +92,26 @@ if (-not $NoInstall -and -not (Test-Path (Join-Path $FrontendDir "node_modules")
     Push-Location $FrontendDir
     npm install
     Pop-Location
+}
+
+if (-not $SkipVision) {
+    if (-not (Test-Command "python")) {
+        Write-Warn "Python not found. License-plate OCR will fall back to the built-in engine."
+    } elseif (Test-Port 8715) {
+        Write-Warn "Vision port 8715 is already in use. Skip HyperLPR startup."
+    } elseif (-not (Test-Path (Join-Path $HyperLprDir "server.py"))) {
+        Write-Warn "HyperLPR server.py not found. Skip vision service."
+    } else {
+        $visionOut = Join-Path $LogsDir "hyperlpr.out.log"
+        $visionErr = Join-Path $LogsDir "hyperlpr.err.log"
+        Start-LoggedProcess `
+            -Name "HyperLPR vision service (port 8715)" `
+            -FilePath "python" `
+            -ArgumentList @("server.py") `
+            -WorkingDirectory $HyperLprDir `
+            -OutFile $visionOut `
+            -ErrFile $visionErr
+    }
 }
 
 if (-not $SkipBackend) {
@@ -170,8 +192,9 @@ Write-Host "Backend:  http://localhost:$BackendPort"
 Write-Host "Logs:     $LogsDir"
 Write-Host ""
 Write-Host "Useful commands:"
-Write-Host "  .\start.ps1                 Start frontend + backend with Maven Wrapper when available"
+Write-Host "  .\start.ps1                 Start vision + backend + frontend"
 Write-Host "  .\start.ps1 -SkipBackend    Start frontend only"
+Write-Host "  .\start.ps1 -SkipVision     Start without the local HyperLPR OCR service"
 Write-Host "  .\start.ps1 -Mode preview   Build frontend and serve dist"
 Write-Host "  .\start.ps1 -Detached       Start frontend in background and write logs"
 Write-Host "  .\stop.ps1                  Stop services started on common ports"

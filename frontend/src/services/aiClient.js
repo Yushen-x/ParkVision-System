@@ -199,6 +199,59 @@ function lastUserText(messages) {
   return "";
 }
 
+// Demo-stable fixed Q&A: the quick-ask buttons (and close variants) always map
+// to a clean, on-topic answer so the recorded demo never shows an off-answer.
+// Keyword matching below still covers free-form typing as a fallback.
+function normalizeQuestion(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[\s，。、？?！!,.~·]/g, "");
+}
+
+function fixedAnswer(q, ctx) {
+  const norm = normalizeQuestion(q);
+  if (!norm) return null;
+  const free = ctx.freeCount ?? "若干";
+  const total = ctx.totalSlots ?? "—";
+  const plate = ctx.plate || "当前车辆";
+  const order = ctx.orderNo || "当前订单";
+  const fee = ctx.fee != null ? `￥${Number(ctx.fee).toFixed(2)}` : "按时段动态计算";
+
+  const FIXED_QA = [
+    {
+      keys: ["我要取车", "取车", "提车", "出库", "把车开出来"],
+      answer: `已为${order}创建取车任务，搬运台车正前往 ${plate} 所在车位，预计 1–2 分钟送达 A 区交接点。您可在“履约中枢”查看 AGV 实时进度。`,
+    },
+    {
+      keys: ["现在停车费多少", "停车费多少", "停车费", "多少钱", "费用", "收费", "账单"],
+      answer: `${order}当前预估费用 ${fee}，由“基础时段费 + 高峰系数 + 新能源/会员调整”动态合成。明细可在“动态计费”查看，支付后自动从钱包扣款。`,
+    },
+    {
+      keys: ["还有空位吗", "有空位吗", "有位吗", "空位", "车位", "停哪"],
+      answer: `当前还有 ${free}/${total} 个空闲车位。新能源车会优先匹配带充电桩的车位，入场时由车牌识别自动分配，无需手动选位。`,
+    },
+    {
+      keys: ["帮我vip优先取车", "vip优先取车", "vip优先", "vip", "优先取车", "插队", "加急"],
+      answer: `已为${order}申请 VIP 优先取车，任务已插入调度队首，高峰期可优先放行，预计较普通取车提前约 50%。`,
+    },
+    {
+      keys: ["临停取物", "临时取物", "拿东西", "拿个东西", "取物"],
+      answer: `临停取物任务已下发，车辆会被调度到交接区且计费会话保持开启；办完后系统会自动回送复位入库。`,
+    },
+    {
+      keys: ["充电", "电量", "续航"],
+      answer: `本库每个车位均配充电桩。${plate} 若为新能源车，入库后可一键开启充电，费用并入停车账单，可在“动态计费”查看明细。`,
+    },
+  ];
+
+  for (const item of FIXED_QA) {
+    if (item.keys.some((k) => norm.includes(normalizeQuestion(k)))) {
+      return item.answer;
+    }
+  }
+  return null;
+}
+
 function mockAssistantReply(messages, context = {}) {
   const q = lastUserText(messages);
   const ctx = context || {};
@@ -207,6 +260,9 @@ function mockAssistantReply(messages, context = {}) {
   const plate = ctx.plate || "当前车辆";
   const order = ctx.orderNo || "当前订单";
   const fee = ctx.fee != null ? `￥${Number(ctx.fee).toFixed(2)}` : "按时段动态计算";
+
+  const fixed = fixedAnswer(q, ctx);
+  if (fixed) return fixed;
 
   const has = (...kw) => kw.some((k) => q.includes(k));
 
