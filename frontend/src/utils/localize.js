@@ -166,6 +166,8 @@ const dictionary = {
   AUTO_SETTLEMENT: "自动结算",
   ALLOW: "允许",
   FUEL: "燃油",
+  Fuel: "燃油",
+  Electric: "新能源",
   STANDARD: "标准",
   PASSENGER: "乘用车",
   EV_PRIORITY: "新能源优先",

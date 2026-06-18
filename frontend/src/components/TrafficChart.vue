@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 const props = defineProps({
   history: {
@@ -12,14 +12,19 @@ const props = defineProps({
   },
 });
 
+const container = ref(null);
 const canvas = ref(null);
+let observer = null;
+let logicalWidth = 0;
+let logicalHeight = 0;
 
 function draw() {
-  if (!canvas.value) return;
+  if (!canvas.value || logicalWidth <= 0 || logicalHeight <= 0) return;
+
   const ctx = canvas.value.getContext("2d");
-  const width = canvas.value.width;
-  const height = canvas.value.height;
-  const padding = 46;
+  const width = logicalWidth;
+  const height = logicalHeight;
+  const padding = Math.max(36, Math.round(Math.min(width, height) * 0.12));
   const all = [...props.history, ...props.prediction];
   const max = Math.max(...all, 10) + 12;
   const chartWidth = width - padding * 2;
@@ -64,10 +69,58 @@ function draw() {
   });
 }
 
-onMounted(draw);
+function resize() {
+  if (!container.value || !canvas.value) return;
+
+  const rect = container.value.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  logicalWidth = Math.max(Math.floor(rect.width), 280);
+  logicalHeight = Math.max(Math.floor(rect.height), 220);
+
+  canvas.value.width = Math.floor(logicalWidth * dpr);
+  canvas.value.height = Math.floor(logicalHeight * dpr);
+  canvas.value.style.width = `${logicalWidth}px`;
+  canvas.value.style.height = `${logicalHeight}px`;
+
+  const ctx = canvas.value.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+
+onMounted(() => {
+  resize();
+  if (typeof ResizeObserver !== "undefined" && container.value) {
+    observer = new ResizeObserver(resize);
+    observer.observe(container.value);
+  } else {
+    window.addEventListener("resize", resize);
+  }
+});
+
+onUnmounted(() => {
+  observer?.disconnect();
+  window.removeEventListener("resize", resize);
+});
+
 watch(() => [props.history, props.prediction], draw, { deep: true });
 </script>
 
 <template>
-  <canvas ref="canvas" width="920" height="320" aria-label="车流预测图表"></canvas>
+  <div ref="container" class="traffic-chart">
+    <canvas ref="canvas" aria-label="车流预测图表"></canvas>
+  </div>
 </template>
+
+<style scoped>
+.traffic-chart {
+  width: 100%;
+  min-height: 220px;
+  height: clamp(220px, 28vw, 320px);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.traffic-chart canvas {
+  display: block;
+}
+</style>

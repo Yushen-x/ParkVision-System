@@ -13,6 +13,8 @@ import {
   runOwnerAction,
   state,
 } from "../stores/parkingStore";
+import { useNow } from "../composables/useNow";
+import { ENERGY_EV, ENERGY_FUEL, isEvEnergyType } from "../utils/energyType";
 import { zhMoney, zhText } from "../utils/localize";
 import { aiChat, aiStatusLabel } from "../services/aiClient";
 
@@ -32,6 +34,7 @@ async function doCheckIn(plate) {
 }
 const pageRoute = useVueRoute();
 const router = useRouter();
+const now = useNow();
 const validTabs = ["vehicle", "wallet", "navigation", "reserve", "assistant"];
 const activeTab = ref(validTabs.includes(pageRoute.query.tab) ? pageRoute.query.tab : "vehicle");
 const ownerName = computed(() => state.auth.user?.displayName || state.auth.user?.username || "车主");
@@ -121,7 +124,7 @@ async function retrieveFromNav() {
 
 const duration = computed(() => {
   if (!currentOrder.value?.entryTime) return "00:00";
-  const diff = Math.max(0, Date.now() - new Date(currentOrder.value.entryTime).getTime());
+  const diff = Math.max(0, now.value - new Date(currentOrder.value.entryTime).getTime());
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60)
     .toString()
@@ -248,7 +251,7 @@ function maybeRunIntent(text) {
 }
 
 // --- 车位预约闭环 ---------------------------------------------------------
-const resForm = reactive({ plateNo: "", phone: "", energyType: "Fuel" });
+const resForm = reactive({ plateNo: "", phone: "", energyType: ENERGY_FUEL });
 const reservations = computed(() => state.reservations.slice(0, 5));
 const resError = ref("");
 
@@ -380,7 +383,7 @@ function resHint(reservation) {
                 <div v-for="v in myVehicles" :key="v.plateNo" class="checkin-item">
                   <div class="checkin-meta">
                     <b>{{ v.plateNo }}</b>
-                    <span>{{ v.energyType === 'EV' ? '新能源' : '燃油' }} · {{ v.membershipType || '临时' }}</span>
+                    <span>{{ isEvEnergyType(v.energyType) ? '新能源' : '燃油' }} · {{ v.membershipType || '临时' }}</span>
                   </div>
                   <button class="c-btn c-btn-primary checkin-btn" :disabled="state.busy.entry" @click="doCheckIn(v.plateNo)">
                     <i class="fa-solid fa-right-to-bracket"></i> 我已到场
@@ -506,8 +509,8 @@ function resHint(reservation) {
               <input v-model.trim="resForm.plateNo" type="text" placeholder="车牌，如 沪A12345" />
               <input v-model.trim="resForm.phone" type="text" placeholder="手机号（可选）" />
               <select v-model="resForm.energyType">
-                <option value="Fuel">燃油车</option>
-                <option value="Electric">新能源</option>
+                <option :value="ENERGY_FUEL">燃油车</option>
+                <option :value="ENERGY_EV">新能源</option>
               </select>
               <button class="c-btn c-btn-primary" type="submit"><i class="fa-solid fa-lock"></i> 预约锁位</button>
             </form>

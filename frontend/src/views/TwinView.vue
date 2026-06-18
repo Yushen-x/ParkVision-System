@@ -1,10 +1,13 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { simulateEntry, state, refreshCore, refreshAdminData } from "../stores/parkingStore";
 import { parkvisionApi } from "../api/parkvisionApi";
 import { zhText } from "../utils/localize";
+
+const router = useRouter();
 
 /* ------------------------------------------------------------------ *
  * Vertical rotary tower garage (垂直升降塔库), no roads.                *
@@ -1205,7 +1208,7 @@ function selectPick(pick, point) {
         ["入侵检测", cam.intrusionState ? "是" : "否"],
         ["状态", cam.status || "在线"],
       ],
-      actions: [{ label: "查看 AI 感知", icon: "fa-eye", fn: () => {} }],
+      actions: [{ label: "查看 AI 感知", icon: "fa-eye", fn: () => router.push("/ai") }],
       anchor: point.clone(),
     };
   } else if (pick.kind === "gate") {

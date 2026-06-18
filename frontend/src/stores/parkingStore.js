@@ -1,6 +1,7 @@
 import { computed, reactive } from "vue";
 import { parkvisionApi, setToken, clearToken } from "../api/parkvisionApi";
 import { probeBackendAi } from "../services/aiClient";
+import { ENERGY_FUEL, normalizeEnergyType, slotStatusForEnergy } from "../utils/energyType";
 import {
   mockAdminOverview,
   buildMockBillingComponents,
@@ -398,7 +399,11 @@ export function disconnectTwinStream() {
 // --- Reservation -> hold -> entry 业务闭环（后端 + 数据库） -------------------
 export async function createReservation({ plateNo, phone, energyType } = {}) {
   try {
-    const reservation = await parkvisionApi.createReservation({ plateNo, phone, energyType });
+    const reservation = await parkvisionApi.createReservation({
+      plateNo,
+      phone,
+      energyType: normalizeEnergyType(energyType),
+    });
     addEvent("车位预约", `${reservation.plateNo} 已锁定车位 ${reservation.slotId}，保留 15 分钟。`);
     await loadOwnerData();
     await refreshCore();
@@ -464,7 +469,8 @@ function registerEntryLocal({ plateNo, energyType } = {}) {
     return null;
   }
   const plate = (plateNo || fallbackPlates[Math.floor(Math.random() * fallbackPlates.length)]).toUpperCase();
-  slot.status = energyType === "Electric" || plate.includes("D") ? "charging" : "occupied";
+  const normalizedEnergy = normalizeEnergyType(energyType);
+  slot.status = slotStatusForEnergy(normalizedEnergy, plate);
   slot.available = false;
 
   const order = {
@@ -498,7 +504,7 @@ export async function upsertVehicle(vehicle = {}) {
       phone: vehicle.phone || vehicle.phoneMasked,
       plateNo,
       vehicleType: vehicle.vehicleType,
-      energyType: vehicle.energyType,
+      energyType: normalizeEnergyType(vehicle.energyType),
       membershipType: vehicle.membershipType || vehicle.memberLevel,
       memberLevel: vehicle.memberLevel,
       accountStatus: vehicle.accountStatus,
@@ -536,7 +542,7 @@ function upsertVehicleLocal(vehicle = {}) {
   if (!plateNo) return null;
   const existing = state.customerVehicles.find((item) => item.plateNo === plateNo);
   if (existing) {
-    Object.assign(existing, { ...vehicle, plateNo });
+    Object.assign(existing, { ...vehicle, plateNo, energyType: normalizeEnergyType(vehicle.energyType) });
     return existing;
   }
   const row = {
@@ -544,7 +550,7 @@ function upsertVehicleLocal(vehicle = {}) {
     ownerName: vehicle.ownerName || "新客户",
     phoneMasked: vehicle.phoneMasked || "138****0000",
     plateNo,
-    energyType: vehicle.energyType || "Fuel",
+    energyType: normalizeEnergyType(vehicle.energyType),
     memberLevel: vehicle.memberLevel || "Standard",
     membershipType: vehicle.membershipType || vehicle.memberLevel || "Standard",
     accountStatus: vehicle.accountStatus || "Active",
@@ -1014,7 +1020,7 @@ function fallbackSimulateEntry() {
   if (!slot) return;
 
   const plateNo = fallbackPlates[Math.floor(Math.random() * fallbackPlates.length)];
-  slot.status = plateNo.startsWith("SH-D") ? "charging" : "occupied";
+  slot.status = slotStatusForEnergy(resolveEnergyForPlate(plateNo), plateNo);
   slot.available = false;
 
   const order = {
@@ -1159,9 +1165,17 @@ function syncOrderStatus(order) {
     slot.status = "empty";
     slot.available = true;
   } else if (order.status === "PARKED") {
-    slot.status = order.plateNo.startsWith("SH-D") ? "charging" : "occupied";
+    slot.status = slotStatusForEnergy(resolveEnergyForPlate(order.plateNo), order.plateNo);
     slot.available = false;
   }
+}
+
+function resolveEnergyForPlate(plateNo) {
+  const plate = String(plateNo || "").toUpperCase();
+  const profile =
+    state.customerVehicles.find((item) => item.plateNo === plate) ||
+    state.owner.vehicles.find((item) => item.plateNo === plate);
+  return profile?.energyType || ENERGY_FUEL;
 }
 
 function pushOwnerTimeline(title, detail) {

@@ -1,7 +1,10 @@
 <script setup>
 import { computed, ref } from "vue";
 import { enqueueVip, getters, runOwnerAction, runVision, state, triggerPreDispatch } from "../stores/parkingStore";
+import { useNow } from "../composables/useNow";
 import { zhMoney, zhText } from "../utils/localize";
+
+const now = useNow();
 
 const currentOrder = getters.currentOrder;
 const keyword = ref("");
@@ -93,7 +96,7 @@ const relatedEvents = computed(() => {
 
 const elapsedLabel = computed(() => {
   if (!selectedOrder.value?.entryTime) return "无";
-  const diff = Math.max(0, Date.now() - new Date(selectedOrder.value.entryTime).getTime());
+  const diff = Math.max(0, now.value - new Date(selectedOrder.value.entryTime).getTime());
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60);
   return `${hours} 小时 ${minutes % 60} 分钟`;

@@ -19,6 +19,7 @@ import {
   updateAdminUser,
   upsertVehicle,
 } from "../stores/parkingStore";
+import { ENERGY_EV, ENERGY_FUEL, normalizeEnergyType } from "../utils/energyType";
 import { zhMoney, zhText } from "../utils/localize";
 import { aiStatusLabel } from "../services/aiClient";
 
@@ -286,7 +287,7 @@ const vehicleForm = reactive({
   plateNo: "",
   ownerName: "",
   phoneMasked: "",
-  energyType: "Fuel",
+  energyType: ENERGY_FUEL,
   memberLevel: "Standard",
   accessType: "Allow",
 });
@@ -296,7 +297,7 @@ function openNewVehicle() {
     plateNo: "",
     ownerName: "",
     phoneMasked: "",
-    energyType: "Fuel",
+    energyType: ENERGY_FUEL,
     memberLevel: "Standard",
     accessType: "Allow",
   });
@@ -309,7 +310,7 @@ function editVehicle(vehicle) {
     plateNo: vehicle.plateNo,
     ownerName: vehicle.ownerName,
     phoneMasked: vehicle.phoneMasked,
-    energyType: vehicle.energyType || "Fuel",
+    energyType: normalizeEnergyType(vehicle.energyType),
     memberLevel: vehicle.memberLevel || "Standard",
     accessType: vehicle.accessType || "Allow",
   });
@@ -322,7 +323,7 @@ const vehicleError = ref("");
 async function saveVehicle() {
   if (!vehicleForm.plateNo.trim()) return;
   vehicleError.value = "";
-  const result = await upsertVehicle({ ...vehicleForm });
+  const result = await upsertVehicle({ ...vehicleForm, energyType: normalizeEnergyType(vehicleForm.energyType) });
   if (!result.ok) {
     vehicleError.value = result.error || "保存失败";
     return;
@@ -829,8 +830,8 @@ onMounted(async () => {
           <label>
             <span>能源类型</span>
             <select v-model="vehicleForm.energyType">
-              <option value="Fuel">燃油</option>
-              <option value="Electric">新能源</option>
+              <option :value="ENERGY_FUEL">燃油</option>
+              <option :value="ENERGY_EV">新能源</option>
             </select>
           </label>
           <label>

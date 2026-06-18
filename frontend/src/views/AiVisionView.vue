@@ -895,15 +895,10 @@ label.primary-button {
 
 .forecast-chart {
   margin-top: 6px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
 }
 
-.forecast-chart canvas {
-  width: 100%;
-  height: auto;
-  display: block;
+.forecast-chart :deep(.traffic-chart) {
+  border: 1px solid var(--border-color);
 }
 
 .forecast-legend {
