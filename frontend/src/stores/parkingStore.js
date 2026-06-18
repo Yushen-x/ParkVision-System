@@ -136,7 +136,7 @@ export const getters = {
   ownerActiveOrder: computed(
     () => state.owner.orders.find((order) => order.status !== "FINISHED") || null,
   ),
-  ownerHistory: computed(() => state.owner.orders.filter((order) => order.status === "FINISHED")),
+  ownerHistory: computed(() => listOwnerFinishedOrders(state.owner.orders)),
 };
 
 // --- Auth (fixed accounts; role is derived from the account) ----------------
@@ -191,7 +191,60 @@ export async function login({ username, password } = {}) {
     loginAt: new Date().toISOString(),
   };
   persistUser(user);
+  void hydrate();
   return { ok: true, user };
+}
+
+function ownerPlateSet() {
+  const plates = new Set(
+    (state.owner.vehicles || [])
+      .map((vehicle) => String(vehicle.plateNo || "").trim().toUpperCase())
+      .filter(Boolean),
+  );
+  const profilePlates = state.owner.profile?.plates;
+  if (Array.isArray(profilePlates)) {
+    profilePlates.forEach((plate) => {
+      const normalized = String(plate || "").trim().toUpperCase();
+      if (normalized) plates.add(normalized);
+    });
+  }
+  if (!plates.size && state.auth.user?.username === "owner") {
+    plates.add("SH-A7686");
+  }
+  return plates;
+}
+
+function listOwnerFinishedOrders(orders = []) {
+  const plates = ownerPlateSet();
+  return [...orders]
+    .filter((order) => {
+      if (order.status !== "FINISHED") return false;
+      if (!plates.size) return true;
+      return plates.has(String(order.plateNo || "").trim().toUpperCase());
+    })
+    .sort((a, b) => new Date(b.entryTime || 0) - new Date(a.entryTime || 0));
+}
+
+function buildOwnerOrdersFallback() {
+  const plates = ownerPlateSet();
+  if (!plates.size) return [];
+  return state.orders
+    .filter((order) => plates.has(String(order.plateNo || "").trim().toUpperCase()))
+    .sort((a, b) => new Date(b.entryTime || 0) - new Date(a.entryTime || 0));
+}
+
+function upsertOwnerOrder(order) {
+  if (!order || state.auth.user?.role !== "owner") return;
+  const plates = ownerPlateSet();
+  const plateNo = String(order.plateNo || "").trim().toUpperCase();
+  if (plates.size && !plates.has(plateNo)) return;
+
+  const idx = state.owner.orders.findIndex((item) => item.orderNo === order.orderNo);
+  if (idx >= 0) {
+    Object.assign(state.owner.orders[idx], order);
+    return;
+  }
+  state.owner.orders.push({ ...order });
 }
 
 // Owner self-registration: backend creates the login + customer + vehicle and
@@ -223,22 +276,35 @@ export async function loadOwnerData() {
   if (state.auth.user?.role !== "owner") return;
   state.busy.ownerData = true;
   try {
-    const [profile, vehicles, orders, reservations, wallet] = await Promise.all([
+    const [profileR, vehiclesR, ordersR, reservationsR, walletR] = await Promise.allSettled([
       parkvisionApi.getOwnerProfile(),
       parkvisionApi.getOwnerVehicles(),
       parkvisionApi.getOwnerOrders(),
       parkvisionApi.getReservations(),
-      parkvisionApi.getOwnerWallet().catch(() => null),
+      parkvisionApi.getOwnerWallet(),
     ]);
-    state.owner.profile = profile || null;
-    state.owner.vehicles = Array.isArray(vehicles) ? vehicles : [];
-    state.owner.orders = Array.isArray(orders) ? orders : [];
-    state.owner.wallet = wallet || null;
-    state.reservations = Array.isArray(reservations) ? reservations : [];
+
+    if (profileR.status === "fulfilled") {
+      state.owner.profile = profileR.value || null;
+    }
+    if (vehiclesR.status === "fulfilled") {
+      state.owner.vehicles = Array.isArray(vehiclesR.value) ? vehiclesR.value : [];
+    }
+    if (walletR.status === "fulfilled") {
+      state.owner.wallet = walletR.value || null;
+    }
+    if (reservationsR.status === "fulfilled") {
+      state.reservations = Array.isArray(reservationsR.value) ? reservationsR.value : [];
+    }
+
+    if (ordersR.status === "fulfilled" && Array.isArray(ordersR.value)) {
+      state.owner.orders = ordersR.value;
+    } else {
+      state.owner.orders = buildOwnerOrdersFallback();
+    }
+
     const active = getters.ownerActiveOrder.value;
     if (active) state.activePlate = active.plateNo;
-  } catch {
-    /* backend unreachable: keep existing owner state */
   } finally {
     state.busy.ownerData = false;
   }
@@ -296,6 +362,9 @@ export async function refreshAdminData() {
 export async function pollRealtime() {
   try {
     await refreshCore();
+    if (state.auth.user?.role === "owner") {
+      await loadOwnerData();
+    }
   } catch {
     state.onlineMode = "Fallback mode";
   }
@@ -675,6 +744,7 @@ export async function ownerEntry(plateNo) {
     const order = await parkvisionApi.ownerEntry(plateNo);
     addEvent("车辆入场", `${order.plateNo} 已分配到车位 ${order.slotId}。`);
     state.activePlate = order.plateNo;
+    upsertOwnerOrder(order);
     await refreshCore();
     await loadOwnerData();
     signalTwin("storage");
@@ -1184,7 +1254,11 @@ function patchOrderByNo(orderNo, patch) {
   const global = state.orders.find((item) => item.orderNo === orderNo);
   if (global) Object.assign(global, patch);
   const owner = state.owner.orders.find((item) => item.orderNo === orderNo);
-  if (owner) Object.assign(owner, patch);
+  if (owner) {
+    Object.assign(owner, patch);
+  } else if (global) {
+    upsertOwnerOrder({ ...global, ...patch });
+  }
   return global || owner || null;
 }
 

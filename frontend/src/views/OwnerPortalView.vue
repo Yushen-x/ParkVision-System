@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { useRoute as useVueRoute, useRouter } from "vue-router";
 import {
   cancelReservation,
@@ -7,6 +7,7 @@ import {
   enqueueVip,
   fulfillReservation,
   getters,
+  loadOwnerData,
   logout,
   ownerEntry,
   rechargeWallet,
@@ -102,6 +103,17 @@ function clearTouchTimer() {
 }
 
 onBeforeUnmount(clearTouchTimer);
+
+onMounted(() => {
+  void loadOwnerData();
+});
+
+function formatOrderTime(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
 
 const route = computed(() => state.indoorRoute);
 const leadGate = computed(() => state.devices.gates.find((gate) => gate.gateId === route.value.targetGate) || state.devices.gates[0]);
@@ -434,7 +446,7 @@ function resHint(reservation) {
               <div v-if="history.length" class="checkin-history">
                 <h4>历史订单</h4>
                 <div v-for="o in history.slice(0, 6)" :key="o.orderNo" class="history-row">
-                  <span>{{ o.plateNo }} · {{ o.slotId }}</span>
+                  <span>{{ o.plateNo }} · {{ o.slotId }} · {{ formatOrderTime(o.entryTime) }}</span>
                   <b>{{ zhMoney(o.amount || 0) }}</b>
                 </div>
               </div>

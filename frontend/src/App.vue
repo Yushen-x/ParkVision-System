@@ -52,7 +52,7 @@ onUnmounted(() => {
 <template>
   <RouterView v-if="route.meta.public || route.meta.owner" />
   <div v-else class="app-shell">
-    <AppSidebar :mode="state.onlineMode" />
+    <AppSidebar />
     <main class="main">
       <TopBar
         :title="title"

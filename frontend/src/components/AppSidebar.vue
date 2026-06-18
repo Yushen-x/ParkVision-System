@@ -3,8 +3,6 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { logout, state } from "../stores/parkingStore";
 
-defineProps({ mode: { type: String, default: "后端优先" } });
-
 const router = useRouter();
 const currentUser = computed(() => state.auth.user);
 
@@ -48,10 +46,6 @@ const navItems = [
           </div>
         </div>
         <button class="sidebar-logout" title="退出登录" @click="doLogout"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-      </div>
-      <div class="system-status">
-        <span class="status-indicator-dot"></span>
-        <span>系统在线</span>
       </div>
       <span class="version-tag">PV-CPS v1.2.0</span>
     </div>
