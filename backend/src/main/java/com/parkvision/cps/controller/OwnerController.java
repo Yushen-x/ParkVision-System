@@ -70,6 +70,11 @@ public class OwnerController {
         return ApiResponse.ok(ownerService.changeOwnOrder(currentUser(authentication), orderNo, OrderStatus.TOUCHING));
     }
 
+    @PostMapping("/orders/{orderNo}/touch-complete")
+    public ApiResponse<ParkingOrder> completeTouch(Authentication authentication, @PathVariable String orderNo) {
+        return ApiResponse.ok(ownerService.changeOwnOrder(currentUser(authentication), orderNo, OrderStatus.PARKED));
+    }
+
     @PostMapping("/orders/{orderNo}/pay")
     public ApiResponse<ParkingOrder> pay(Authentication authentication, @PathVariable String orderNo) {
         return ApiResponse.ok(ownerService.changeOwnOrder(currentUser(authentication), orderNo, OrderStatus.FINISHED));

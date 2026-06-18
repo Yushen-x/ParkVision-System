@@ -227,6 +227,9 @@ export const parkvisionApi = {
   ownerTouch(orderNo) {
     return request(`/owner/orders/${orderNo}/touch-and-go`, { method: "POST" });
   },
+  ownerCompleteTouch(orderNo) {
+    return request(`/owner/orders/${encodeURIComponent(orderNo)}/touch-complete`, { method: "POST" });
+  },
   ownerPay(orderNo) {
     return request(`/owner/orders/${orderNo}/pay`, { method: "POST" });
   },
@@ -399,9 +402,6 @@ export const parkvisionApi = {
   },
   getRecognitions(params = {}) {
     return request(withQuery("/admin/recognitions", params));
-  },
-  resetSystem() {
-    return request("/system/reset", { method: "POST" });
   },
   setEmergency(active) {
     return request(withQuery("/devices/emergency", { active }), { method: "POST" });

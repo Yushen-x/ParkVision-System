@@ -1,5 +1,5 @@
 import { computed, reactive } from "vue";
-import { parkvisionApi, setToken, clearToken } from "../api/parkvisionApi";
+import { parkvisionApi, setToken, clearToken, getToken } from "../api/parkvisionApi";
 import { probeBackendAi } from "../services/aiClient";
 import { ENERGY_FUEL, normalizeEnergyType, slotStatusForEnergy } from "../utils/energyType";
 import {
@@ -118,6 +118,7 @@ export const state = reactive({
     register: false,
     account: false,
     ownerData: false,
+    reset: false,
   },
 });
 
@@ -700,15 +701,23 @@ export async function triggerPreDispatch() {
 }
 
 export async function enqueueVip(orderNo = getters.currentOrder.value?.orderNo) {
+  if (!orderNo) return { ok: false, error: "没有可操作的订单" };
+
   state.busy.ownerAction = true;
   try {
     const task = await parkvisionApi.triggerVip(orderNo);
     addEvent("VIP 优先取车", `${task.plateNo} 已插入队首。`);
     pushOwnerTimeline("VIP 优先取车", "当前订单已创建优先 AGV 调度任务。");
     await refreshCore();
-    await refreshAdminData();
-  } catch {
+    if (state.auth.user?.role === "owner") await loadOwnerData();
+    else await refreshAdminData();
+    return { ok: true, plateNo: task.plateNo };
+  } catch (error) {
+    if (error?.isApiError) {
+      return { ok: false, error: error.message || "VIP 优先取车失败" };
+    }
     fallbackVip(orderNo);
+    return { ok: true, mode: "local", plateNo: findOrderByNo(orderNo)?.plateNo };
   } finally {
     state.busy.ownerAction = false;
     signalTwin("retrieve");
@@ -754,6 +763,10 @@ export async function runOwnerAction(action, orderNo) {
       await (isOwner ? parkvisionApi.ownerTouch(targetNo) : parkvisionApi.touchOrder(targetNo));
       pushOwnerTimeline("临停取物", "车辆已被调度到交接区，计费会话保持开启。");
       addEvent("车主请求", `订单 ${targetNo} 已提交临停取物请求。`);
+    } else if (action === "park") {
+      await parkvisionApi.ownerCompleteTouch(targetNo);
+      pushOwnerTimeline("临停取物完成", "车辆已送回车位，计费会话继续。");
+      addEvent("车主请求", `订单 ${targetNo} 已完成临停取物并回库。`);
     } else if (action === "pay") {
       await (isOwner ? parkvisionApi.ownerPay(targetNo) : parkvisionApi.payOrder(targetNo));
       pushOwnerTimeline("支付完成", "订单已关闭，余额已扣减，车位已释放。");
@@ -777,6 +790,10 @@ export async function runOwnerAction(action, orderNo) {
       const order = state.orders.find((o) => o.orderNo === targetNo);
       signalTwin("retrieve", order?.slotId);
     } else if (action === "touch") signalTwin("touch");
+    else if (action === "park") {
+      const order = findOrderByNo(targetNo);
+      signalTwin("storage", order?.slotId);
+    }
   }
 }
 
@@ -862,23 +879,110 @@ export async function toggleEmergency() {
 }
 
 export async function resetSystem() {
+  if (state.busy.reset) return { ok: false, error: "正在重置，请稍候" };
+
+  state.busy.reset = true;
   try {
-    await parkvisionApi.resetSystem();
-    Object.keys(alertStatusOverride).forEach((k) => delete alertStatusOverride[k]);
-    state.adminReport = buildMockReport();
-    state.reservations = [];
-    state.events = [
-      ["系统上线", "运营首页与实时数据源已初始化。"],
-      ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
-      ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
-    ];
-    await hydrate();
-    if (state.auth.user?.role === "owner") await loadOwnerData();
-    addEvent("系统重置", "所有业务数据已恢复到初始状态。");
-    return { ok: true };
-  } catch (error) {
-    return { ok: false, error: error?.message || "重置失败" };
+    try {
+      await parkvisionApi.resetSystem();
+      Object.keys(alertStatusOverride).forEach((k) => delete alertStatusOverride[k]);
+      state.adminReport = buildMockReport();
+      state.reservations = [];
+      state.events = [
+        ["系统上线", "运营首页与实时数据源已初始化。"],
+        ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
+        ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
+      ];
+      await hydrate();
+      if (state.auth.user?.role === "owner") await loadOwnerData();
+      addEvent("系统重置", "所有业务数据已恢复到初始状态。");
+      return { ok: true, mode: "remote" };
+    } catch (error) {
+      if (error?.status === 403 || error?.code === "FORBIDDEN") {
+        return { ok: false, error: "当前账号无权限重置，请使用管理员账号登录。" };
+      }
+
+      const canLocalFallback =
+        !getToken() ||
+        error?.status === 401 ||
+        error?.code === "AUTH_REQUIRED" ||
+        state.onlineMode === "Fallback mode";
+
+      if (canLocalFallback) {
+        resetLocalDemoState();
+        addEvent("系统重置", "后端不可用或未登录，已在本地恢复演示数据。");
+        return { ok: true, mode: "local" };
+      }
+
+      return { ok: false, error: error?.message || "重置失败" };
+    }
+  } finally {
+    state.busy.reset = false;
   }
+}
+
+function resetLocalDemoState() {
+  Object.keys(alertStatusOverride).forEach((k) => delete alertStatusOverride[k]);
+  state.emergency = false;
+  state.activePlate = mockVisionResult.plate;
+  state.summary = { ...mockSummary };
+  state.forecast = structuredClone(mockForecast);
+  state.reservations = [];
+  state.events = [
+    ["系统上线", "运营首页与实时数据源已初始化。"],
+    ["视觉边缘节点", "最新车牌 OCR 结果为 SH-A7686，置信度 0.982。"],
+    ["调度中心", "AGV-03 正在前往浅层缓冲车道。"],
+  ];
+  state.slots = createMockSlots();
+  state.agvs = structuredClone(mockAgvs);
+  state.orders = createMockOrders();
+  state.adminOrders = createMockAdminOrders();
+  state.adminOverview = { ...mockAdminOverview };
+  Object.assign(state.adminFilters, {
+    orderStatus: "",
+    orderKeyword: "",
+    orderDateFrom: "",
+    orderDateTo: "",
+    alertLevel: "",
+    alertStatus: "",
+    alertKeyword: "",
+    profileEnergyType: "",
+    profileMemberLevel: "",
+    profileKeyword: "",
+    paymentStatus: "",
+    paymentMethod: "",
+    paymentKeyword: "",
+    paymentDateFrom: "",
+    paymentDateTo: "",
+  });
+  state.alerts = structuredClone(mockAlerts);
+  state.selectedAlertNo = "AL2026050601";
+  state.adminAlertDetail = null;
+  state.pricingRules = structuredClone(mockPricingRules);
+  state.accessList = structuredClone(mockAccessList);
+  state.customerVehicles = structuredClone(mockCustomerVehicles);
+  state.selectedCustomerOwnerId = "CUS0001";
+  state.adminCustomerDetail = null;
+  state.payments = structuredClone(mockPayments);
+  state.billingComponents = buildMockBillingComponents();
+  state.selectedBillingOrderNo = "PV20260506004";
+  state.selectedAdminOrderNo = "PV20260506004";
+  state.adminOrderDetail = null;
+  state.systemNodes = structuredClone(mockSystemNodes);
+  state.queue = structuredClone(mockQueue);
+  state.devices = structuredClone(mockDeviceOverview);
+  state.pricingPreview = buildMockPricingPreview();
+  state.indoorRoute = buildMockIndoorRoute();
+  state.ownerTimeline = [
+    ["车辆已入库", "AGV 已将车辆放入 E06 车位。"],
+    ["计费已启动", "入场流程结束后，动态停车费开始计算。"],
+    ["车主服务就绪", "取车、临停取物和 VIP 优先取车均可使用。"],
+  ];
+  state.visionResult = { ...mockVisionResult };
+  state.adminReport = buildMockReport();
+  state.owner = { profile: null, vehicles: [], orders: [], wallet: null };
+  state.twinSignal = { scenario: "", slotId: null, seq: 0 };
+  if (!getToken()) state.onlineMode = "Fallback mode";
 }
 
 export async function setDeviceStatus(type, id, status) {
@@ -1068,10 +1172,26 @@ function fallbackPreDispatch() {
   addEvent("预调度入队", "预调度已将深层车位车辆移入缓冲车道。");
 }
 
+function findOrderByNo(orderNo) {
+  return (
+    state.owner.orders.find((item) => item.orderNo === orderNo) ||
+    state.orders.find((item) => item.orderNo === orderNo) ||
+    null
+  );
+}
+
+function patchOrderByNo(orderNo, patch) {
+  const global = state.orders.find((item) => item.orderNo === orderNo);
+  if (global) Object.assign(global, patch);
+  const owner = state.owner.orders.find((item) => item.orderNo === orderNo);
+  if (owner) Object.assign(owner, patch);
+  return global || owner || null;
+}
+
 function fallbackVip(orderNo) {
-  const order = state.orders.find((item) => item.orderNo === orderNo) || getters.currentOrder.value;
+  const order = findOrderByNo(orderNo);
   if (!order) return;
-  order.status = "RETRIEVING";
+  patchOrderByNo(orderNo, { status: "RETRIEVING" });
   syncOrderStatus(order);
   state.queue.unshift({
     plateNo: order.plateNo,
@@ -1116,18 +1236,20 @@ function fallbackVision(options = {}) {
 }
 
 function fallbackOwnerAction(action, orderNo) {
-  const order = state.orders.find((item) => item.orderNo === orderNo);
+  const order = findOrderByNo(orderNo);
   if (!order) return;
 
   if (action === "retrieve") {
-    order.status = "RETRIEVING";
+    patchOrderByNo(orderNo, { status: "RETRIEVING" });
     pushOwnerTimeline("取车已启动", "调度系统已为当前订单创建取车任务。");
   } else if (action === "touch") {
-    order.status = "TOUCHING";
+    patchOrderByNo(orderNo, { status: "TOUCHING" });
     pushOwnerTimeline("临停取物", "调度系统已将车辆送往交接区。");
+  } else if (action === "park") {
+    patchOrderByNo(orderNo, { status: "PARKED" });
+    pushOwnerTimeline("临停取物完成", "车辆已送回车位，计费会话继续。");
   } else if (action === "pay") {
-    order.status = "FINISHED";
-    order.amount = calculateFallbackAmount(order);
+    patchOrderByNo(orderNo, { status: "FINISHED", amount: calculateFallbackAmount(order) });
     pushOwnerTimeline("支付完成", "计费系统已关闭订单并释放车位。");
   }
 

@@ -6,6 +6,7 @@ defineProps({
   emergency: { type: Boolean, default: false },
   entryBusy: { type: Boolean, default: false },
   dispatchBusy: { type: Boolean, default: false },
+  resetBusy: { type: Boolean, default: false },
 });
 
 defineEmits(["entry", "pre-dispatch", "emergency", "reset"]);
@@ -48,8 +49,9 @@ onUnmounted(() => window.clearInterval(timer));
         <i class="fa-solid" :class="emergency ? 'fa-lock-open' : 'fa-triangle-exclamation'"></i>
         {{ emergency ? "解除急停" : "紧急停车" }}
       </button>
-      <button class="reset-button" @click="$emit('reset')" title="重置所有数据到初始状态">
-        <i class="fa-solid fa-arrows-rotate"></i> 重置演示
+      <button class="reset-button" :disabled="resetBusy" @click="$emit('reset')" title="重置所有数据到初始状态">
+        <i class="fa-solid fa-arrows-rotate" :class="{ 'fa-spin': resetBusy }"></i>
+        {{ resetBusy ? "重置中…" : "重置演示" }}
       </button>
     </div>
   </header>
@@ -73,5 +75,9 @@ onUnmounted(() => window.clearInterval(timer));
 .reset-button:hover {
   background: var(--brand, #6366f1);
   color: #fff;
+}
+.reset-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 </style>

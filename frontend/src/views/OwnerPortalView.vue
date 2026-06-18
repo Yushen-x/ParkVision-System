@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, reactive, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useRoute as useVueRoute, useRouter } from "vue-router";
 import {
   cancelReservation,
@@ -14,7 +14,7 @@ import {
   state,
 } from "../stores/parkingStore";
 import { useNow } from "../composables/useNow";
-import { ENERGY_EV, ENERGY_FUEL, isEvEnergyType } from "../utils/energyType";
+import { ENERGY_EV, ENERGY_FUEL, isEvEnergyType, normalizeEnergyType } from "../utils/energyType";
 import { zhMoney, zhText } from "../utils/localize";
 import { aiChat, aiStatusLabel } from "../services/aiClient";
 
@@ -71,6 +71,8 @@ const rechargeBusy = ref(false);
 const walletNotice = ref("");
 const walletError = ref("");
 const actionError = ref("");
+const vipNotice = ref("");
+const vipError = ref("");
 
 const txLabels = { WALLET: "停车扣款", CASH: "现金结算", RECHARGE: "钱包充值", AUTO_SETTLEMENT: "自动结算" };
 
@@ -91,6 +93,15 @@ async function doRecharge() {
 const showOverlay = ref(false);
 const timer = ref(180);
 let timerId = null;
+
+function clearTouchTimer() {
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+  }
+}
+
+onBeforeUnmount(clearTouchTimer);
 
 const route = computed(() => state.indoorRoute);
 const leadGate = computed(() => state.devices.gates.find((gate) => gate.gateId === route.value.targetGate) || state.devices.gates[0]);
@@ -145,11 +156,11 @@ async function doAction(action) {
   if (action === "touch") {
     showOverlay.value = true;
     timer.value = 180;
-    clearInterval(timerId);
+    clearTouchTimer();
     timerId = window.setInterval(() => {
       timer.value -= 1;
       if (timer.value <= 0) {
-        clearInterval(timerId);
+        clearTouchTimer();
       }
     }, 1000);
   }
@@ -160,19 +171,36 @@ async function doAction(action) {
     actionError.value = result.error || "操作失败";
     if (action === "touch") {
       showOverlay.value = false;
-      clearInterval(timerId);
+      clearTouchTimer();
     }
   }
 }
 
 async function doVip() {
-  if (!currentOrder.value) return;
-  await enqueueVip(currentOrder.value.orderNo);
+  if (!currentOrder.value || state.busy.ownerAction) return;
+  vipNotice.value = "";
+  vipError.value = "";
+  const result = await enqueueVip(currentOrder.value.orderNo);
+  if (result.ok) {
+    vipNotice.value =
+      result.mode === "local"
+        ? `${result.plateNo || currentOrder.value.plateNo} 的 VIP 任务已在本地入队。`
+        : `${result.plateNo || currentOrder.value.plateNo} 已插入 AGV 队首，优先取车已生效。`;
+  } else {
+    vipError.value = result.error || "VIP 优先取车失败";
+  }
 }
 
-function finishTouch() {
+async function finishTouch() {
   showOverlay.value = false;
-  clearInterval(timerId);
+  clearTouchTimer();
+  if (!currentOrder.value || currentOrder.value.status !== "TOUCHING") return;
+
+  actionError.value = "";
+  const result = await runOwnerAction("park", currentOrder.value.orderNo);
+  if (result && !result.ok) {
+    actionError.value = result.error || "结束临停取物失败";
+  }
 }
 
 function formatTime(seconds) {
@@ -255,12 +283,21 @@ const resForm = reactive({ plateNo: "", phone: "", energyType: ENERGY_FUEL });
 const reservations = computed(() => state.reservations.slice(0, 5));
 const resError = ref("");
 
+function syncReservationForm() {
+  const vehicle = myVehicles.value[0];
+  if (!vehicle?.plateNo) return;
+  resForm.plateNo = vehicle.plateNo;
+  resForm.energyType = normalizeEnergyType(vehicle.energyType, ENERGY_FUEL);
+}
+
+watch(myVehicles, syncReservationForm, { immediate: true });
+
 async function submitReservation() {
   resError.value = "";
   const result = await createReservation({ ...resForm });
   if (result.ok) {
-    resForm.plateNo = "";
     resForm.phone = "";
+    syncReservationForm();
   } else {
     resError.value = result.error || "预约失败";
   }
@@ -354,7 +391,7 @@ function resHint(reservation) {
               </button>
             </div>
 
-            <div class="c-vip-card" @click="doVip">
+            <div class="c-vip-card" :class="{ disabled: state.busy.ownerAction || !hasActiveOrder }" @click="doVip">
               <div class="c-vip-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
               <div class="c-vip-text">
                 <h4>VIP 优先取车</h4>
@@ -362,6 +399,8 @@ function resHint(reservation) {
               </div>
               <div class="c-vip-price">+￥5</div>
             </div>
+            <p v-if="vipNotice" class="wallet-ok"><i class="fa-solid fa-circle-check"></i> {{ vipNotice }}</p>
+            <p v-if="vipError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ vipError }}</p>
 
             <div class="phone-secondary-action">
               <button class="ghost-button" :disabled="state.busy.ownerAction" @click="doAction('pay')">
@@ -563,7 +602,9 @@ function resHint(reservation) {
             <h3>临停取物已开启</h3>
             <p>车辆会停在交接区，取物期间订单和计费保持开启。</p>
             <strong>{{ formatTime(timer) }}</strong>
-            <button class="primary-button full" @click="finishTouch">关闭</button>
+            <button class="primary-button full" :disabled="state.busy.ownerAction" @click="finishTouch">
+              {{ state.busy.ownerAction ? "回库中…" : "完成取物并回库" }}
+            </button>
           </div>
         </div>
         </div>
