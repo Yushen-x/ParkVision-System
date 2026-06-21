@@ -37,11 +37,21 @@ onUnmounted(() => window.clearInterval(timer));
         <span style="color:var(--text-muted); font-size:11px; margin-right: 6px;">本地时间</span>
         <strong style="color:var(--brand); font-family:'Outfit', sans-serif; font-variant-numeric: tabular-nums;">{{ clock }}</strong>
       </div>
-      <button class="ghost-button" :disabled="entryBusy" @click="$emit('entry')">
+      <button
+        class="ghost-button"
+        :disabled="entryBusy"
+        title="模拟车辆到达入口：自动分配空闲车位并创建停车订单"
+        @click="$emit('entry')"
+      >
         <i class="fa-solid fa-car"></i>
         {{ entryBusy ? "提交中..." : "登记入场" }}
       </button>
-      <button class="primary-button" :disabled="dispatchBusy" @click="$emit('pre-dispatch')">
+      <button
+        class="primary-button"
+        :disabled="dispatchBusy"
+        title="高峰预调度：将深层车位车辆提前移至缓冲车道，缩短取车等待"
+        @click="$emit('pre-dispatch')"
+      >
         <i class="fa-solid fa-forward-fast"></i>
         {{ dispatchBusy ? "调度中..." : "触发预调度" }}
       </button>

@@ -106,6 +106,17 @@ public class OrderService {
     public ParkingOrder changeStatus(String orderNo, OrderStatus status) {
         ParkingOrder order = repository.findOrderByNo(orderNo)
                 .orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Order not found: " + orderNo));
+        if (order.getStatus() == status) {
+            return order;
+        }
+        if (status == OrderStatus.TOUCHING && order.getStatus() != OrderStatus.PARKED) {
+            throw new BusinessException("INVALID_STATUS", "仅在场停车中的订单可发起临停取物");
+        }
+        if (status == OrderStatus.PARKED && order.getStatus() == OrderStatus.TOUCHING) {
+            order.setStatus(status);
+            syncSlotState(order, status);
+            return repository.saveOrder(order);
+        }
         order.setStatus(status);
         syncSlotState(order, status);
         if (status == OrderStatus.FINISHED) {

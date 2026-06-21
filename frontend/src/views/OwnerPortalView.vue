@@ -19,10 +19,8 @@ import { ENERGY_EV, ENERGY_FUEL, isEvEnergyType, normalizeEnergyType } from "../
 import { zhMoney, zhText } from "../utils/localize";
 import { aiChat, aiStatusLabel } from "../services/aiClient";
 
-// Strictly the signed-in owner's own active order (pulled from /api/owner).
-const currentOrder = computed(
-  () => getters.ownerActiveOrder.value || state.owner.orders[0] || null,
-);
+// Strictly the signed-in owner's active (non-finished) order from /api/owner.
+const currentOrder = computed(() => getters.ownerActiveOrder.value);
 const myVehicles = computed(() => state.owner.vehicles);
 const history = computed(() => getters.ownerHistory.value);
 const hasActiveOrder = computed(() => Boolean(getters.ownerActiveOrder.value));
@@ -131,6 +129,8 @@ const ownerStatus = computed(() => {
       return "取车中";
     case "TOUCHING":
       return "取物中";
+    case "PAYING":
+      return "待支付";
     case "FINISHED":
       return "已关闭";
     default:
@@ -139,6 +139,8 @@ const ownerStatus = computed(() => {
 });
 
 const isRetrieving = computed(() => ["RETRIEVING", "TOUCHING"].includes(currentOrder.value?.status));
+const canRetrieve = computed(() => currentOrder.value?.status === "PARKED");
+const canPay = computed(() => ["RETRIEVING", "PAYING"].includes(currentOrder.value?.status));
 
 async function retrieveFromNav() {
   if (!currentOrder.value || isRetrieving.value) return;
@@ -165,6 +167,18 @@ const agvLabel = computed(() => `${Math.max(1, Math.round((route.value.agvEtaSec
 async function doAction(action) {
   if (!currentOrder.value) return;
 
+  actionError.value = "";
+  if (action !== "pay") {
+    vipNotice.value = "";
+    vipError.value = "";
+  }
+
+  const result = await runOwnerAction(action, currentOrder.value.orderNo);
+  if (result && !result.ok) {
+    actionError.value = result.error || "操作失败";
+    return;
+  }
+
   if (action === "touch") {
     showOverlay.value = true;
     timer.value = 180;
@@ -175,16 +189,6 @@ async function doAction(action) {
         clearTouchTimer();
       }
     }, 1000);
-  }
-
-  actionError.value = "";
-  const result = await runOwnerAction(action, currentOrder.value.orderNo);
-  if (result && !result.ok) {
-    actionError.value = result.error || "操作失败";
-    if (action === "touch") {
-      showOverlay.value = false;
-      clearTouchTimer();
-    }
   }
 }
 
@@ -281,12 +285,12 @@ async function sendChat(text) {
 
 function maybeRunIntent(text) {
   if (!currentOrder.value) return;
-  if (/取车|提车|出库/.test(text) && !/临停|取物/.test(text)) {
+  if (/VIP|插队|加急/i.test(text) || (/优先/.test(text) && /取车|出库/.test(text))) {
+    void doVip();
+  } else if (/取车|提车|出库/.test(text) && !/临停|取物/.test(text)) {
     void doAction("retrieve");
   } else if (/临停|取物/.test(text)) {
     void doAction("touch");
-  } else if (/VIP|优先|插队|加急/i.test(text)) {
-    void doVip();
   }
 }
 
@@ -392,11 +396,11 @@ function resHint(reservation) {
             </div>
 
             <div class="c-actions">
-              <button class="c-btn c-btn-primary" :disabled="state.busy.ownerAction" @click="doAction('retrieve')">
+              <button class="c-btn c-btn-primary" :disabled="state.busy.ownerAction || !canRetrieve" @click="doAction('retrieve')">
                 <i class="fa-solid fa-truck-ramp-box"></i>
-                取车
+                {{ currentOrder?.status === 'RETRIEVING' ? '取车中…' : '取车' }}
               </button>
-              <button class="c-btn c-btn-secondary" :disabled="state.busy.ownerAction" @click="doAction('touch')">
+              <button class="c-btn c-btn-secondary" :disabled="state.busy.ownerAction || currentOrder?.status !== 'PARKED'" @click="doAction('touch')">
                 <i class="fa-solid fa-box-open"></i>
                 临停取物
                 <span class="c-badge">不结单</span>
@@ -415,10 +419,13 @@ function resHint(reservation) {
             <p v-if="vipError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ vipError }}</p>
 
             <div class="phone-secondary-action">
-              <button class="ghost-button" :disabled="state.busy.ownerAction" @click="doAction('pay')">
+              <button class="ghost-button" :disabled="state.busy.ownerAction || !canPay" @click="doAction('pay')">
                 立即支付并关闭订单
               </button>
-              <small class="pay-hint">钱包余额 ￥{{ walletBalance.toFixed(2) }}<span v-if="discountPercent">（会员 {{ discountPercent }}% 折扣）</span></small>
+              <small class="pay-hint">
+                钱包余额 ￥{{ walletBalance.toFixed(2) }}<span v-if="discountPercent">（会员 {{ discountPercent }}% 折扣）</span>
+                <span v-if="canPay"> · 取车完成后在此支付关单</span>
+              </small>
             </div>
             <p v-if="actionError" class="checkin-error"><i class="fa-solid fa-circle-exclamation"></i> {{ actionError }}</p>
           </template>

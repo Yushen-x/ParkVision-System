@@ -222,10 +222,10 @@ export const parkvisionApi = {
     return request(`/owner/reservations/${encodeURIComponent(id)}/fulfill`, { method: "POST" });
   },
   ownerRetrieve(orderNo) {
-    return request(`/owner/orders/${orderNo}/retrieve`, { method: "POST" });
+    return request(`/owner/orders/${encodeURIComponent(orderNo)}/retrieve`, { method: "POST" });
   },
   ownerTouch(orderNo) {
-    return request(`/owner/orders/${orderNo}/touch-and-go`, { method: "POST" });
+    return request(`/owner/orders/${encodeURIComponent(orderNo)}/touch-and-go`, { method: "POST" });
   },
   ownerCompleteTouch(orderNo) {
     return request(`/owner/orders/${encodeURIComponent(orderNo)}/touch-complete`, { method: "POST" });
@@ -367,7 +367,10 @@ export const parkvisionApi = {
     return request(`/orders/${orderNo}/retrieve`, { method: "POST" });
   },
   touchOrder(orderNo) {
-    return request(`/orders/${orderNo}/touch-and-go`, { method: "POST" });
+    return request(`/orders/${encodeURIComponent(orderNo)}/touch-and-go`, { method: "POST" });
+  },
+  completeTouch(orderNo) {
+    return request(`/orders/${encodeURIComponent(orderNo)}/touch-complete`, { method: "POST" });
   },
   payOrder(orderNo) {
     return request(`/orders/${orderNo}/pay`, { method: "POST" });

@@ -45,6 +45,11 @@ public class OrderController {
         return ApiResponse.ok(orderService.changeStatus(orderNo, OrderStatus.TOUCHING));
     }
 
+    @PostMapping("/{orderNo}/touch-complete")
+    public ApiResponse<ParkingOrder> completeTouch(@PathVariable String orderNo) {
+        return ApiResponse.ok(orderService.changeStatus(orderNo, OrderStatus.PARKED));
+    }
+
     @PostMapping("/{orderNo}/pay")
     public ApiResponse<ParkingOrder> pay(@PathVariable String orderNo) {
         return ApiResponse.ok(orderService.changeStatus(orderNo, OrderStatus.FINISHED));

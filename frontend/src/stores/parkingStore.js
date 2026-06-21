@@ -727,10 +727,13 @@ export async function simulateEntry(plateNo) {
     state.activePlate = order.plateNo;
     await refreshCore();
     await refreshAdminData();
-    return { ok: true, order };
+    return { ok: true, mode: "remote", order };
   } catch (error) {
-    fallbackSimulateEntry();
-    return { ok: false, error: error.message || "入场失败" };
+    const order = fallbackSimulateEntry();
+    if (order) {
+      return { ok: true, mode: "local", order };
+    }
+    return { ok: false, error: error.message || "入场失败，当前没有可分配的空闲车位" };
   } finally {
     state.busy.entry = false;
     signalTwin("storage");
@@ -762,8 +765,13 @@ export async function triggerPreDispatch() {
     const task = await parkvisionApi.triggerPreDispatch();
     addEvent("预调度入队", `${task.plateNo} 已进入预调度队列。`);
     await refreshCore();
-  } catch {
-    fallbackPreDispatch();
+    return { ok: true, mode: "remote", plateNo: task.plateNo };
+  } catch (error) {
+    const fallback = fallbackPreDispatch();
+    if (fallback) {
+      return { ok: true, mode: "local", plateNo: fallback.plateNo };
+    }
+    return { ok: false, error: error.message || "预调度失败，当前没有可移位的在场订单" };
   } finally {
     state.busy.preDispatch = false;
     signalTwin("retrieve");
@@ -826,7 +834,6 @@ export async function runOwnerAction(action, orderNo) {
   try {
     if (action === "retrieve") {
       await (isOwner ? parkvisionApi.ownerRetrieve(targetNo) : parkvisionApi.retrieveOrder(targetNo));
-      try { await parkvisionApi.payOrder(targetNo); } catch { /* settle best-effort */ }
       pushOwnerTimeline("取车已启动", "AGV 取车任务已加入实时调度队列。");
       addEvent("车主请求", `订单 ${targetNo} 已提交取车请求。`);
     } else if (action === "touch") {
@@ -834,7 +841,11 @@ export async function runOwnerAction(action, orderNo) {
       pushOwnerTimeline("临停取物", "车辆已被调度到交接区，计费会话保持开启。");
       addEvent("车主请求", `订单 ${targetNo} 已提交临停取物请求。`);
     } else if (action === "park") {
-      await parkvisionApi.ownerCompleteTouch(targetNo);
+      if (isOwner) {
+        await parkvisionApi.ownerCompleteTouch(targetNo);
+      } else {
+        await parkvisionApi.completeTouch(targetNo);
+      }
       pushOwnerTimeline("临停取物完成", "车辆已送回车位，计费会话继续。");
       addEvent("车主请求", `订单 ${targetNo} 已完成临停取物并回库。`);
     } else if (action === "pay") {
@@ -848,12 +859,28 @@ export async function runOwnerAction(action, orderNo) {
     else await refreshAdminData();
     return { ok: true };
   } catch (error) {
+    const canLocalFallback =
+      ["touch", "park", "retrieve", "pay"].includes(action) &&
+      (!error?.isApiError || error.status === 404 || error.status === 500 || error.status >= 502);
+
+    if (canLocalFallback) {
+      fallbackOwnerAction(action, targetNo);
+      await refreshCore();
+      if (isOwner) await loadOwnerData();
+      else await refreshAdminData();
+      return { ok: true, mode: "local" };
+    }
+
     if (error?.isApiError) {
       addEvent("操作失败", error.message || "操作未完成。");
       return { ok: false, error: error.message || "操作未完成" };
     }
+
     fallbackOwnerAction(action, targetNo);
-    return { ok: false, error: error?.message || "网络异常，已本地处理" };
+    await refreshCore();
+    if (isOwner) await loadOwnerData();
+    else await refreshAdminData();
+    return { ok: true, mode: "local" };
   } finally {
     state.busy.ownerAction = false;
     if (action === "retrieve") {
@@ -1191,7 +1218,7 @@ function deriveEmergencyState() {
 
 function fallbackSimulateEntry() {
   const slot = state.slots.find((item) => item.status === "empty");
-  if (!slot) return;
+  if (!slot) return null;
 
   const plateNo = fallbackPlates[Math.floor(Math.random() * fallbackPlates.length)];
   slot.status = slotStatusForEnergy(resolveEnergyForPlate(plateNo), plateNo);
@@ -1212,34 +1239,36 @@ function fallbackSimulateEntry() {
   recomputeSummary();
   syncFallbackExperience(order);
   addEvent("车辆入场", `${plateNo} 已自动分配到车位 ${slot.id}。`);
+  return order;
 }
 
 function fallbackPreDispatch() {
   const deepSlot = state.slots.find((item) => item.layer === "Deep" && item.status === "occupied");
   const activeOrder = state.orders.find((item) => item.status !== "FINISHED");
+  if (!activeOrder) return null;
+
   if (deepSlot) {
     deepSlot.status = "buffer";
   }
-  if (activeOrder) {
-    state.queue.unshift({
-      plateNo: activeOrder.plateNo,
-      type: "高峰预调度移位",
-      tag: "预调度",
-      wait: "00:48",
-      vip: true,
-    });
-    state.agvs[0] = {
-      ...state.agvs[0],
-      loaded: true,
-      task: `移动车辆 ${activeOrder.plateNo}`,
-      mode: "TRANSIT",
-      velocityMps: 0.78,
-      lastCommand: "relocate",
-    };
-  }
+  state.queue.unshift({
+    plateNo: activeOrder.plateNo,
+    type: "高峰预调度移位",
+    tag: "预调度",
+    wait: "00:48",
+    vip: true,
+  });
+  state.agvs[0] = {
+    ...state.agvs[0],
+    loaded: true,
+    task: `移动车辆 ${activeOrder.plateNo}`,
+    mode: "TRANSIT",
+    velocityMps: 0.78,
+    lastCommand: "relocate",
+  };
   recomputeSummary();
   syncFallbackExperience(activeOrder);
   addEvent("预调度入队", "预调度已将深层车位车辆移入缓冲车道。");
+  return { plateNo: activeOrder.plateNo };
 }
 
 function findOrderByNo(orderNo) {
